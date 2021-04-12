@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from .fc_dense_layer import FC_Dense_Layer
@@ -6,8 +5,8 @@ from .activation_layer import Activation_Layer
 
 from .loss_functions import *
 
-class Network(object):
 
+class Network(object):
     """This class is designed to represent an entire neural network.
 
     A network has a list of layers, which is filled with instantiated layer objects."""
@@ -27,7 +26,6 @@ class Network(object):
 
     def predict(self, input_data):
 
-
         """Use the current network to predict the label for the input data."""
 
         # Create a blank array to store the output data.
@@ -40,7 +38,6 @@ class Network(object):
 
             # Pass the data through every layer in the network.
             for layer in self._layers:
-
                 current_sample = layer.feed_forward(current_sample)
 
             # Once the data has been passed all the way through the network, add it to the list of output data.
@@ -48,7 +45,6 @@ class Network(object):
 
         # Finally return the predicted values.
         return outputs
-
 
     def train(self, input_data, correct_outputs, learning_rate):
 
@@ -64,14 +60,12 @@ class Network(object):
                 current_sample = input_data[i]
 
                 for layer in self._layers:
-
                     current_sample = layer.feed_forward(current_sample)
 
                 # Add the cost of this piece of training data to the total cost of the network.
-                cost_gradient = variance_derivative(correct_outputs[i], current_sample)
+                network_error = variance_derivative(correct_outputs[i], current_sample)
 
                 for layer in reversed(self._layers):
-
-                    cost_gradient = layer.propagate_backward(cost_gradient, learning_rate)
+                    network_error = layer.propagate_backward(network_error, learning_rate)
 
         print("The network has been adjusted.")
