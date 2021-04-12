@@ -5,10 +5,10 @@ import numpy as np
 
 # The base class is needed for the dense layer to inherit from.
 
-from .layer import Layer
+from .base_layer import Base_Layer
 
 
-class FC_Dense_Layer(Layer):
+class FC_Dense_Layer(Base_Layer):
 
 
     def __init__(self, num_inputs, num_outputs):

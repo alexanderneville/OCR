@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 import abc
 
-class Layer(abc.ABC):
+class Base_Layer(abc.ABC):
 
-    @abc.abstractmethod
-    def __init__(self):
+    """
 
-        pass
+    This abstract class is used to build a common interface for all layers to use.
+    This is helpful, as it makes feeding data through the network much easier.
+
+    """
 
     @abc.abstractmethod
     def feed_forward(self, input_data):

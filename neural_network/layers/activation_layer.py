@@ -1,9 +1,9 @@
 
 import numpy as np
 
-from .layer import Layer
+from .base_layer import Base_Layer
 
-class Activation_Layer(Layer):
+class Activation_Layer(Base_Layer):
 
     """
 
