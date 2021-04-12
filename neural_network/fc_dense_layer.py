@@ -27,11 +27,8 @@ class FC_Dense_Layer(Layer):
         """
 
         # Use numpy to generate a matrix full of random values.
-        # The number of rows is equal to the number of outputs, with each row having a column for each input.
+        # The number of rows is equal to the number of inputs, with each row having a column for every output neuron.
         self._weights = np.random.rand(num_inputs, num_outputs)
-
-        # That the output (before bias is applied) will have many columns, but just one row.
-        # So create a matrix that has one column in every row as opposed to a 1D array.
         self._biases = np.random.rand(1, num_outputs)
 
     def feed_forward(self, input_data):
@@ -62,7 +59,7 @@ class FC_Dense_Layer(Layer):
         This function takes in the error with respect to the output of the layer.
         It calculates the necessary changes to the transposed weights and biases.
         Finally it returns the derivative of the network error with respect to the input.
-        This value is passed to the previous layer and so on.
+        This value is passed to the previous layer as the 'layer_error' and so on
 
         """
 
