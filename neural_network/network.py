@@ -1,8 +1,10 @@
 
 import numpy as np
 
-from fc_dense_layer import FC_Dense_Layer
-from activation_layer import Activation_Layer
+from .fc_dense_layer import FC_Dense_Layer
+from .activation_layer import Activation_Layer
+
+from .loss_functions import *
 
 class Network(object):
 
@@ -14,7 +16,7 @@ class Network(object):
 
         # When a network is instantiated, its list of layers is set to blank.
         self._layers = []
-        # For debugging purposes keep track
+        # For debugging purposes keep track of the network cost as we correct the network.
         self._cost = 0
 
     def add_layer(self, new_layer):
@@ -48,13 +50,28 @@ class Network(object):
         return outputs
 
 
-    def train(self, input_data, correct_outputs):
+    def train(self, input_data, correct_outputs, learning_rate):
 
+        """Given some input data and the correct labels for that data, adjust the network to suit the data."""
 
-        for i in range(len(input_data)):
+        # Every time the network is trained, reset the cost to 0
+        self._cost = 0
 
-            current_sample = input_data[i]
+        for cycle in range(1000):
 
-            for layer in self._layers:
+            for i in range(len(input_data)):
 
-                current_sample = layer.feed_forward(current_sample)
+                current_sample = input_data[i]
+
+                for layer in self._layers:
+
+                    current_sample = layer.feed_forward(current_sample)
+
+                # Add the cost of this piece of training data to the total cost of the network.
+                cost_gradient = variance_derivative(correct_outputs[i], current_sample)
+
+                for layer in reversed(self._layers):
+
+                    cost_gradient = layer.propagate_backward(cost_gradient, learning_rate)
+
+        print("The network has been adjusted.")

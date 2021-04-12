@@ -14,6 +14,6 @@ class Layer(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def propogate_backward(self, error, learning_rate):
+    def propagate_backward(self, error, learning_rate):
 
         pass

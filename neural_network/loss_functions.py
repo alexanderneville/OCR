@@ -1,7 +1,7 @@
 
 import numpy as np
 
-def error(correct, predicted):
+def variance(correct, predicted):
 
     """
 
@@ -16,12 +16,13 @@ def error(correct, predicted):
 
 
 
-def error_derivative(correct, predicted):
+def variance_derivative(correct, predicted):
 
     """
 
     This function calculates the derivative of the variance.
+    You can see the resembelance to the expression above.
 
     """
 
-    return (2 / len(predicted)) * (correct - predicted)
+    return (2 * (correct - predicted)) / correct.size

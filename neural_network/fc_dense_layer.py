@@ -5,7 +5,7 @@ import numpy as np
 
 # The base class is needed for the dense layer to inherit from.
 
-from layer import Layer
+from .layer import Layer
 
 
 class FC_Dense_Layer(Layer):
@@ -28,11 +28,11 @@ class FC_Dense_Layer(Layer):
 
         # Use numpy to generate a matrix full of random values.
         # The number of rows is equal to the number of outputs, with each row having a column for each input.
-        self._weights = np.random.randn(num_outputs, num_inputs)
+        self._weights = np.random.rand(num_inputs, num_outputs) - 0.5
 
         # That the output (before bias is applied) will have many columns, but just one row.
         # So create a matrix that has one column in every row as opposed to a 1D array.
-        self._biases = np.random.rand(num_outputs, 1)
+        self._biases = np.random.rand(1, num_outputs) - 0.5
 
     def feed_forward(self, input_data):
 
@@ -47,7 +47,7 @@ class FC_Dense_Layer(Layer):
         self._input_data = input_data
         # In order to multiply each input with its respective weight, use np.dot
         # The weights are passed first so the the matrix multiplicaion is valid.
-        output = np.dot(self._weights, self._input_data)
+        output = np.dot(self._input_data, self._weights)
 
         # two numpy arrays can be added like this (short for np.add())
         output += self._biases
@@ -55,7 +55,7 @@ class FC_Dense_Layer(Layer):
         # finally return the output which resembles the input (a single column matrix)
         return output
 
-    def propogate_backward(self, error, learning_rate):
+    def propagate_backward(self, layer_error, learning_rate):
 
         """
 
@@ -66,4 +66,10 @@ class FC_Dense_Layer(Layer):
 
         """
 
-        pass
+        input_error = np.dot(layer_error, np.transpose(self._weights))
+        weight_error = np.dot(np.transpose(self._input_data), layer_error)
+
+        self._weights -= (learning_rate * weight_error)
+        self._biases -= (learning_rate * layer_error)
+
+        return input_error

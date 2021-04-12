@@ -1,22 +1,22 @@
 
 import numpy as np
 
-from layer import Layer
+from .layer import Layer
 
 class Activation_Layer(Layer):
 
-        """
+    """
 
-        The activation layer inherits from the 'Layer' class.
-        One of these layers sits between each dense layer in the network.
-        The activation layer has as many inputs as the previous layer has outputs.
-        Various activation functions might be used:
+    The activation layer inherits from the 'Layer' class.
+    One of these layers sits between each dense layer in the network.
+    The activation layer has as many inputs as the previous layer has outputs.
+    Various activation functions might be used:
 
-        1. sigmoid
-        2. rlu
-        3. tanh
+    1. sigmoid
+    2. rlu
+    3. tanh
 
-        """
+    """
     def __init__(self, function, function_derivative):
 
         """
@@ -26,8 +26,8 @@ class Activation_Layer(Layer):
 
         """
 
-        self.function = function
-        self.function_derivative = function_derivative
+        self.chosen_function = function
+        self.chosen_function_derivative = function_derivative
 
 
     def feed_forward(self, input_data):
@@ -43,11 +43,11 @@ class Activation_Layer(Layer):
         self._input_data = input_data
 
         # use the activation function on the input.
-        return self.function(self._input_data)
+        return self.chosen_function(self._input_data)
 
 
 
-    def propogate_backward(self, error, learning_rate):
+    def propagate_backward(self, layer_error, learning_rate):
 
         """
 
@@ -56,4 +56,5 @@ class Activation_Layer(Layer):
         The learning rate has to be included so that all layers have a common interface even though it is not needed in activation layers.
 
         """
-        pass
+
+        return (self.chosen_function_derivative(self._input_data) * layer_error)
