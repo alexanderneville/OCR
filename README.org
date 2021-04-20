@@ -1,0 +1,4 @@
+#+TITLE: Optical Character Recognition
+#+AUTHOR: Alexander Neville
+
+This is my A-level course work project. I will be making a program which can convert hand written characters into digital ones. This program will also be able to identify where text is within a website.

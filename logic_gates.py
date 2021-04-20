@@ -23,7 +23,7 @@ logical_nand = np.array([[[1]], [[1]], [[1]], [[0]]])
 useless_gate = np.array([[[1]], [[1]], [[1]], [[1]]])
 
 # Instantiate the network
-network = nn.Network([2,3,3,1])
+network = nn.Network([2,4,4,1])
 
 # Add some layers to the network
 # An activation layer follows each fully connected layer.
