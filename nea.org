@@ -1,0 +1,22 @@
+#+TITLE: Neural Network Powered Character Recognition System
+#+AUTHOR: Alexander Neville
+
+* Introduction
+
+The value of wide-spread use of computer systems has been proven indispensable, not only in daily life, but also during the extra-ordinary pandemic period of 2020 and 2021. Modern computer networks and connected technology were able to power schools and businesses, while it was impossible for people to work directly with one another. As a computer science student, I embraced this move towards technological class work, although - like many students - some aspects of this change were more difficult.
+
+The most obvious of these is the newfound need to upload, store and submit both handwritten and printed class work. Students and teachers alike require a system that can enable them to seamlessly share ideas that work best on paper, in a more presentable and convenient manner.
+
+I will attempt to solve this problem by developing a platform that students and teachers can use to instantly convert their handwritten work to digital characters, making exporting and sharing work easier than ever.
+
+* Analysis
+** Research
+** Client Discussion
+** Objectives
+** Prototype
+** Critical Path
+** Feasibility Study
+* Design
+* Implementation
+* Testing
+* Solution
