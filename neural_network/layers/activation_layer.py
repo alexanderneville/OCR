@@ -1,10 +1,9 @@
-
 import numpy as np
 
 from .base_layer import Base_Layer
 
-class Activation_Layer(Base_Layer):
 
+class Activation_Layer(Base_Layer):
     """
 
     The activation layer inherits from the 'Layer' class.
@@ -17,8 +16,8 @@ class Activation_Layer(Base_Layer):
     3. tanh
 
     """
-    def __init__(self, function, function_derivative):
 
+    def __init__(self, function, function_derivative):
         """
 
         Assign the choosen activation function to this layer.
@@ -28,10 +27,9 @@ class Activation_Layer(Base_Layer):
 
         self.chosen_function = function
         self.chosen_function_derivative = function_derivative
-
+        self._input_data = None
 
     def feed_forward(self, input_data):
-
         """
 
         Like other layers this function is called as data is fed through the network.
@@ -45,10 +43,7 @@ class Activation_Layer(Base_Layer):
         # use the activation function on the input.
         return self.chosen_function(self._input_data)
 
-
-
     def propagate_backward(self, layer_error, learning_rate):
-
         """
 
         This layer has no trainable parameters so no adjustments to the layer have to be made.

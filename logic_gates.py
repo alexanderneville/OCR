@@ -2,7 +2,6 @@
 import numpy as np
 import neural_network as nn
 
-
 print("""The input data is:
 
 00
@@ -42,7 +41,7 @@ print(network.predict(input_data))
 
 print("\nsolving 'or' gate")
 network.train(input_data, logical_or, 0.1)
-print(network.predict(input_data))
+
 
 
 print("\nsolving 'nand' gate")
