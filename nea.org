@@ -1,3 +1,4 @@
+
 #+TITLE: Neural Network Powered Character Recognition System
 #+AUTHOR: Alexander Neville
 
@@ -13,10 +14,36 @@ I will attempt to solve this problem by developing a platform that students and 
 ** Research
 ** Client Discussion
 ** Objectives
+1. A user can log into the application.
+2. A user can upload images containing text.
+3. The program can identify characters within an image.
+4. A user can add labels to identified data.
+5. Labelled data can be used to train a model.
+6. A user can subsequently use saved models.
 ** Prototype
 ** Critical Path
+
+Development and testing will be easiest if the project is split into constituent parts. An obvious distinction to make is between frontend components and user experience and the backend logic and operation. In addition, the algorithms that power the application need to be proven to work before they can be implemented into the system.
+
 ** Feasibility Study
 * Design
+
+Having established the purpose of this system, the next step is to plan how the technologies I have identified can be implemented and joined together to create a functional application.
+
+** Test Plan
+
+|------+-----------+-------------+----------+--------------|
+| Test | Objective | Description | Expected | Real Outcome |
+|------+-----------+-------------+----------+--------------|
+|      |           |             |          |              |
+|------+-----------+-------------+----------+--------------|
+
+** Algorithm
+
+The purpose of this system is training a machine learning model to recognise a subject's own handwriting. Research suggests that a Neural Network is a suitable machine learning algorithm for /learning/ to distinguish between a set of predefined characters.
+
+** Database Systems
+** UI
 * Implementation
 * Testing
 * Solution
