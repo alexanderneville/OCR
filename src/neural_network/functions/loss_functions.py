@@ -1,14 +1,10 @@
 
 import numpy as np
 
-def variance(correct, predicted):
+def cost(correct, predicted):
 
     """
-
-    The 'correct' parameter is the vector of true values that the training data is labelled with.
-    The 'predicted' parameter is the vector of values produced by the network.
-
-    This function is designed to calculate the variance of the data.
+    return the cost of a single training example for diagnostics
 
     """
 
@@ -16,7 +12,7 @@ def variance(correct, predicted):
 
 
 
-def variance_derivative(correct, predicted):
+def d_cost(correct, predicted):
 
     """
 

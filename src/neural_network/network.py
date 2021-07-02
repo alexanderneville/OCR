@@ -57,7 +57,7 @@ class Network(object):
 
         """Given some input data and the correct labels for that data, adjust the network to suit the data."""
 
-        for cycle in range(1000):
+        for _ in range(1000):
 
             for i in range(len(input_data)):
 
@@ -66,8 +66,7 @@ class Network(object):
                 for layer in self._layers:
                     current_sample = layer.feed_forward(current_sample)
 
-                # Add the cost of this piece of training data to the total cost of the network.
-                network_error = functions.variance_derivative(correct_outputs[i], current_sample)
+                network_error = functions.d_cost(correct_outputs[i], current_sample)
 
                 for layer in reversed(self._layers):
                     network_error = layer.propagate_backward(network_error, learning_rate)
