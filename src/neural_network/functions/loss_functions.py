@@ -17,7 +17,6 @@ def d_cost(correct, predicted):
     """
 
     This function calculates the derivative of the variance.
-    You can see the resembelance to the expression above.
 
     """
 

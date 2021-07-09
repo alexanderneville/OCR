@@ -1,18 +1,18 @@
-
+import numpy as np
 from . import functions
 from . import layers
 
 class Network(object):
-    """This class is designed to represent an entire neural network.
-
-    A network has a list of layers, which is filled with instantiated layer objects."""
+    """
+    This class is designed to represent an entire neural network.
+    A network has a list of layers, which is filled with instantiated layer objects.
+    Each layer is composed of numpy arrays.
+    """
 
     def __init__(self, layout):
 
         """
-
         A list is passed in with each element representing how many neurons required in each layer.
-
         """
 
         # When a network is instantiated, its list of layers is set to blank.
@@ -41,7 +41,7 @@ class Network(object):
         # Iterate through each piece of data.
         for i in range(len(input_data)):
 
-            current_sample = input_data[i]
+            current_sample = np.array([input_data[i].flatten()])
 
             # Pass the data through every layer in the network.
             for layer in self._layers:
@@ -55,13 +55,13 @@ class Network(object):
 
     def train(self, input_data, correct_outputs, learning_rate):
 
-        """Given some input data and the correct labels for that data, adjust the network to suit the data."""
+        """input_data[i] is one training example, correct_outputs[i] is the output of the final layer."""
 
         for _ in range(1000):
 
             for i in range(len(input_data)):
 
-                current_sample = input_data[i]
+                current_sample = np.array([input_data[i].flatten()])
 
                 for layer in self._layers:
                     current_sample = layer.feed_forward(current_sample)

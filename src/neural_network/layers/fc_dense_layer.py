@@ -42,8 +42,6 @@ class FC_Dense_Layer(Base_Layer):
         """
 
         self._input_data = input_data
-        # In order to multiply each input with its respective weight, use np.dot
-        # The weights are passed first so the the matrix multiplicaion is valid.
         output = np.dot(self._input_data, self._weights)
 
         # two numpy arrays can be added like this (short for np.add())
