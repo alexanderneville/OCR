@@ -40,20 +40,19 @@ useless_gate = np.array([[[1]], [[1]], [[1]], [[1]]])
 
 
 print("solving 'and' gate")
-network.train(input_data, logical_and, 0.1)
+network.train(input_data, logical_and, 1000, 0.1)
 print(calc_output(network.predict(input_data)))
 
 print("\nsolving 'or' gate")
-network.train(input_data, logical_or, 0.1)
+network.train(input_data, logical_or, 1000, 0.1)
 print(calc_output(network.predict(input_data)))
 
 print("\nsolving 'nand' gate")
-network.train(input_data, logical_nand, 0.1)
+network.train(input_data, logical_nand, 1000, 0.1)
 print(calc_output(network.predict(input_data)))
 
-
 print("\nsolving useless gate")
-network.train(input_data, useless_gate, 0.1)
+network.train(input_data, useless_gate, 1000, 0.1)
 print(calc_output(network.predict(input_data)))
 
 print("\n")

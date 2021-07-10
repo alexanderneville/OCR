@@ -40,6 +40,13 @@ def calc_x_activations(x_train):
 
 # x_train = calc_x_activations(x_train)
 y_activations = calc_y_activations(y_train)
+# x_train = x_train.astype('float32')
+x_train = x_train/255 #activations between 0 and 1 makes training more predictable
 
-network = nn.Network([28*28,16,16,10])
-network.train(x_train, y_activations, 0.1)
+network = nn.Network([784, 50, 50 ,10])
+network.train(x_train[:1000], y_activations[:1000], 200, 0.1)
+output = network.predict(x_train[:5])
+
+print(y_train[:5])
+for i in output:
+    print(i)

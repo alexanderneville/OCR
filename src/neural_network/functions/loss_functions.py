@@ -20,4 +20,4 @@ def d_cost(correct, predicted):
 
     """
 
-    return (2 * (correct - predicted)) / correct.size
+    return (2 * (predicted - correct))/correct.size

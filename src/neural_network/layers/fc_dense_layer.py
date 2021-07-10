@@ -28,8 +28,8 @@ class FC_Dense_Layer(Base_Layer):
 
         # Use numpy to generate a matrix full of random values.
         # The number of rows is equal to the number of inputs, with each row having a column for every output neuron.
-        self._weights = np.random.rand(num_inputs, num_outputs)
-        self._biases = np.random.rand(1, num_outputs)
+        self._weights = (np.random.rand(num_inputs, num_outputs) - 0.5)
+        self._biases = (np.random.rand(1, num_outputs) - 0.5)
 
     def feed_forward(self, input_data):
 
@@ -64,7 +64,7 @@ class FC_Dense_Layer(Base_Layer):
         input_error = np.dot(layer_error, np.transpose(self._weights))
         weight_error = np.dot(np.transpose(self._input_data), layer_error)
 
-        self._weights += (learning_rate * weight_error)
-        self._biases += (learning_rate * layer_error)
+        self._weights -= (learning_rate * weight_error)
+        self._biases -= (learning_rate * layer_error)
 
         return input_error
