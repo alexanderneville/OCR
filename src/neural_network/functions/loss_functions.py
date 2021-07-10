@@ -1,7 +1,7 @@
 
 import numpy as np
 
-def cost(correct, predicted):
+def cost(correct, predicted) -> float:
 
     """
     return the cost of a single training example for diagnostics
