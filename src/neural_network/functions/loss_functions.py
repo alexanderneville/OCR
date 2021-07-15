@@ -5,7 +5,6 @@ def cost(correct, predicted) -> float:
 
     """
     return the cost of a single training example for diagnostics
-
     """
 
     return np.mean(np.power((correct - predicted), 2))
@@ -20,4 +19,4 @@ def d_cost(correct, predicted):
 
     """
 
-    return (2 * (predicted - correct))/correct.size
+    return (predicted - correct)/correct.size

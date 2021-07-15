@@ -31,6 +31,23 @@ class Network(object):
             self._layers.append(layers.FC_Dense_Layer(x, y))
             self._layers.append(layers.Activation_Layer(functions.tanh, functions.tanh_derivative))
 
+    @property
+    def parameters(self) -> tuple[list[np.ndarray], list[np.ndarray]]:
+
+        """retun tuple containing lists of the tunable parameters of the network."""
+
+        weights = []
+        biases = []
+
+        for i in self._layers:
+
+            if isinstance(i, layers.FC_Dense_Layer):
+
+                weights.append(i._weights)
+                biases.append(i._biases)
+
+        return weights, biases
+
     def add_layer(self, new_layer: layers.Base_Layer) -> None:
 
         """Add a layer to the network."""
@@ -64,6 +81,50 @@ class Network(object):
 
         return output
 
+
+    def batch_learning(self, batch, correct_outputs, learning_rate) -> None:
+
+        """perform gradient descent for a given mini-batch of examples"""
+
+        weights, biases = self.parameters
+        nabla_weights = [np.zeros(w.shape) for w in weights]
+        nabla_biases = [np.zeros(b.shape) for b in biases]
+
+        # back propogation for each example
+        for sample_num in range(len(batch)):
+
+            current_sample = np.array(batch[sample_num].flatten())
+            output = self.predict(current_sample, single_sample=True)
+            self._cost += functions.cost(correct_outputs[sample_num], output)
+            nabla_cost = functions.d_cost(correct_outputs[sample_num], output)
+
+            delta_weights = [np.zeros(w.shape) for w in weights]
+            delta_biases = [np.zeros(b.shape) for b in biases]
+            layer_num = -1 # keep track of progress backwards through network.
+
+            for layer in reversed(self._layers):
+
+                if isinstance(layer, layers.FC_Dense_Layer):
+
+                    costs = layer.propagate_backward(nabla_cost, learning_rate, calc_only=True) # input for next layer
+                    delta_weights[layer_num] = costs[1]
+                    delta_biases[layer_num] = costs[2]
+                    layer_num -= 1
+                    nabla_cost = costs[0]
+
+                else:
+
+                    nabla_cost = layer.propagate_backward(nabla_cost, learning_rate)
+
+            nabla_weights = [current+delta for current, delta in zip(nabla_weights, delta_weights)]
+            nabla_biases = [current+delta for current, delta in zip(nabla_biases, delta_biases)]
+
+        for layer in self._layers:
+            if isinstance(layer, layers.FC_Dense_Layer):
+                layer.update((learning_rate/len(batch))*nabla_weights.pop(0),
+                    (learning_rate/len(batch))*nabla_biases.pop(0))
+
+
     def train(self, input_data, correct_outputs, epochs: int = 1, learning_rate: float = 0.1, batch_size: int = None):
 
         """input_data[i] is one training example, correct_outputs[i] is the output of the final layer."""
@@ -81,10 +142,13 @@ class Network(object):
 
                     # debug.print_data(name="output activations", activations=current_sample, true_values=correct_outputs[j])
                     self._cost += functions.cost(correct_outputs[sample_num], output)
-                    nabla_error = functions.d_cost(correct_outputs[sample_num], output)
-                    # print(np.shape(nabla_error))
+                    # nabla is the mathematical symbol for steepest descent
+                    nabla_cost = functions.d_cost(correct_outputs[sample_num], output)
                     for layer in reversed(self._layers):
-                        nabla_error = layer.propagate_backward(nabla_error, learning_rate)
+                        if isinstance(layer, layers.FC_Dense_Layer):
+                            nabla_cost = layer.propagate_backward(nabla_cost, learning_rate)[0]
+                        else:
+                            nabla_cost = layer.propagate_backward(nabla_cost, learning_rate)
 
             else:
 
@@ -92,17 +156,8 @@ class Network(object):
 
                 for batch_num in range(len(batches)):
 
-                    nabla_error = np.zeros((1, self._layout[-1]))
-
-                    for sample_num in range(len(batches[batch_num])):
-
-                        output = self.predict(batches[batch_num][sample_num], single_sample=True)
-                        self._cost += functions.cost(correct_outputs[((batch_num * batch_size) + sample_num)], output)
-                        delta_error = functions.d_cost(correct_outputs[((batch_num * batch_size) + sample_num)], output)
-                        nabla_error += delta_error
-
-                    nabla_error /= len(batches[batch_num])
-                    for layer in reversed(self._layers):
-                        nabla_error = layer.propagate_backward(nabla_error, learning_rate)
+                    self.batch_learning(batches[batch_num], 
+                        correct_outputs[(batch_size * batch_num):(batch_size * batch_num + batch_size)],
+                        learning_rate)
                         
             print(f"Epoch: {i+1}, Average Cost: {self._cost/len(input_data)}, Remaining: {epochs - (i+1)}")

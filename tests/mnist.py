@@ -43,7 +43,19 @@ def calc_output(activations) -> int:
 
     return index
 
-def evaluate(labels: list[int], predictions) -> None:
+def test_SGD(x_train, y_train, x_test, y_test, network: nn.Network):
+
+    network.train(x_train, y_train, 200, 0.1)
+    output = network.predict(x_test)
+    evaluate(output, y_test)
+
+def test_batch_learning(x_train, y_train, x_test, y_test, network: nn.Network):
+
+    network.train(x_train, y_train, 200, 0.1, 200)
+    output = network.predict(x_test)
+    evaluate(output, y_test)
+
+def evaluate(predictions, labels: list[int]) -> None:
 
     """Calculate predictions and measure accuracy."""
 
@@ -62,20 +74,17 @@ def evaluate(labels: list[int], predictions) -> None:
 def main():
 
     (x_train, y_train), (x_test, y_test) = mnist.load_data() # load dataset
+    y_train_activations = calc_y_activations(y_train)
 
-    # x_train = calc_x_activations(x_train)
-    y_activations = calc_y_activations(y_train)
-    # x_train = x_train.astype('float32')
-    x_train = x_train/255 #activations between 0 and 1 makes training more predictable
-    x_test = x_test/255 #activations between 0 and 1 makes training more predictable
+    #activations between 0 and 1 makes training more predictable
+    x_train = x_train/255
+    x_test = x_test/255
 
+    # instantiate a network
     network = nn.Network([784, 50, 50 ,10])
-    network.train(x_train[:2000], y_activations[:2000], 200, 0.1)
-    # network.train(x_train[:2000], y_activations[:2000], 200, 0.1, batch_size=133)
-    # network.train(x_train[:10000], y_activations[:10000], 200, 0.1, batch_size=100)
+    # test_SGD(x_train[:2000], y_train_activations[:2000], x_test[:2000], y_test[:2000], network)
+    test_batch_learning(x_train[:2000], y_train_activations[:2000], x_test[:2000], y_test[:2000], network)
 
-    output = network.predict(x_test[:100])
-    evaluate(y_test[:100], output)
 
 if __name__ == "__main__":
     main()

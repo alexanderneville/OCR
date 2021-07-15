@@ -50,7 +50,7 @@ class FC_Dense_Layer(Base_Layer):
         # finally return the output which resembles the input (a single column matrix)
         return output
 
-    def propagate_backward(self, layer_error, learning_rate):
+    def propagate_backward(self, layer_error, learning_rate, calc_only: bool = False):
 
         """
 
@@ -64,7 +64,17 @@ class FC_Dense_Layer(Base_Layer):
         input_error = np.dot(layer_error, np.transpose(self._weights))
         weight_error = np.dot(np.transpose(self._input_data), layer_error)
 
-        self._weights -= (learning_rate * weight_error)
-        self._biases -= (learning_rate * layer_error)
+        if not calc_only:
 
-        return input_error
+            self._weights -= (learning_rate * weight_error)
+            self._biases -= (learning_rate * layer_error)
+
+        return input_error, weight_error, layer_error
+
+    def update(self, d_weights, d_biases):
+
+        """update parameters by given vectors using mini-batch gradient descent"""
+
+        self._weights -= d_weights
+        self._biases -= d_biases
+

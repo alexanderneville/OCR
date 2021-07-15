@@ -2,13 +2,13 @@
 
 import numpy as np
 
-def sigmoid():
+def sigmoid(input_data):
 
-    pass
+    return 1.0/(1.0+np.exp(input_data))
 
-def sigmoid_derivative():
+def sigmoid_derivative(input_data):
 
-    pass
+    return sigmoid(input_data)*(1-sigmoid(input_data))
 
 def tanh(input_data):
 
