@@ -10,65 +10,60 @@
 #include <string.h>
 #include <png.h>
 
+#include "./includes/image_structures.h"
+
 #define SIGNATURE 8
 #define CHECK(X) ({int __val = (X); (__val == -1 ? ({fprintf(stderr, "ERROR  (" __FILE__ ":%d) -- %s\n", __LINE__,strerror(errno)); exit(-1);-1;}) : __val); })
 
-png_structp png_ptr;
-png_infop info_ptr;
-png_infop end_info;
-
-int width, height;
 png_byte color_type;
 png_byte bit_depth;
 int channels;
 
-unsigned char ** pixels;
-
-void read_image(char * file_name) {
+unsigned char ** read_image(char * file_name, int * height, int * width) {
 
     FILE *fp = fopen(file_name, "rb");
 
     if (!fp) {
-        exit(-1);
+        return NULL;
     }
 
     char header[8];
     fread(header, 1, 8, fp);
     if (png_sig_cmp(header, 0, SIGNATURE)){
         printf("not a png file\n");
-        exit(-1);
+        return NULL;
     } 
 
-    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL); //use default error handling
+    png_struct * png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL); //use default error handling
     if (!png_ptr){
         exit(-1);
         fclose(fp);
     }
 
     // note that png_infopp & png_infop structs are a type alias for pointers to struct png_info.
-    info_ptr = png_create_info_struct(png_ptr);
+    png_info * info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr){
         png_destroy_read_struct(
            &png_ptr,
            (png_infopp)NULL, 
            (png_infopp)NULL);
-        exit(-1);
+        return NULL;
     }
 
-    end_info = png_create_info_struct(png_ptr);
+    png_info * end_info = png_create_info_struct(png_ptr);
     if (!end_info){
         png_destroy_read_struct(
             &png_ptr, 
             &info_ptr,
             (png_infopp)NULL);
-        return;
+        return NULL;
     }
 
     if (setjmp(png_jmpbuf(png_ptr))) {
 
         png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
         fclose(fp);
-        exit(-1);
+        return NULL;
 
     }
 
@@ -95,8 +90,8 @@ void read_image(char * file_name) {
 
     png_read_update_info(png_ptr, info_ptr);
 
-    height = png_get_image_height(png_ptr, info_ptr);
-    width = png_get_image_width(png_ptr, info_ptr);
+    * height = png_get_image_height(png_ptr, info_ptr);
+    * width = png_get_image_width(png_ptr, info_ptr);
     color_type = png_get_color_type(png_ptr, info_ptr);
     bit_depth = png_get_bit_depth(png_ptr, info_ptr);
     channels = png_get_channels(png_ptr, info_ptr);
@@ -109,10 +104,10 @@ void read_image(char * file_name) {
     /* printf("\n\n"); */
 
     // pixels is a pointer to an array contating pointers to arrays of png_bytes
-    pixels = (unsigned char **) malloc(sizeof(unsigned char *) * height);
+    unsigned char ** pixels = (unsigned char **) malloc(sizeof(unsigned char *) * (* height));
 
     // initialise malloced memory
-    for (int y = 0; y < height; y++) {
+    for (int y = 0; y < (* height); y++) {
         // each png_bytep in the pixels array is initialised to the size of one row
         pixels[y] = (unsigned char *) malloc(png_get_rowbytes(png_ptr, info_ptr));
     }
@@ -124,25 +119,26 @@ void read_image(char * file_name) {
     png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
     fclose(fp);
 
+    return pixels;
+
 }
 
-void inspect_image() {
+void inspect_image(unsigned char ** pixels, int height, int width) {
 
     for (int y = 0; y < height; y++) {
-        // each element in pixels is a png_bytep or "png_byte *"
-        // the png_bytep is a pointer to a list of png_byte
+        // retrive array pointer for every row 
         unsigned char * row = pixels[y];
-        for (int x = 0; x < width; x+=3) {
+        for (int x = 0; x < width*3; x+=3) {
+            // one pixel takes three indexes under RGB
             int R = row[x];
             int G = row[x+1];
             int B = row[x+2];
-            printf("pixel at position ( %d , %d ) has RGB values: %d - %d - %d\n", x, y, R, G, B);
+            printf("pixel at position ( %d , %d ) has RGB values: %d - %d - %d\n", x/3, y, R, G, B);
         }
     }
-
 }
 
-void write_image(char * file_name) {
+void write_image(char * file_name, unsigned char ** pixels, int height, int width) {
 
     FILE *fp = fopen(file_name, "wb");
 
@@ -150,8 +146,8 @@ void write_image(char * file_name) {
         exit(-1);
     }
 
-    png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    info_ptr = png_create_info_struct(png_ptr);
+    png_struct * png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    png_info * info_ptr = png_create_info_struct(png_ptr);
     png_init_io(png_ptr, fp);
 
     png_set_IHDR(png_ptr, info_ptr, width, height,
@@ -173,9 +169,13 @@ void write_image(char * file_name) {
 
 int main(int argc, char ** argv) {
 
-    read_image(argv[1]);
-    inspect_image();
-    write_image(argv[2]);
+    int height, width;
+    unsigned char ** pixels = read_image(argv[1], &height, &width);
+    image_data * image = initialise_data(pixels, height, width, 3);
+    inspect_image(pixels, height, width);
+    pixels = image->export_pixels(image);
+    inspect_image(pixels, height, width);
+    write_image(argv[2], pixels, height, width);
     return 0;
 
 }
