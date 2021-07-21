@@ -178,8 +178,9 @@ int main(int argc, char ** argv) {
     // move data in and out of structures
     image_data * image = initialise_data(pixels, height, width, 3);
     image->colour_to_greyscale(image);
-    /* image->expand_greyscale(image); */
+    image->expand_greyscale(image);
     pixels = image->export_pixels(image);
+    /* inspect_image(pixels, height, width); */
 
     write_image(argv[2], pixels, height, width, image->channels);
 
