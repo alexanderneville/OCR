@@ -21,9 +21,12 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->pixels = (float *) malloc(sizeof(float) * height * width * 3); 
 
     for (int y = 0; y < height; y++) {
+        //row
         unsigned char * row = pixels[y];
         for (int x = 0; x < width * new_image_p->channels; x += new_image_p->channels) {
+            //pixel
             for (int c = 0; c < new_image_p->channels; c ++) {
+                //channel
                 new_image_p->pixels[(y * new_image_p->width * new_image_p->channels) + x + c] = row[x + c];
             }
         }
@@ -34,6 +37,7 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
 
     new_image_p->export_pixels = &export_pixels;
     new_image_p->colour_to_greyscale = &colour_to_greyscale;
+    new_image_p->expand_greyscale = &expand_greyscale;
     new_image_p->reduce_noise = &reduce_noise;
     new_image_p->reduce_resolution = & reduce_resolution;
     new_image_p->soften = &soften;
@@ -62,8 +66,93 @@ unsigned char ** export_pixels(image_data * image) {
     return pixels;
 
 }
+void colour_to_greyscale(image_data * image) {
 
-void colour_to_greyscale(image_data * image) {}
+    if (image->channels != 3) {
+        return;
+    }
+
+    // perceptual and gamma correction
+    float weights[3] = {0.299, 0.587, 0.114};
+
+    /* float * greyscale = (float *) malloc(sizeof(float) * image->height * image->width); */
+
+    for (int y = 0; y < image->height; y++) {
+        for (int x = 0; x < image->width * image->channels; x += image->channels) {
+            float intensity = 0.0;
+            for (int c = 0; c < image->channels; c ++) {
+                /* intensity += weights[c] * (image->pixels[(y * image->width * image->channels) + x + c]); */
+                intensity += image->pixels[(y * image->width * image->channels) + x + c] / 3;
+            }
+            for (int c = 0; c < image->channels; c ++) {
+                image->pixels[(y * image->width * image->channels) + x + c] = intensity;
+            }
+        }
+    }
+
+    // update the image struct
+    /* image->channels = 1; */
+    /* image->pixels = (float *) realloc(image->pixels, sizeof(float) * image->height * image->width * image->channels); */
+    /* image->pixels = greyscale; */
+
+}
+
+/* void colour_to_greyscale(image_data * image) { */
+/*  */
+/*     if (image->channels != 3) { */
+/*         return; */
+/*     } */
+/*  */
+/*     // perceptual and gamma correction */
+/*     float weights[3] = {0.299, 0.587, 0.114}; */
+/*  */
+/*     float * greyscale = (float *) malloc(sizeof(float) * image->height * image->width); */
+/*  */
+/*     for (int y = 0; y < image->height; y++) { */
+/*         for (int x = 0; x < image->width * image->channels; x += image->channels) { */
+/*             float intensity = 0.0; */
+/*             for (int c = 0; c < image->channels; c ++) { */
+                /* intensity += weights[c] * (image->pixels[(y * image->width * image->channels) + x + c]); */
+/*                 intensity += image->pixels[(y * image->width * image->channels) + x + c]; */
+/*             } */
+/*             intensity /= 3.0; */
+/*             printf("%f\n", intensity); */
+/*             greyscale[y + x] = intensity; */
+/*         } */
+/*     } */
+/*  */
+/*     // update the image struct */
+/*     image->channels = 1; */
+/*     image->pixels = (float *) realloc(image->pixels, sizeof(float) * image->height * image->width * image->channels); */
+/*     image->pixels = greyscale; */
+/*  */
+/* } */
+/*  */
+/* void expand_greyscale(image_data * image){ */
+/*  */
+/*     if (image->channels == 3) { */
+/*         return; */
+/*     } */
+/*  */
+/*     float * rgb = (float *) malloc(sizeof(float) * image->height * image->width * 3); */
+/*  */
+/*     for (int y = 0; y < image->height; y++) { */
+/*         for (int x = 0; x < image->width; x++) { */
+/*             // set each channel of the resulting array to the same value in original array */
+/*             for (int c = 0; c < 3; c ++) { */
+/*                 rgb[(y * image->width * 3) + (x * 3) + c] = image->pixels[y + x]; */
+/*             } */
+/*         } */
+/*     } */
+/*  */
+/*     // update the image struct */
+/*     image->channels = 3; */
+/*     image->pixels = (float *) realloc(image->pixels, sizeof(float) * image->height * image->width * image->channels); */
+/*     image->pixels = rgb; */
+/*  */
+/* }; */
+
+void expand_greyscale(image_data * image) {};
 void reduce_noise(image_data * image) {}
 void reduce_resolution(image_data * image) {}
 void soften(image_data * image) {}

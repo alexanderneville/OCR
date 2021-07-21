@@ -15,11 +15,13 @@
 #define SIGNATURE 8
 #define CHECK(X) ({int __val = (X); (__val == -1 ? ({fprintf(stderr, "ERROR  (" __FILE__ ":%d) -- %s\n", __LINE__,strerror(errno)); exit(-1);-1;}) : __val); })
 
-png_byte color_type;
-png_byte bit_depth;
-int channels;
+int color_type;
+int bit_depth;
+
 
 unsigned char ** read_image(char * file_name, int * height, int * width) {
+
+    int channels;
 
     FILE *fp = fopen(file_name, "rb");
 
@@ -138,7 +140,7 @@ void inspect_image(unsigned char ** pixels, int height, int width) {
     }
 }
 
-void write_image(char * file_name, unsigned char ** pixels, int height, int width) {
+void write_image(char * file_name, unsigned char ** pixels, int height, int width, int channels) {
 
     FILE *fp = fopen(file_name, "wb");
 
@@ -150,6 +152,12 @@ void write_image(char * file_name, unsigned char ** pixels, int height, int widt
     png_info * info_ptr = png_create_info_struct(png_ptr);
     png_init_io(png_ptr, fp);
 
+    /* if (channels == 3) { */
+    /*     color_type = PNG_COLOR_TYPE_RGB; */
+    /* } else if (channels == 1) { */
+    /*     color_type = PNG_COLOR_TYPE_GRAY; */
+    /* } */
+
     png_set_IHDR(png_ptr, info_ptr, width, height,
                  bit_depth, color_type, PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
@@ -158,24 +166,23 @@ void write_image(char * file_name, unsigned char ** pixels, int height, int widt
     png_write_image(png_ptr, pixels);
     png_write_end(png_ptr, NULL);
 
-    //cleanup
-    for (int y = 0; y < height; y++)
-            free(pixels[y]);
-    free(pixels);
-
     fclose(fp);
 
 }
 
 int main(int argc, char ** argv) {
 
-    int height, width;
+    int height, width, channels;
     unsigned char ** pixels = read_image(argv[1], &height, &width);
+
+    // move data in and out of structures
     image_data * image = initialise_data(pixels, height, width, 3);
-    inspect_image(pixels, height, width);
+    image->colour_to_greyscale(image);
+    /* image->expand_greyscale(image); */
     pixels = image->export_pixels(image);
-    inspect_image(pixels, height, width);
-    write_image(argv[2], pixels, height, width);
+
+    write_image(argv[2], pixels, height, width, image->channels);
+
     return 0;
 
 }
