@@ -137,15 +137,31 @@ void reduce_noise(image_data * image) {
     int kernel_dimensions = 5;
     kernel_configuration type = Mean; 
     float * kernel = create_kernel(type, kernel_dimensions);
-    printf("kernel created\n");
-    free(image->pixels);
+    /* for (int i = 0; i < 9; i ++){ */
+    /*     printf("%f\n", kernel[i]); */
+    /* } */
     image->pixels = apply_convolution(image, kernel, kernel_dimensions);
-    printf("kernel applied\n");
 
-    //update the list of pixels
     /* traverse_tree(root, image); */
 
 }
 
 void reduce_resolution(image_data * image) {}
-void soften(image_data * image) {}
+
+void soften(image_data * image) {
+
+    // initialise the kernel
+    int kernel_dimensions = 5;
+    kernel_configuration type = Gaussian; 
+    float * kernel = (float*) malloc(sizeof(float) * kernel_dimensions * kernel_dimensions);
+    kernel = create_kernel(type, kernel_dimensions);
+
+    for (int i = 0; i < 25; i ++){
+        printf("%f\n", kernel[i]);
+    }
+
+    image->pixels = apply_convolution(image, kernel, kernel_dimensions);
+
+    //update the list of pixels
+    /* traverse_tree(root, image); */
+}

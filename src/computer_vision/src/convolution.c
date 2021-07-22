@@ -1,6 +1,7 @@
 #include "../includes/convolution.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 float * create_kernel(kernel_configuration type, int kernel_dimensions) {
 
@@ -18,19 +19,19 @@ float * create_kernel(kernel_configuration type, int kernel_dimensions) {
             float weights[] = {1.0,2.0,1.0,
                                2.0,4.0,2.0,
                                1.0,2.0,1.0};
-            kernel = weights;
+
+            memcpy(kernel, weights, sizeof(float) * 9);
 
         } else if (kernel_dimensions == 5) {
-            float weights[] = {1.0, 4.0, 6.0, 4.0, 1.0,
-                               4.0, 16.0, 24.0, 16.0, 4.0, 
-                               6.0, 24.0, 36.0, 24.0, 6.0,
-                               4.0, 16.0, 24.0, 16.0, 4.0,
-                               1.0, 4.0, 6.0, 4.0, 1.0};
-            kernel = weights;
+            float weights[] = {1.0,  4.0,  6.0,  4.0,  1.0,
+                               4.0,  16.0, 24.0, 16.0, 4.0, 
+                               6.0,  24.0, 36.0, 24.0, 6.0,
+                               4.0,  16.0, 24.0, 16.0, 4.0,
+                               1.0,  4.0,  6.0,  4.0,  1.0};
+
+            memcpy(kernel, weights, sizeof(float) * 25);
         }
-
     }
-
     return kernel;
 }
 
@@ -48,6 +49,7 @@ float * apply_convolution(image_data * image, float * kernel, int kernel_dimensi
             float weighted_sum = 0;
 
             for (int j = 0; j < kernel_dimensions * kernel_dimensions; j++) {
+                /* printf("%f\n", kernel[j]); */
                 // get x and y displacement from center (within the kernel)
                 int x_pos = j % kernel_dimensions;
                 int y_pos = j / kernel_dimensions;
@@ -66,8 +68,9 @@ float * apply_convolution(image_data * image, float * kernel, int kernel_dimensi
 
                 }
             }
+            /* printf("%f\n", sum_used_weights); */
             float intensity = weighted_sum / sum_used_weights;
-            printf("%d %d %f\n", x, y, intensity);
+            /* printf("%d %d %f\n", x, y, intensity); */
             blurred_image[y*image->width + x] = intensity;
             /* node_data current_pixel = {(y*image->width + x), intensity}; */
             /* insert_data(root, &current_pixel); */
