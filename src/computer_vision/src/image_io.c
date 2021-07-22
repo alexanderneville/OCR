@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <png.h>
-#include "../includes/image_handling.h"
+#include "../includes/image_io.h"
 
 unsigned char ** read_image(char * file_name, int * height, int * width, int * channels, int * bit_depth, int * color_type) {
 

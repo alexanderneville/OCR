@@ -11,7 +11,7 @@
 #include <string.h>
 #include <png.h>
 
-#include "../includes/image_handling.h"
+#include "../includes/image_io.h"
 #include "../includes/image_processing.h"
 
 PyObject* test(PyObject* self) {

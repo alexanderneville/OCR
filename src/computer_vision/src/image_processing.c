@@ -90,12 +90,6 @@ void colour_to_greyscale(image_data * image) {
         }
     }
 
-    /* for (int y = 0; y < image->height; y++) { */
-    /*     for (int x = 0; x < image->width; x++) { */
-    /*         printf("%f\n", greyscale[y * image->width + x]); */
-    /*     } */
-    /* } */
-
     // update the image struct
     image->channels = 1;
     free(image->pixels);
@@ -137,9 +131,6 @@ void reduce_noise(image_data * image) {
     int kernel_dimensions = 5;
     kernel_configuration type = Mean; 
     float * kernel = create_kernel(type, kernel_dimensions);
-    /* for (int i = 0; i < 9; i ++){ */
-    /*     printf("%f\n", kernel[i]); */
-    /* } */
     image->pixels = apply_convolution(image, kernel, kernel_dimensions);
 
     /* traverse_tree(root, image); */
@@ -156,12 +147,10 @@ void soften(image_data * image) {
     float * kernel = (float*) malloc(sizeof(float) * kernel_dimensions * kernel_dimensions);
     kernel = create_kernel(type, kernel_dimensions);
 
-    for (int i = 0; i < 25; i ++){
-        printf("%f\n", kernel[i]);
-    }
+    /* for (int i = 0; i < 25; i ++){ */
+    /*     printf("%f\n", kernel[i]); */
+    /* } */
 
     image->pixels = apply_convolution(image, kernel, kernel_dimensions);
 
-    //update the list of pixels
-    /* traverse_tree(root, image); */
 }
