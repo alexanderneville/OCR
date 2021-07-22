@@ -1,5 +1,6 @@
 #include "../includes/convolution.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 float * create_kernel(kernel_configuration type, int kernel_dimensions) {
 
@@ -33,10 +34,11 @@ float * create_kernel(kernel_configuration type, int kernel_dimensions) {
     return kernel;
 }
 
-node * apply_convolution(image_data * image, float * kernel, int kernel_dimensions) {
+float * apply_convolution(image_data * image, float * kernel, int kernel_dimensions) {
 
     // create a tree to store the data
-    node * root = create_node();
+    /* node * root = create_node(); */
+    float * blurred_image = (float *) malloc(sizeof(float) * image->height * image->width);
     int kernel_center = ((kernel_dimensions + 1) / 2) -1;
 
     for (int y = 0; y < image->height; y++) {
@@ -64,11 +66,14 @@ node * apply_convolution(image_data * image, float * kernel, int kernel_dimensio
 
                 }
             }
-
-            node_data current_pixel = {(y*image->width + x), weighted_sum / sum_used_weights};
-            insert_data(root, &current_pixel);
+            float intensity = weighted_sum / sum_used_weights;
+            printf("%d %d %f\n", x, y, intensity);
+            blurred_image[y*image->width + x] = intensity;
+            /* node_data current_pixel = {(y*image->width + x), intensity}; */
+            /* insert_data(root, &current_pixel); */
 
         }
     }
-    return root;
+    return blurred_image;
+    /* return root; */
 };

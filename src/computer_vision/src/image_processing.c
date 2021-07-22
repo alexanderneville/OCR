@@ -137,10 +137,13 @@ void reduce_noise(image_data * image) {
     int kernel_dimensions = 5;
     kernel_configuration type = Mean; 
     float * kernel = create_kernel(type, kernel_dimensions);
-    node * root = apply_convolution(image, kernel, kernel_dimensions);
+    printf("kernel created\n");
+    free(image->pixels);
+    image->pixels = apply_convolution(image, kernel, kernel_dimensions);
+    printf("kernel applied\n");
 
     //update the list of pixels
-    traverse_tree(root, image);
+    /* traverse_tree(root, image); */
 
 }
 

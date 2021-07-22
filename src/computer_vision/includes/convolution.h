@@ -10,6 +10,6 @@
     } kernel_configuration; 
 
     float * create_kernel(kernel_configuration type, int kernel_dimensions);
-    node * apply_convolution(image_data * image, float * kernel, int kernel_dimensions);
+    float * apply_convolution(image_data * image, float * kernel, int kernel_dimensions);
 
 #endif // convolution_H

@@ -4,8 +4,8 @@ LIBS= -lpng
 
 IDIR=../includes
 ODIR=./obj
-_HEADS = image_handling.h image_processing.h
-_OBJ = main.o image_handling.o image_processing.o
+_HEADS = image_handling.h image_processing.h convolution.h tree.h
+_OBJ = main.o image_handling.o image_processing.o convolution.o tree.o
 
 HEADS = $(patsubst %,$(IDIR)/%,$(_HEADS))
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
