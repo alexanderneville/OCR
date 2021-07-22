@@ -131,6 +131,18 @@ void expand_greyscale(image_data * image){
 
 };
 
-void reduce_noise(image_data * image) {}
+void reduce_noise(image_data * image) {
+    
+    // initialise the kernel
+    int kernel_dimensions = 5;
+    kernel_configuration type = Mean; 
+    float * kernel = create_kernel(type, kernel_dimensions);
+    node * root = apply_convolution(image, kernel, kernel_dimensions);
+
+    //update the list of pixels
+    traverse_tree(root, image);
+
+}
+
 void reduce_resolution(image_data * image) {}
 void soften(image_data * image) {}

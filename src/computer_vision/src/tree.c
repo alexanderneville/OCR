@@ -1,32 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "./includes/tree.h"
-#include "./includes/image_structures.h"
+#include "../includes/tree.h"
+#include "../includes/image_processing.h"
 
 node * create_node() {
 
-  node * new_node = (node *) malloc(sizeof(node));
-  new_node->data = NULL;
-  new_node->left = NULL;
-  new_node->right = NULL;
+  node * new_node_p = (node *) malloc(sizeof(node));
+  new_node_p->data = NULL;
+  new_node_p->left = NULL;
+  new_node_p->right = NULL;
 
-  return new_node;
+  return new_node_p;
 
 }
 
-void insert_tree(node * node_p, node_data * data) {
+void insert_data(node * node_p, node_data * data) {
 
     if (node_p->data) {
 
-        if (data->intensity <= node_p->data->intensity) {
+        if (data->position <= node_p->data->position) {
 
             if (! node_p->left) node_p->left = create_node();
-            insert_tree(node_p->left, data);
+            insert_data(node_p->left, data);
 
-        } else if (data->intensity > node_p->data->intensity) {
+        } else if (data->position > node_p->data->position) {
 
             if (! node_p->right) node_p->right = create_node();
-            insert_tree(node_p->right, data);
+            insert_data(node_p->right, data);
 
         }
 
@@ -34,11 +34,11 @@ void insert_tree(node * node_p, node_data * data) {
 
 }
 
-void traverse_tree(node * node_p) {
+void traverse_tree(node * node_p, image_data * image) {
 
-    if (node_p->left){ traverse_tree(node_p->left); }
-    printf("%f\n", node_p->data->intensity);
-    if (node_p->right){ traverse_tree(node_p->right); }
+    if (node_p->left){ traverse_tree(node_p->left, image); }
+    image->pixels[node_p->data->position] = node_p->data->intensity;
+    if (node_p->right){ traverse_tree(node_p->right, image); }
 
 }
 
@@ -46,6 +46,7 @@ void destroy_tree(node * node_p) {
 
     if (node_p->left){ destroy_tree(node_p->left); }
     if (node_p->right){ destroy_tree(node_p->right); }
+    free(node_p->data);
     free(node_p);
 
 }

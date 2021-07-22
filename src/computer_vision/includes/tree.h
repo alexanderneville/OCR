@@ -1,5 +1,6 @@
 #ifndef tree_H
 #define tree_H
+#include "../includes/image_processing.h"
 
 typedef struct node_data_T {
 
@@ -18,7 +19,7 @@ typedef struct node_T {
 
 node * create_node();
 void insert_data(node * node_p, node_data * data);
-void traverse_tree(node * node_p);
+void traverse_tree(node * node_p, image_data * image);
 void destroy_tree(node * node_p);
 
 #endif // !tree_H
