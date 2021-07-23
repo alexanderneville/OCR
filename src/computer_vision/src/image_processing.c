@@ -137,8 +137,6 @@ void reduce_noise(image_data * image) {
 
 }
 
-void reduce_resolution(image_data * image) {}
-
 void soften(image_data * image) {
 
     // initialise the kernel
@@ -152,5 +150,20 @@ void soften(image_data * image) {
     /* } */
 
     image->pixels = apply_convolution(image, kernel, kernel_dimensions);
+
+}
+
+void reduce_resolution(image_data * image) {
+
+    float * tmp = image->pixels;
+    int new_height;
+    int new_width;
+
+    /* image->pixels = max_pool_image(image, 2, &new_height, &new_width); */
+    image->pixels = mean_pool_image(image, 2, &new_height, &new_width);
+    image->height = new_height;
+    image->width = new_width;
+
+    free(tmp);
 
 }

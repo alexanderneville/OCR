@@ -80,3 +80,53 @@ float * apply_convolution(image_data * image, float * kernel, int kernel_dimensi
     return blurred_image;
     /* return root; */
 };
+
+float * mean_pool_image(image_data * image, int dimensions, int * height, int * width) {
+
+    * height = image->height / dimensions;
+    * width = image->width / dimensions;
+
+    float * pixelated_image = (float *) malloc(sizeof(float) * (* height) * (* width));
+
+    for (int y = 0; y < image->height; y+=dimensions) {
+        for (int x = 0; x < image->width; x+=dimensions) { // for every pixel
+            float kernel_sum  = 0.0;
+            if (x + dimensions < image->width && y + dimensions < image->height) {
+                for (int j = 0; j < dimensions; j++ ) {
+                    for (int i = 0; i < dimensions; i++) {
+                        kernel_sum += image->pixels[(y + j) * image->width + (x + i)];
+                    }
+                }
+            pixelated_image[(y/dimensions) * (* width) + (x/dimensions)] = (kernel_sum / (dimensions * dimensions));
+            }
+        }
+    }
+    return pixelated_image;
+};
+
+float * max_pool_image(image_data * image, int dimensions, int * height, int * width) {
+
+    // set the dimensions of the new image
+    * height = image->height / dimensions;
+    * width = image->width / dimensions;
+
+    float * pixelated_image = (float *) malloc(sizeof(float) * (* height) * (* width));
+
+    for (int y = 0; y < image->height; y+=dimensions) {
+        for (int x = 0; x < image->width; x+=dimensions) { // for every pixel
+            float kernel_maximum  = 255.0;
+            if (x + dimensions < image->width && y + dimensions < image->height) {
+                // find the darkest pixel in the image
+                for (int j = 0; j < dimensions; j++ ) {
+                    for (int i = 0; i < dimensions; i++) {
+                        if (image->pixels[(y + j) * image->width + (x + i)] < kernel_maximum) {
+                            kernel_maximum = image->pixels[(y + j) * image->width + (x + i)];
+                        }
+                    }
+                }
+            pixelated_image[(y/dimensions) * (* width) + (x/dimensions)] = kernel_maximum;
+            }
+        }
+    }
+    return pixelated_image;
+};
