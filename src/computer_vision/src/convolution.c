@@ -31,11 +31,22 @@ float * create_kernel(kernel_configuration type, int kernel_dimensions) {
 
             memcpy(kernel, weights, sizeof(float) * 25);
         }
+
+    } else if (type == Sharpen) {
+        
+        //radius must eeequal 3
+        float weights[] = {0.0,  -1.0, 0.0,
+                           -1.0, 5.0,  -1.0,
+                           0.0,  -1.0, 0.0};
+
+        memcpy(kernel, weights, sizeof(float) * 9);
+        
     }
+
     return kernel;
 }
 
-float * apply_convolution(image_data * image, float * kernel, int kernel_dimensions) {
+float * apply_convolution(image_data * image, kernel_configuration type, float * kernel, int kernel_dimensions) {
 
     // create a tree to store the data
     /* node * root = create_node(); */
@@ -68,8 +79,13 @@ float * apply_convolution(image_data * image, float * kernel, int kernel_dimensi
 
                 }
             }
+            float intensity;
             /* printf("%f\n", sum_used_weights); */
-            float intensity = weighted_sum / sum_used_weights;
+            if (type == Gaussian || type == Mean) {
+                intensity = weighted_sum / sum_used_weights;
+            } else if (type == Sharpen){
+                intensity = weighted_sum;
+            } 
             /* printf("%d %d %f\n", x, y, intensity); */
             blurred_image[y*image->width + x] = intensity;
             /* node_data current_pixel = {(y*image->width + x), intensity}; */

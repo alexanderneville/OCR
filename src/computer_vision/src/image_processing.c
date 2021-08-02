@@ -42,6 +42,7 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->reduce_noise = &reduce_noise;
     new_image_p->reduce_resolution = & reduce_resolution;
     new_image_p->soften = &soften;
+    new_image_p->sharpen = &sharpen;
 
     return new_image_p;
 }
@@ -131,7 +132,7 @@ void reduce_noise(image_data * image) {
     int kernel_dimensions = 5;
     kernel_configuration type = Mean; 
     float * kernel = create_kernel(type, kernel_dimensions);
-    image->pixels = apply_convolution(image, kernel, kernel_dimensions);
+    image->pixels = apply_convolution(image, type, kernel, kernel_dimensions);
 
     /* traverse_tree(root, image); */
 
@@ -149,7 +150,23 @@ void soften(image_data * image) {
     /*     printf("%f\n", kernel[i]); */
     /* } */
 
-    image->pixels = apply_convolution(image, kernel, kernel_dimensions);
+    image->pixels = apply_convolution(image, type, kernel, kernel_dimensions);
+
+}
+
+void sharpen(image_data * image) {
+
+    // initialise the kernel
+    int kernel_dimensions = 3;
+    kernel_configuration type = Sharpen; 
+    float * kernel = (float*) malloc(sizeof(float) * kernel_dimensions * kernel_dimensions);
+    kernel = create_kernel(type, kernel_dimensions);
+
+    /* for (int i = 0; i < 25; i ++){ */
+    /*     printf("%f\n", kernel[i]); */
+    /* } */
+
+    image->pixels = apply_convolution(image, type, kernel, kernel_dimensions);
 
 }
 

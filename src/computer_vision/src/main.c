@@ -19,7 +19,12 @@ int main(int argc, char ** argv) {
     unsigned char ** pixels = read_image(argv[1], &height, &width, &channels, &bit_depth, &color_type);
     image_data * image_p = initialise_data(pixels, height, width, 3);
     (* image_p).colour_to_greyscale(image_p);
-    (* image_p).reduce_resolution(image_p);
+    (* image_p).soften(image_p);
+    (* image_p).soften(image_p);
+    (* image_p).soften(image_p);
+    (* image_p).soften(image_p);
+    /* (* image_p).reduce_resolution(image_p); */
+    (* image_p).sharpen(image_p);
     (* image_p).expand_greyscale(image_p);
     pixels = (* image_p).export_pixels(image_p);
     write_image(argv[2], pixels, image_p->height, image_p->width, image_p->channels, bit_depth, color_type);
