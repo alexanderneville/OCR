@@ -14,6 +14,7 @@ def init_user(conn: sqlite3.Connection):
                             username TEXT UNIQUE NOT NULL,
                             password TEXT NOT NULL,
                             salt INTEGER NOT NULL,
+                            full_name TEXT NOT NULL,
                             role TEXT NOT NULL);''')
         conn.commit()
 
@@ -23,43 +24,6 @@ def init_user(conn: sqlite3.Connection):
         conn.close()
         raise e
 
-# def init_teacher(conn: sqlite3.Connection):
-# 
-#     try:
-# 
-#         cursor = conn.cursor()
-#         cursor.execute("DROP TABLE IF EXISTS teacher")
-#         cursor.execute('''CREATE TABLE teacher (
-#                             id INTEGER PRIMARY KEY AUTOINCREMENT,
-#                             username TEXT UNIQUE NOT NULL,
-#                             password TEXT NOT NULL,
-#                             salt INTEGER NOT NULL);''')
-#         conn.commit()
-# 
-#     except sqlite3.Error as e:
-# 
-#         print("error creating teacher table.")
-#         conn.close()
-#         raise e
-# 
-# def init_student(conn: sqlite3.Connection):
-# 
-#     try:
-# 
-#         cursor = conn.cursor()
-#         cursor.execute("DROP TABLE IF EXISTS student")
-#         cursor.execute('''CREATE TABLE student (
-#                             id INTEGER PRIMARY KEY AUTOINCREMENT,
-#                             username TEXT UNIQUE NOT NULL,
-#                             password TEXT NOT NULL,
-#                             salt INTEGER NOT NULL);''')
-#         conn.commit()
-# 
-#     except sqlite3.Error as e:
-# 
-#         print("error creating student table.")
-#         conn.close()
-#         raise e
 
 def init_class(conn: sqlite3.Connection):
 
@@ -142,21 +106,3 @@ def init_cache(conn: sqlite3.Connection):
         conn.close()
         raise e
 
-def main():
-
-    # initialise the connection
-    print(__file__)
-    db_path = os.path.dirname(os.path.dirname(__file__))+'/application_data.db'
-    conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
-
-    # run create table functions
-    init_user(conn)
-    init_class(conn)
-    init_class_student(conn)
-    init_model(conn)
-    init_cache(conn)
-
-    conn.close()
-
-if __name__ == "__main__":
-    main()
