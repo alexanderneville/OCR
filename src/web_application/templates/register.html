@@ -17,17 +17,26 @@
 
     <p>Please enter your login details:</p>
 
-    <form action="/login" method="post">
+    <form action="/register" method="post">
 
         <label for="username">Username:</label>
         <input type="text" name="username" placeholder="e.g. JohnSmith123"> <br>
+
+        <label for="full_name">Full Name:</label>
+        <input type="text" name="full_name"> <br>
+
         <label for="password">Password:</label>
         <input type="password" name="password"> <br>
+
+
         <div>
+
             <input type="radio" id="teacher_radio" name="role" value="teacher">
             <label for="teacher_radio">Teacher</label>
+
             <input type="radio" id="student_radio" name="role" value="student">
             <label for="student_radio">Student</label>
+
         </div>
         <input type="submit" value="Login">
 

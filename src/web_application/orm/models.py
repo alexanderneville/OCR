@@ -8,7 +8,7 @@ def check_exists(conn: sqlite3.Connection, username: str):
     cursor = conn.cursor()
     return cursor.execute('SELECT id FROM user WHERE username =?', [username]).fetchone()
 
-def create_user(conn: sqlite3.Connection, id: int):
+def create_user_object(conn: sqlite3.Connection, id: int):
 
     cursor = conn.cursor()
     data = cursor.execute('SELECT role FROM user WHERE id=?', [id]).fetchone()
@@ -77,7 +77,7 @@ class Teacher(entity_model):
             new_user_id = cursor.execute('SELECT id FROM user WHERE username =?', [username]).fetchone()
             conn.commit()
 
-            return new_user_id[0]
+            return int(new_user_id[0])
 
     def delete(self):
         pass

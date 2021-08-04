@@ -42,4 +42,4 @@ if __name__ == "__main__":
 
     create_tables()
     # test_insertion()
-    populate_tables()
+    # populate_tables()
