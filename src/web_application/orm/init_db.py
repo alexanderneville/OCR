@@ -74,7 +74,7 @@ def init_model(conn: sqlite3.Connection):
         cursor.execute('''CREATE TABLE model (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             owner_id INTEGER NOT NULL,
-                            path TEXT NOT NULL,
+                            path TEXT,
                             FOREIGN KEY (owner_id) REFERENCES user (id) ON UPDATE CASCADE ON DELETE CASCADE
                             );''')
         conn.commit()

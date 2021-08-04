@@ -1,8 +1,10 @@
 import orm, os, sqlite3
 
 # replace with the path to the data directory
-data_path = "/home/alex/code/nea/data/"
-db_path = data_path+'application_data.db'
+
+data_path = orm.data_path
+db_path = orm.db_path
+secret_key = '1234'
 
 def create_tables():
 
