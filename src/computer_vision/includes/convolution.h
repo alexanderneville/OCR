@@ -11,8 +11,8 @@
     } kernel_configuration; 
 
     float * create_kernel(kernel_configuration type, int kernel_dimensions);
-    float * apply_convolution(image_data * image, kernel_configuration type, float * kernel, int kernel_dimensions);
-    float * max_pool_image(image_data * image, int dimensions, int * height, int * width);
-    float * mean_pool_image(image_data * image, int dimensions, int * height, int * width);
+    float * apply_convolution(float * pixels, int height, int width, kernel_configuration type, float * kernel, int kernel_dimensions);
+    float * max_pool_image(float * pixels, int step, int * height, int * width);
+    float * mean_pool_image(float * pixels, int step, int * height, int * width);
 
 #endif // convolution_H

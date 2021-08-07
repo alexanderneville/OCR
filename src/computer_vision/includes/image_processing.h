@@ -2,13 +2,18 @@
 #define image_structure_H
 
 typedef struct image_data_T {
+
     int height, width;
     int channels;
-    float * pixels;
+    float * greyscale;
+    float * R;
+    float * G;
+    float * B;
+
     // methods
     unsigned char ** (* export_pixels) (struct image_data_T * image);
-    void (* colour_to_greyscale) (struct image_data_T * image);
-    void (* expand_greyscale) (struct image_data_T * image);
+    void (* rgb_to_greyscale) (struct image_data_T * image);
+    void (* greyscale_to_rgb) (struct image_data_T * image);
     void (* reduce_noise) (struct image_data_T * image);
     void (* reduce_resolution) (struct image_data_T * image);
     void (* soften) (struct image_data_T * image);
@@ -18,8 +23,8 @@ typedef struct image_data_T {
 
 image_data * initialise_data(unsigned char ** pixels, int height, int width, int channels);
 unsigned char ** export_pixels(image_data * image);
-void colour_to_greyscale(image_data * image);
-void expand_greyscale(image_data * image);
+void rgb_to_greyscale(image_data * image);
+void greyscale_to_rgb(image_data * image);
 void reduce_noise(image_data * image);
 void reduce_resolution(image_data * image);
 void soften(image_data * image);
