@@ -24,6 +24,7 @@ int main(int argc, char ** argv) {
 
     image_data * image_p = initialise_data(pixels, height, width, 3);
 
+    printf("data has been read into structs\n");
     /* (* image_p).rgb_to_greyscale(image_p); */
     /* (* image_p).greyscale_to_rgb(image_p); */
     /* (* image_p).soften(image_p); */
@@ -35,6 +36,7 @@ int main(int argc, char ** argv) {
     /* (* image_p).invert(image_p); */
 
     pixels = (* image_p).export_pixels(image_p);
+    printf("data has been exported\n");
 
     write_image(argv[2], pixels, image_p->height, image_p->width, image_p->channels, bit_depth, color_type);
 

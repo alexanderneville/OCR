@@ -11,6 +11,7 @@
 #include <png.h>
 
 #include "../includes/image_processing.h"
+#include "../includes/matrix.h"
 #include "../includes/tree.h"
 #include "../includes/convolution.h"
 
@@ -28,13 +29,13 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
 
     if (channels == 3) {
 
-        new_image_p->R = (float*) malloc(sizeof(float) * height * width);
-        new_image_p->G = (float*) malloc(sizeof(float) * height * width);
-        new_image_p->B = (float*) malloc(sizeof(float) * height * width);
+        new_image_p->R = create_matrix(new_image_p->height, new_image_p->width);
+        new_image_p->G = create_matrix(new_image_p->height, new_image_p->width);
+        new_image_p->B = create_matrix(new_image_p->height, new_image_p->width);
 
     } else {
 
-        new_image_p->greyscale = (float *) malloc(sizeof(float) * new_image_p->height * new_image_p->width); 
+        new_image_p->greyscale = create_matrix(new_image_p->height, new_image_p->width);
 
     }
 
@@ -46,15 +47,15 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
 
             if (new_image_p->channels == 3) {
 
-                new_image_p->R[(y * new_image_p->width) + x/3] = row[x + 0];
-                new_image_p->G[(y * new_image_p->width) + x/3] = row[x + 1];
-                new_image_p->B[(y * new_image_p->width) + x/3] = row[x + 2];
+                new_image_p->R->array[(y * new_image_p->width) + x/3] = row[x + 0];
+                new_image_p->G->array[(y * new_image_p->width) + x/3] = row[x + 1];
+                new_image_p->B->array[(y * new_image_p->width) + x/3] = row[x + 2];
 
             } else if (new_image_p->channels == 1) {
 
                 for (int c = 0; c < new_image_p->channels; c ++) {
 
-                    new_image_p->greyscale[(y * new_image_p->width * new_image_p->channels) + x + c] = row[x + c];
+                    new_image_p->greyscale->array[(y * new_image_p->width * new_image_p->channels) + x + c] = row[x + c];
 
                 }
             }
@@ -85,16 +86,16 @@ void rgb_to_greyscale(image_data * image) {
     // perceptual and gamma correction
     float weights[3] = {0.299, 0.587, 0.114};
 
-    float * tmp_greyscale = (float *) malloc(sizeof(float) * image->height * image->width);
+    matrix * tmp_greyscale = create_matrix(image->height, image->width);
 
     for (int y = 0; y < image->height; y++) {
         for (int x = 0; x < image->width; x ++) {
 
             float intensity = 0.0;
-            intensity += weights[0] * (image->R[(y * image->width) + x]);
-            intensity += weights[1] * (image->G[(y * image->width) + x]);
-            intensity += weights[2] * (image->B[(y * image->width) + x]);
-            tmp_greyscale[(y * image->width) + x] = intensity;
+            intensity += weights[0] * (image->R->array[(y * image->width) + x]);
+            intensity += weights[1] * (image->G->array[(y * image->width) + x]);
+            intensity += weights[2] * (image->B->array[(y * image->width) + x]);
+            tmp_greyscale->array[(y * image->width) + x] = intensity;
 
         }
     }
@@ -107,8 +108,8 @@ void rgb_to_greyscale(image_data * image) {
     free(image->B);
     image->R = image->G = image->B = NULL;
 
-    image->greyscale = (float *) malloc(sizeof(float) * image->height * image->width * image->channels);
-    memcpy(image->greyscale, tmp_greyscale, sizeof(float) * image->height * image->width * image->channels);
+    image->greyscale = create_matrix(image->height, image->width);
+    memcpy(image->greyscale->array, tmp_greyscale->array, sizeof(float) * image->height * image->width * image->channels);
     free(tmp_greyscale);
 
 }
@@ -119,9 +120,9 @@ void greyscale_to_rgb(image_data * image){
         return;
     }
 
-    image->R = (float*) malloc(sizeof(float) * image->height * image->width);
-    image->G = (float*) malloc(sizeof(float) * image->height * image->width);
-    image->B = (float*) malloc(sizeof(float) * image->height * image->width);
+    image->R = create_matrix(image->height, image->width);
+    image->G = create_matrix(image->height, image->width);
+    image->B = create_matrix(image->height, image->width);
 
     for (int y = 0; y < image->height; y++) {
         for (int x = 0; x < image->width; x++) {
@@ -129,7 +130,7 @@ void greyscale_to_rgb(image_data * image){
             /* image->R[(y * image->width) + x] = image->greyscale[(y * image->width) + x]; */
             /* image->G[(y * image->width) + x] = image->greyscale[(y * image->width) + x]; */
             /* image->B[(y * image->width) + x] = image->greyscale[(y * image->width) + x]; */
-            image->R[(y * image->width) + x] = image->G[(y * image->width) + x] = image->B[(y * image->width) + x] = image->greyscale[(y * image->width) + x];
+            image->R->array[(y * image->width) + x] = image->G->array[(y * image->width) + x] = image->B->array[(y * image->width) + x] = image->greyscale->array[(y * image->width) + x];
         }
     }
 
@@ -154,15 +155,15 @@ unsigned char ** export_pixels(image_data * image) {
         for (int x = 0; x < image->width * 3; x += 3) {
             if (image->channels == 3) {
 
-                row[x + 0] = image->R[(y * image->width) + x/3];
-                row[x + 1] = image->G[(y * image->width) + x/3];
-                row[x + 2] = image->B[(y * image->width) + x/3];
+                row[x + 0] = image->R->array[(y * image->width) + x/3];
+                row[x + 1] = image->G->array[(y * image->width) + x/3];
+                row[x + 2] = image->B->array[(y * image->width) + x/3];
 
             } else if (image->channels == 1) {
 
                 for (int c = 0; c < 3; c ++) {
 
-                    row[x+c] = image->greyscale[(y*image->width) + x/3];
+                    row[x+c] = image->greyscale->array[(y*image->width) + x/3];
 
                 }
             }
@@ -182,14 +183,21 @@ void reduce_noise(image_data * image) {
 
     if (image->channels == 1) {
 
-        image->greyscale = apply_convolution(image->greyscale, image->height, image->width, type, kernel, kernel_dimensions);
+        matrix * tmp = image->greyscale;
+        image->greyscale = apply_convolution(image->greyscale, type, kernel, kernel_dimensions);
+        free(tmp);
 
     } else if (image->channels == 3) {
 
-        image->R = apply_convolution(image->R, image->height, image->width, type, kernel, kernel_dimensions);
-        image->G = apply_convolution(image->G, image->height, image->width, type, kernel, kernel_dimensions);
-        image->B = apply_convolution(image->B, image->height, image->width, type, kernel, kernel_dimensions);
+        matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
+        tmp[0] = image->R; tmp[1] = image->G; tmp[2] = image->B;
 
+        image->R = apply_convolution(image->R, type, kernel, kernel_dimensions);
+        image->G = apply_convolution(image->G, type, kernel, kernel_dimensions);
+        image->B = apply_convolution(image->B, type, kernel, kernel_dimensions);
+
+        for (int i = 0; i < 3; i++) { free(tmp[i]); }
+        free(tmp);
     }
 
 }
@@ -203,13 +211,21 @@ void soften(image_data * image) {
 
     if (image->channels == 1) {
 
-        image->greyscale = apply_convolution(image->greyscale, image->height, image->width, type, kernel, kernel_dimensions);
+        matrix * tmp = image->greyscale;
+        image->greyscale = apply_convolution(image->greyscale, type, kernel, kernel_dimensions);
+        free(tmp);
 
     } else if (image->channels == 3) {
 
-        image->R = apply_convolution(image->R, image->height, image->width, type, kernel, kernel_dimensions);
-        image->G = apply_convolution(image->G, image->height, image->width, type, kernel, kernel_dimensions);
-        image->B = apply_convolution(image->B, image->height, image->width, type, kernel, kernel_dimensions);
+        matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
+        tmp[0] = image->R; tmp[1] = image->G; tmp[2] = image->B;
+
+        image->R = apply_convolution(image->R, type, kernel, kernel_dimensions);
+        image->G = apply_convolution(image->G, type, kernel, kernel_dimensions);
+        image->B = apply_convolution(image->B, type, kernel, kernel_dimensions);
+
+        for (int i = 0; i < 3; i++) { free(tmp[i]); }
+        free(tmp);
 
     }
 
@@ -224,13 +240,21 @@ void sharpen(image_data * image) {
 
     if (image->channels == 1) {
 
-        image->greyscale = apply_convolution(image->greyscale, image->height, image->width, type, kernel, kernel_dimensions);
+        matrix * tmp = image->greyscale;
+        image->greyscale = apply_convolution(image->greyscale, type, kernel, kernel_dimensions);
+        free(tmp);
 
     } else if (image->channels == 3) {
 
-        image->R = apply_convolution(image->R, image->height, image->width, type, kernel, kernel_dimensions);
-        image->G = apply_convolution(image->G, image->height, image->width, type, kernel, kernel_dimensions);
-        image->B = apply_convolution(image->B, image->height, image->width, type, kernel, kernel_dimensions);
+        matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
+        tmp[0] = image->R; tmp[1] = image->G; tmp[2] = image->B;
+
+        image->R = apply_convolution(image->R, type, kernel, kernel_dimensions);
+        image->G = apply_convolution(image->G, type, kernel, kernel_dimensions);
+        image->B = apply_convolution(image->B, type, kernel, kernel_dimensions);
+
+        for (int i = 0; i < 3; i++) { free(tmp[i]); }
+        free(tmp);
 
     }
 
@@ -243,18 +267,18 @@ void reduce_resolution(image_data * image) {
 
     if (image->channels == 1) {
 
-        float * tmp = image->greyscale;
-        image->greyscale = mean_pool_image(image->greyscale, 2, &new_height, &new_width);
+        matrix * tmp = image->greyscale;
+        image->greyscale = mean_pool_image(image->greyscale, 2);
         free(tmp);
 
     } else if (image->channels == 3) {
 
-        float ** tmp = (float **) malloc(sizeof(float*) * 3);
+        matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
         tmp[0] = image->R; tmp[1] = image->G; tmp[2] = image->B;
 
-        image->R = mean_pool_image(image->R, 2, &new_height, &new_width);
-        image->G = mean_pool_image(image->G, 2, &new_height, &new_width);
-        image->B = mean_pool_image(image->B, 2, &new_height, &new_width);
+        image->R = mean_pool_image(image->R, 2);
+        image->G = mean_pool_image(image->G, 2);
+        image->B = mean_pool_image(image->B, 2);
 
         for (int i = 0; i < 3; i++) { free(tmp[i]); }
         free(tmp);
@@ -274,13 +298,13 @@ void invert(image_data * image) {
         for (int x = 0; x < image->width; x ++){
 
             if (image->channels == 3) {
-                image->R[(y * image->width) + x] = 255.0 - image->R[(y * image->width) + x];
-                image->G[(y * image->width) + x] = 255.0 - image->G[(y * image->width) + x];
-                image->B[(y * image->width) + x] = 255.0 - image->B[(y * image->width) + x];
+                image->R->array[(y * image->width) + x] = 255.0 - image->R->array[(y * image->width) + x];
+                image->G->array[(y * image->width) + x] = 255.0 - image->G->array[(y * image->width) + x];
+                image->B->array[(y * image->width) + x] = 255.0 - image->B->array[(y * image->width) + x];
 
             } else if (image->channels == 1) {
 
-                image->greyscale[(y * image->width) + x] = 255.0 - image->greyscale[(y * image->width) + x];
+                image->greyscale->array[(y * image->width) + x] = 255.0 - image->greyscale->array[(y * image->width) + x];
 
             }
 

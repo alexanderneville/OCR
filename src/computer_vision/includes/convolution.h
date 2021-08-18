@@ -2,6 +2,7 @@
 #define convolution_H
 
     #include "./image_processing.h"
+    #include "./matrix.h"
     #include "./tree.h"
 
     typedef enum kernel_configuration_E {
@@ -11,8 +12,8 @@
     } kernel_configuration; 
 
     float * create_kernel(kernel_configuration type, int kernel_dimensions);
-    float * apply_convolution(float * pixels, int height, int width, kernel_configuration type, float * kernel, int kernel_dimensions);
-    float * max_pool_image(float * pixels, int step, int * height, int * width);
-    float * mean_pool_image(float * pixels, int step, int * height, int * width);
+    matrix * apply_convolution(matrix * matrix_p, kernel_configuration type, float * kernel, int kernel_dimensions);
+    matrix * max_pool_image(matrix * matrix_p, int step);
+    matrix * mean_pool_image(matrix * matrix_p, int step);
 
 #endif // convolution_H

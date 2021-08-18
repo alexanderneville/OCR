@@ -1,14 +1,16 @@
 #ifndef image_structure_H
 #define image_structure_H
 
+#include "./matrix.h"
+
 typedef struct image_data_T {
 
     int height, width;
     int channels;
-    float * greyscale;
-    float * R;
-    float * G;
-    float * B;
+    matrix * greyscale;
+    matrix * R;
+    matrix * G;
+    matrix * B;
 
     // methods
     unsigned char ** (* export_pixels) (struct image_data_T * image);

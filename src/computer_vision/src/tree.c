@@ -37,7 +37,7 @@ void insert_data(node * node_p, node_data * data) {
 void traverse_tree(node * node_p, image_data * image) {
 
     if (node_p->left){ traverse_tree(node_p->left, image); }
-    image->greyscale[node_p->data->position] = node_p->data->intensity;
+    image->greyscale->array[node_p->data->position] = node_p->data->intensity;
     if (node_p->right){ traverse_tree(node_p->right, image); }
 
 }
