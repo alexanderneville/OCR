@@ -71,10 +71,18 @@ class FC_Dense_Layer(Base_Layer):
 
         return input_error, weight_error, layer_error
 
+    @property
+    def layer_parameters(self):
+        return self._weights, self._biases
+
+    @layer_parameters.setter
+    def layer_parameters(self, weights, biases):
+        self._weights = weights
+        self._biases = biases
+
     def update(self, d_weights, d_biases):
 
         """update parameters by given vectors using mini-batch gradient descent"""
 
         self._weights -= d_weights
         self._biases -= d_biases
-

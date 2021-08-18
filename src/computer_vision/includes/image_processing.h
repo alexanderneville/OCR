@@ -18,6 +18,7 @@ typedef struct image_data_T {
     void (* reduce_resolution) (struct image_data_T * image);
     void (* soften) (struct image_data_T * image);
     void (* sharpen) (struct image_data_T * image);
+    void (* invert) (struct image_data_T * image);
 
 } image_data;
 
@@ -29,5 +30,6 @@ void reduce_noise(image_data * image);
 void reduce_resolution(image_data * image);
 void soften(image_data * image);
 void sharpen(image_data * image);
+void invert(image_data * image);
 
 #endif //image_structure_H

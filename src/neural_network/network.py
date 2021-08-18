@@ -1,3 +1,4 @@
+import json
 import numpy as np
 from . import functions
 from . import layers
@@ -21,10 +22,14 @@ class Network(object):
         """
 
         self._layout = layout
+
         # When a network is instantiated, its list of layers is set to blank.
         self._layers: list[layers.Base_Layer] = []
+
         # For debugging purposes keep track of the network cost as the network is corrected.
         self._cost = 0
+
+        self._activation = "tanh"
 
         for x, y in zip(layout[:-1], layout[1:]):
 
@@ -32,7 +37,7 @@ class Network(object):
             self._layers.append(layers.Activation_Layer(functions.tanh, functions.tanh_derivative))
 
     @property
-    def parameters(self) -> tuple[list[np.ndarray], list[np.ndarray]]:
+    def network_parameters(self) -> tuple[list[np.ndarray], list[np.ndarray]]:
 
         """retun tuple containing lists of the tunable parameters of the network."""
 
@@ -43,8 +48,9 @@ class Network(object):
 
             if isinstance(i, layers.FC_Dense_Layer):
 
-                weights.append(i._weights)
-                biases.append(i._biases)
+                current_layer_parameters = i.layer_parameters
+                weights.append(current_layer_parameters[0])
+                biases.append(current_layer_parameters[1])
 
         return weights, biases
 
@@ -86,7 +92,7 @@ class Network(object):
 
         """perform gradient descent for a given mini-batch of examples"""
 
-        weights, biases = self.parameters
+        weights, biases = self.network_parameters
         nabla_weights = [np.zeros(w.shape) for w in weights]
         nabla_biases = [np.zeros(b.shape) for b in biases]
 
@@ -161,3 +167,28 @@ class Network(object):
                         learning_rate)
                         
             print(f"Epoch: {i+1}, Average Cost: {self._cost/len(input_data)}, Remaining: {epochs - (i+1)}")
+
+    def export_layout(self, path):
+
+        weights, biases = self.network_parameters
+        list_weights = []
+        list_biases = []
+
+        for i in range(len(biases)):
+            list_biases.append(biases[i].tolist())
+            list_weights.append(weights[i].tolist())
+
+        config = {
+            "layout": self._layout,
+            "actication": self._activation,
+            "weights": list_weights,
+            "biases": list_biases,
+        }
+
+        with open(path, "w") as f:
+            json.dump(config, f, indent=4)
+
+    def import_layout(self, path):
+
+        with open(path) as f:
+            config = json.load(f)

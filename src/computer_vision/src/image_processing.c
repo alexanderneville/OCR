@@ -70,6 +70,7 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->reduce_resolution = & reduce_resolution;
     new_image_p->soften = &soften;
     new_image_p->sharpen = &sharpen;
+    new_image_p->invert = &invert;
 
     return new_image_p;
 
@@ -265,4 +266,25 @@ void reduce_resolution(image_data * image) {
     image->width = new_width;
 
     return;
+}
+
+void invert(image_data * image) {
+
+    for (int y = 0; y < image->height; y ++){
+        for (int x = 0; x < image->width; x ++){
+
+            if (image->channels == 3) {
+                image->R[(y * image->width) + x] = 255.0 - image->R[(y * image->width) + x];
+                image->G[(y * image->width) + x] = 255.0 - image->G[(y * image->width) + x];
+                image->B[(y * image->width) + x] = 255.0 - image->B[(y * image->width) + x];
+
+            } else if (image->channels == 1) {
+
+                image->greyscale[(y * image->width) + x] = 255.0 - image->greyscale[(y * image->width) + x];
+
+            }
+
+        }
+    }
+        
 }
