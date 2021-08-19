@@ -1,9 +1,7 @@
 #ifndef convolution_H
 #define convolution_H
 
-    #include "./image_processing.h"
     #include "./matrix.h"
-    #include "./tree.h"
 
     typedef enum kernel_configuration_E {
         Mean = 0,

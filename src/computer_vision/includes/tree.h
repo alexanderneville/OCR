@@ -1,5 +1,6 @@
 #ifndef tree_H
 #define tree_H
+
 #include "../includes/image_processing.h"
 
 typedef struct node_data_T {

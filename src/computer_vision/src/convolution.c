@@ -1,8 +1,9 @@
-#include "../includes/convolution.h"
-#include "../includes/matrix.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "../includes/convolution.h"
+#include "../includes/matrix.h"
 
 float * create_kernel(kernel_configuration type, int kernel_dimensions) {
 
@@ -106,10 +107,10 @@ matrix * mean_pool_image(matrix * matrix_p, int step) {
 
     matrix * pixelated_image = create_matrix(new_height, new_width);
 
-    for (int y = 0; y < new_height; y+=step) {
-        for (int x = 0; x < new_width; x+=step) { // for every pixel
+    for (int y = 0; y < matrix_p->y; y+=step) {
+        for (int x = 0; x < matrix_p->x; x+=step) { // for every pixel
             float kernel_sum  = 0.0;
-            if (x + step < new_width && y + step < new_height) {
+            if (x + step < matrix_p->x && y + step < matrix_p->y) {
                 for (int j = 0; j < step; j++ ) {
                     for (int i = 0; i < step; i++) {
                         kernel_sum += matrix_p->array[(y + j) * matrix_p->x + (x + i)];
@@ -132,10 +133,10 @@ matrix * max_pool_image(matrix * matrix_p, int step) {
 
     matrix * pixelated_image = create_matrix(new_height, new_width);
 
-    for (int y = 0; y < new_height; y+=step) {
-        for (int x = 0; x < new_width; x+=step) { // for every pixel
+    for (int y = 0; y < matrix_p->y; y+=step) {
+        for (int x = 0; x < matrix_p->x; x+=step) { // for every pixel
             float kernel_maximum  = 255.0;
-            if (x + step < new_width && y + step < new_height) {
+            if (x + step < matrix_p->x && y + step < matrix_p->y) {
                 // find the darkest pixel in the image
                 for (int j = 0; j < step; j++ ) {
                     for (int i = 0; i < step; i++) {

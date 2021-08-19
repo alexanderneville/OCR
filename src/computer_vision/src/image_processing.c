@@ -67,11 +67,12 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->export_pixels = &export_pixels;
     new_image_p->rgb_to_greyscale = &rgb_to_greyscale;
     new_image_p->greyscale_to_rgb = &greyscale_to_rgb;
-    new_image_p->reduce_noise = &reduce_noise;
+    /* new_image_p->reduce_noise = &reduce_noise; */
     new_image_p->reduce_resolution = & reduce_resolution;
-    new_image_p->soften = &soften;
-    new_image_p->sharpen = &sharpen;
+    /* new_image_p->soften = &soften; */
+    /* new_image_p->sharpen = &sharpen; */
     new_image_p->invert = &invert;
+    new_image_p->process = &process;
 
     return new_image_p;
 
@@ -174,11 +175,8 @@ unsigned char ** export_pixels(image_data * image) {
 
 }
 
-void reduce_noise(image_data * image) {
-    
-    // initialise the kernel
-    int kernel_dimensions = 5;
-    kernel_configuration type = Mean; 
+void process(image_data * image, kernel_configuration type, int kernel_dimensions) {
+
     float * kernel = create_kernel(type, kernel_dimensions);
 
     if (image->channels == 1) {
@@ -198,77 +196,18 @@ void reduce_noise(image_data * image) {
 
         for (int i = 0; i < 3; i++) { free(tmp[i]); }
         free(tmp);
-    }
-
-}
-
-void soften(image_data * image) {
-
-    // initialise the kernel
-    int kernel_dimensions = 5;
-    kernel_configuration type = Gaussian; 
-    float * kernel = create_kernel(type, kernel_dimensions);
-
-    if (image->channels == 1) {
-
-        matrix * tmp = image->greyscale;
-        image->greyscale = apply_convolution(image->greyscale, type, kernel, kernel_dimensions);
-        free(tmp);
-
-    } else if (image->channels == 3) {
-
-        matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
-        tmp[0] = image->R; tmp[1] = image->G; tmp[2] = image->B;
-
-        image->R = apply_convolution(image->R, type, kernel, kernel_dimensions);
-        image->G = apply_convolution(image->G, type, kernel, kernel_dimensions);
-        image->B = apply_convolution(image->B, type, kernel, kernel_dimensions);
-
-        for (int i = 0; i < 3; i++) { free(tmp[i]); }
-        free(tmp);
-
-    }
-
-}
-
-void sharpen(image_data * image) {
-
-    // initialise the kernel
-    int kernel_dimensions = 3;
-    kernel_configuration type = Sharpen; 
-    float * kernel = create_kernel(type, kernel_dimensions);
-
-    if (image->channels == 1) {
-
-        matrix * tmp = image->greyscale;
-        image->greyscale = apply_convolution(image->greyscale, type, kernel, kernel_dimensions);
-        free(tmp);
-
-    } else if (image->channels == 3) {
-
-        matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
-        tmp[0] = image->R; tmp[1] = image->G; tmp[2] = image->B;
-
-        image->R = apply_convolution(image->R, type, kernel, kernel_dimensions);
-        image->G = apply_convolution(image->G, type, kernel, kernel_dimensions);
-        image->B = apply_convolution(image->B, type, kernel, kernel_dimensions);
-
-        for (int i = 0; i < 3; i++) { free(tmp[i]); }
-        free(tmp);
-
     }
 
 }
 
 void reduce_resolution(image_data * image) {
 
-    int new_height = image->height;
-    int new_width = image->width;
+    int step = 2;
 
     if (image->channels == 1) {
 
         matrix * tmp = image->greyscale;
-        image->greyscale = mean_pool_image(image->greyscale, 2);
+        image->greyscale = max_pool_image(image->greyscale, step);
         free(tmp);
 
     } else if (image->channels == 3) {
@@ -276,18 +215,17 @@ void reduce_resolution(image_data * image) {
         matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
         tmp[0] = image->R; tmp[1] = image->G; tmp[2] = image->B;
 
-        image->R = mean_pool_image(image->R, 2);
-        image->G = mean_pool_image(image->G, 2);
-        image->B = mean_pool_image(image->B, 2);
+        image->R = mean_pool_image(image->R, step);
+        image->G = mean_pool_image(image->G, step);
+        image->B = mean_pool_image(image->B, step);
 
         for (int i = 0; i < 3; i++) { free(tmp[i]); }
         free(tmp);
 
-
     }
 
-    image->height = new_height;
-    image->width = new_width;
+    image->height /= step;
+    image->width /= step;
 
     return;
 }
