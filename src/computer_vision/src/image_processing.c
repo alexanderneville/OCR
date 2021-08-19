@@ -67,12 +67,11 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->export_pixels = &export_pixels;
     new_image_p->rgb_to_greyscale = &rgb_to_greyscale;
     new_image_p->greyscale_to_rgb = &greyscale_to_rgb;
-    /* new_image_p->reduce_noise = &reduce_noise; */
     new_image_p->reduce_resolution = & reduce_resolution;
-    /* new_image_p->soften = &soften; */
-    /* new_image_p->sharpen = &sharpen; */
     new_image_p->invert = &invert;
     new_image_p->process = &process;
+    new_image_p->resize = &resize;
+
 
     return new_image_p;
 
@@ -236,6 +235,7 @@ void invert(image_data * image) {
         for (int x = 0; x < image->width; x ++){
 
             if (image->channels == 3) {
+
                 image->R->array[(y * image->width) + x] = 255.0 - image->R->array[(y * image->width) + x];
                 image->G->array[(y * image->width) + x] = 255.0 - image->G->array[(y * image->width) + x];
                 image->B->array[(y * image->width) + x] = 255.0 - image->B->array[(y * image->width) + x];
@@ -250,3 +250,27 @@ void invert(image_data * image) {
     }
         
 }
+
+void resize(image_data * image, float scale_factor) {
+
+    if (image->channels == 1) {
+
+        matrix * tmp = image->greyscale;
+        image->greyscale = scale_matrix(image->greyscale, scale_factor);
+        free(tmp);
+
+    } else if (image->channels == 3) {
+
+        matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
+        tmp[0] = image->R; tmp[1] = image->G; tmp[2] = image->B;
+
+        image->R = scale_matrix(image->R, scale_factor);
+        image->G = scale_matrix(image->G, scale_factor);
+        image->B = scale_matrix(image->B, scale_factor);
+
+        for (int i = 0; i < 3; i++) { free(tmp[i]); }
+        free(tmp);
+
+    }
+
+};
