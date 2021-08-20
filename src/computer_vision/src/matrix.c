@@ -55,15 +55,23 @@ void adjust_scale_factor(float * height, float * width, float * scale_factor, fl
     bool valid_factor = false;
 
     (*scale_factor) -= step; 
+    int escape_counter = 0; 
 
     while (valid_factor == false) {
 
         (*scale_factor) += step;
+        escape_counter ++;
 
         bool valid_height = test_float((*scale_factor) * (* height));
         bool valid_width = test_float((*scale_factor) * (* width));
 
-        if (valid_height && valid_factor) valid_factor = true;
+        if (valid_height && valid_width) valid_factor = true;
+
+        if (valid_width && escape_counter > 2000000) {
+
+            valid_factor = true;
+
+        }
 
     }
 
@@ -78,15 +86,17 @@ matrix * scale_matrix(matrix * matrix_p, float scale_factor) {
     float new_height = matrix_p->y;
     float new_width = matrix_p->x;
 
+    printf("entered scale matrix function\n");
+
     // adjust the scale factor so it produces an exact scale
 
     if (scale_factor > 1) {
 
-        adjust_scale_factor(&new_height, &new_width, &scale_factor, 0.001);
+        adjust_scale_factor(&new_height, &new_width, &scale_factor, 0.0000001);
 
     } else if (scale_factor < 1) {
 
-        adjust_scale_factor(&new_height, &new_width, &scale_factor, -0.001);
+        adjust_scale_factor(&new_height, &new_width, &scale_factor, -0.0000001);
 
     }
 

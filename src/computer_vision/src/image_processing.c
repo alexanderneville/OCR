@@ -259,6 +259,9 @@ void resize(image_data * image, float scale_factor) {
         image->greyscale = scale_matrix(image->greyscale, scale_factor);
         free(tmp);
 
+        image->height = image->greyscale->y;
+        image->width = image->greyscale->x;
+
     } else if (image->channels == 3) {
 
         matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
@@ -270,6 +273,9 @@ void resize(image_data * image, float scale_factor) {
 
         for (int i = 0; i < 3; i++) { free(tmp[i]); }
         free(tmp);
+
+        image->height = image->R->y;
+        image->width = image->R->x;
 
     }
 
