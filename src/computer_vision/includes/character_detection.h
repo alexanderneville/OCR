@@ -2,51 +2,55 @@
 #define detection_H
 
 #define CHAR_DIMENSIONS 32
+#include "../includes/matrix.h"
+#include <pthread.h>
 
 typedef struct character_T {
 
-    float * pixels;
-    int x, y, w, h;
+    matrix * pixels;
+    int x, y;
 
-    int line, word;
+    struct character_T * next;
 
 } character;
 
 typedef struct word_T {
 
-    float * pixels;
-    int x, y, w, h;
+    matrix * pixels;
+    int x, y;
 
-    character * character;
-    int num_characters, max_characters;
-    int line;
+    character * characters;
+    struct word_T * next;
+    pthread_mutex_t word_lock;
 
 } word;
 
 typedef struct line_T {
 
-    float * pixels;
-    int x, y, w, h;
+    matrix * pixels;
+    int x, y;
 
     word * words;
-    int num_words, max_words;
+    struct line_T * next;
+    pthread_mutex_t line_lock;
 
 } line;
 
 typedef struct document_T {
 
-    float * pixels;
-    int x, y, w, h;
-
     line * lines;
-    int num_lines, max_lines;
+    pthread_mutex_t document_lock;
 
 } document;
 
+// initialiser functions
+document * new_document();
+line * new_line();
+word * new_word();
+character * new_character();
 
-document * new_document(float * pixels, int height, int width);
-line * new_line(float * pixels, int x, int y, int w, int h);
-word * new_word(float * pixels, int x, int y, int w, int h);
-character * new_character(float * pixels, int x, int y, int w, int h);
+// processing functions
+matrix * horiz_density(matrix * matrix_p);
+matrix * vert_density(matrix * matrix_p);
 
 #endif

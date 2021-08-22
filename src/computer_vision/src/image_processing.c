@@ -14,6 +14,7 @@
 #include "../includes/matrix.h"
 #include "../includes/tree.h"
 #include "../includes/convolution.h"
+#include "../includes/character_detection.h"
 
 image_data * initialise_data(unsigned char ** pixels, int height, int width, int channels) {
 
@@ -71,6 +72,7 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->invert = &invert;
     new_image_p->process = &process;
     new_image_p->resize = &resize;
+    new_image_p->locate_characters = &locate_characters;
 
 
     return new_image_p;
@@ -279,4 +281,12 @@ void resize(image_data * image, float scale_factor) {
 
     }
 
+};
+
+void locate_characters(image_data * image) {
+
+    matrix * historgram = horiz_density(image->greyscale);
+    for (int i = 0; i < historgram->y; i ++) {
+        printf("%f\n", historgram->array[i]);
+    }
 };

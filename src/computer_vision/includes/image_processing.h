@@ -21,7 +21,8 @@ typedef struct image_data_T {
     void (* reduce_resolution) (struct image_data_T * image);
     void (* invert) (struct image_data_T * image);
     void (* process) (struct image_data_T *, kernel_configuration type, int kernel_dimensions);
-    void (*resize) (struct image_data_T * image, float scale_factor);
+    void (* resize) (struct image_data_T * image, float scale_factor);
+    void (* locate_characters) (struct image_data_T * image);
 
 } image_data;
 
@@ -35,5 +36,6 @@ void reduce_resolution(image_data * image);
 void invert(image_data * image);
 void process(image_data * image, kernel_configuration type, int kernel_dimensions);
 void resize(image_data * image, float scale_factor);
+void locate_characters(image_data * image);
 
 #endif 
