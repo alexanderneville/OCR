@@ -188,7 +188,15 @@ class Network(object):
         with open(path, "w") as f:
             json.dump(config, f, indent=4)
 
-    def import_layout(self, path):
+    @staticmethod
+    def import_layout(path):
 
         with open(path) as f:
             config = json.load(f)
+        new = Network(config["layout"])
+
+        for layer in new._layers:
+            if isinstance(layer, layers.FC_Dense_Layer):
+                layer.set_layer_parameters(np.array(config["weights"].pop(0)), np.array(config["biases"].pop(0)))                
+
+        return new

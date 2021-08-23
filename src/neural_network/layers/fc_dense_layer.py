@@ -75,8 +75,7 @@ class FC_Dense_Layer(Base_Layer):
     def layer_parameters(self):
         return self._weights, self._biases
 
-    @layer_parameters.setter
-    def layer_parameters(self, weights, biases):
+    def set_layer_parameters(self, weights, biases):
         self._weights = weights
         self._biases = biases
 

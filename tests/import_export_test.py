@@ -45,19 +45,8 @@ print(calc_output(network.predict(input_data)))
 
 network.export_layout("test_layout.json")
 
-# network.train(input_data, logical_and, 1000, 0.1, 2) # test mini-batch gradient descent
-# print(calc_output(network.predict(input_data)))
-# 
-# print("\nsolving 'or' gate")
-# network.train(input_data, logical_or, 1000, 0.1)
-# print(calc_output(network.predict(input_data)))
-# 
-# print("\nsolving 'nand' gate")
-# network.train(input_data, logical_nand, 1000, 0.1)
-# print(calc_output(network.predict(input_data)))
-# 
-# print("\nsolving useless gate")
-# network.train(input_data, useless_gate, 1000, 0.1)
-# print(calc_output(network.predict(input_data)))
-# 
+print("\n")
+
+new_network = nn.Network.import_layout("test_layout.json")
+print(calc_output(new_network.predict(input_data)))
 print("\n")
