@@ -11,6 +11,13 @@ typedef enum doc_types_E {
     Line
 } doc_types;
 
+// used to store all possible data while lines, chars etc are located.
+typedef struct tmp_feature_T {
+    int x, y, w, h;
+} tmp_feature;
+
+
+
 typedef struct character_T {
 
     matrix * pixels;

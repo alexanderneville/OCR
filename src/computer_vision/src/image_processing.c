@@ -305,7 +305,7 @@ void locate_characters(image_data * self) {
 
     printf("\n average line intensity: %f\n", darkness);
 
-    int possible_lines[500][2] = {};
+    tmp_feature * possible_lines = (tmp_feature *) malloc(sizeof(tmp_feature) * 500);
 
     int line_counter = 0; // points to the next empty space
     int height_counter = 0;
@@ -344,8 +344,8 @@ void locate_characters(image_data * self) {
 
                 if (sum_below_average == 3) {
 
-                    possible_lines[line_counter][0] = i - height_counter;
-                    possible_lines[line_counter][1] = i - 1;
+                    possible_lines[line_counter].y = i - height_counter;
+                    possible_lines[line_counter].h = height_counter;
                     average_height += height_counter;
                     height_counter = 0;
                     line_counter ++;
@@ -353,7 +353,7 @@ void locate_characters(image_data * self) {
 
                 } else {
                     
-                    printf(" continuing.\n");
+                    printf("  continuing.\n");
 
                 }
             } else {
@@ -366,6 +366,41 @@ void locate_characters(image_data * self) {
 
     fprintf(stdout, "num lines: %d\n", line_counter);
     fprintf(stdout, "average height: %f\n", average_height);
+
+    tmp_feature * adjusted_lines = (tmp_feature *) malloc(sizeof(tmp_feature) * line_counter);
+    int adjusted_line_counter = 0;
+
+    for (int i = 0; i <  line_counter; i ++) {
+        if (possible_lines[i].h > (0.6 * average_height)) {
+            adjusted_lines[adjusted_line_counter].y = possible_lines[i].y;
+            adjusted_lines[adjusted_line_counter].h = possible_lines[i].h;
+            adjusted_line_counter ++;
+        }
+    }
+
+
+    adjusted_lines = realloc(adjusted_lines, sizeof(tmp_feature) * adjusted_line_counter);
+
+    // now add some top and bottom padding to the lines.
+
+    float padding_f = 0.4 * average_height;
+    int padding = padding_f;
+    padding ++;
+
+    for (int i = 0; i <  adjusted_line_counter; i ++) {
+        adjusted_lines[i].y -= padding;
+        adjusted_lines[i].h += padding * 2;
+    }
+
+    for (int i = 0; i <  adjusted_line_counter; i ++) {
+
+        for (int j = 0; j < self->greyscale->x; j ++) {
+
+            self->greyscale->array[(adjusted_lines[i].y * self->greyscale->x) + j] = 255;
+            self->greyscale->array[((adjusted_lines[i].y + adjusted_lines[i].h - 1) * self->greyscale->x) + j] = 255;
+
+        }
+    }
 
 
 };
