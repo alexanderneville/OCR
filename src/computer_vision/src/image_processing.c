@@ -79,93 +79,93 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
 
 }
 
-void rgb_to_greyscale(image_data * image) {
+void rgb_to_greyscale(image_data * self) {
 
-    if (image->channels != 3) {
+    if (self->channels != 3) {
         return;
     }
 
     // perceptual and gamma correction
     float weights[3] = {0.299, 0.587, 0.114};
 
-    matrix * tmp_greyscale = create_matrix(image->height, image->width);
+    matrix * tmp_greyscale = create_matrix(self->height, self->width);
 
-    for (int y = 0; y < image->height; y++) {
-        for (int x = 0; x < image->width; x ++) {
+    for (int y = 0; y < self->height; y++) {
+        for (int x = 0; x < self->width; x ++) {
 
             float intensity = 0.0;
-            intensity += weights[0] * (image->R->array[(y * image->width) + x]);
-            intensity += weights[1] * (image->G->array[(y * image->width) + x]);
-            intensity += weights[2] * (image->B->array[(y * image->width) + x]);
-            tmp_greyscale->array[(y * image->width) + x] = intensity;
+            intensity += weights[0] * (self->R->array[(y * self->width) + x]);
+            intensity += weights[1] * (self->G->array[(y * self->width) + x]);
+            intensity += weights[2] * (self->B->array[(y * self->width) + x]);
+            tmp_greyscale->array[(y * self->width) + x] = intensity;
 
         }
     }
 
     // update the image struct
 
-    image->channels = 1;
-    free(image->R);
-    free(image->G);
-    free(image->B);
-    image->R = image->G = image->B = NULL;
+    self->channels = 1;
+    free(self->R);
+    free(self->G);
+    free(self->B);
+    self->R = self->G = self->B = NULL;
 
-    image->greyscale = create_matrix(image->height, image->width);
-    memcpy(image->greyscale->array, tmp_greyscale->array, sizeof(float) * image->height * image->width * image->channels);
+    self->greyscale = create_matrix(self->height, self->width);
+    memcpy(self->greyscale->array, tmp_greyscale->array, sizeof(float) * self->height * self->width * self->channels);
     free(tmp_greyscale);
 
 }
 
-void greyscale_to_rgb(image_data * image){
+void greyscale_to_rgb(image_data * self){
 
-    if (image->channels == 3) {
+    if (self->channels == 3) {
         return;
     }
 
-    image->R = create_matrix(image->height, image->width);
-    image->G = create_matrix(image->height, image->width);
-    image->B = create_matrix(image->height, image->width);
+    self->R = create_matrix(self->height, self->width);
+    self->G = create_matrix(self->height, self->width);
+    self->B = create_matrix(self->height, self->width);
 
-    for (int y = 0; y < image->height; y++) {
-        for (int x = 0; x < image->width; x++) {
+    for (int y = 0; y < self->height; y++) {
+        for (int x = 0; x < self->width; x++) {
             // set each channel of the resulting array to the same value in original array
             /* image->R[(y * image->width) + x] = image->greyscale[(y * image->width) + x]; */
             /* image->G[(y * image->width) + x] = image->greyscale[(y * image->width) + x]; */
             /* image->B[(y * image->width) + x] = image->greyscale[(y * image->width) + x]; */
-            image->R->array[(y * image->width) + x] = image->G->array[(y * image->width) + x] = image->B->array[(y * image->width) + x] = image->greyscale->array[(y * image->width) + x];
+            self->R->array[(y * self->width) + x] = self->G->array[(y * self->width) + x] = self->B->array[(y * self->width) + x] = self->greyscale->array[(y * self->width) + x];
         }
     }
 
     // update the image struct
-    image->channels = 3;
-    free(image->greyscale);
-    image->greyscale = NULL;
+    self->channels = 3;
+    free(self->greyscale);
+    self->greyscale = NULL;
 
 };
 
-unsigned char ** export_pixels(image_data * image) {
+unsigned char ** export_pixels(image_data * self) {
 
     // initialise the output array.
-    unsigned char ** pixels = (unsigned char **) malloc(sizeof(unsigned char *) * image->height);
-    for (int y = 0; y < image->height; y++) {
-        pixels[y] = (unsigned char *) malloc(sizeof(unsigned char) * image->width * 3);
+    unsigned char ** pixels = (unsigned char **) malloc(sizeof(unsigned char *) * self->height);
+    for (int y = 0; y < self->height; y++) {
+        pixels[y] = (unsigned char *) malloc(sizeof(unsigned char) * self->width * 3);
     }
 
     //copy contents of float array into output array
-    for (int y = 0; y < image->height; y++) {
+    for (int y = 0; y < self->height; y++) {
         unsigned char * row = pixels[y];
-        for (int x = 0; x < image->width * 3; x += 3) {
-            if (image->channels == 3) {
+        for (int x = 0; x < self->width * 3; x += 3) {
+            if (self->channels == 3) {
 
-                row[x + 0] = image->R->array[(y * image->width) + x/3];
-                row[x + 1] = image->G->array[(y * image->width) + x/3];
-                row[x + 2] = image->B->array[(y * image->width) + x/3];
+                row[x + 0] = self->R->array[(y * self->width) + x/3];
+                row[x + 1] = self->G->array[(y * self->width) + x/3];
+                row[x + 2] = self->B->array[(y * self->width) + x/3];
 
-            } else if (image->channels == 1) {
+            } else if (self->channels == 1) {
 
                 for (int c = 0; c < 3; c ++) {
 
-                    row[x+c] = image->greyscale->array[(y*image->width) + x/3];
+                    row[x+c] = self->greyscale->array[(y*self->width) + x/3];
 
                 }
             }
@@ -176,24 +176,24 @@ unsigned char ** export_pixels(image_data * image) {
 
 }
 
-void process(image_data * image, kernel_configuration type, int kernel_dimensions) {
+void process(image_data * self, kernel_configuration type, int kernel_dimensions) {
 
     float * kernel = create_kernel(type, kernel_dimensions);
 
-    if (image->channels == 1) {
+    if (self->channels == 1) {
 
-        matrix * tmp = image->greyscale;
-        image->greyscale = apply_convolution(image->greyscale, type, kernel, kernel_dimensions);
+        matrix * tmp = self->greyscale;
+        self->greyscale = apply_convolution(self->greyscale, type, kernel, kernel_dimensions);
         free(tmp);
 
-    } else if (image->channels == 3) {
+    } else if (self->channels == 3) {
 
         matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
-        tmp[0] = image->R; tmp[1] = image->G; tmp[2] = image->B;
+        tmp[0] = self->R; tmp[1] = self->G; tmp[2] = self->B;
 
-        image->R = apply_convolution(image->R, type, kernel, kernel_dimensions);
-        image->G = apply_convolution(image->G, type, kernel, kernel_dimensions);
-        image->B = apply_convolution(image->B, type, kernel, kernel_dimensions);
+        self->R = apply_convolution(self->R, type, kernel, kernel_dimensions);
+        self->G = apply_convolution(self->G, type, kernel, kernel_dimensions);
+        self->B = apply_convolution(self->B, type, kernel, kernel_dimensions);
 
         for (int i = 0; i < 3; i++) { free(tmp[i]); }
         free(tmp);
@@ -201,50 +201,50 @@ void process(image_data * image, kernel_configuration type, int kernel_dimension
 
 }
 
-void reduce_resolution(image_data * image) {
+void reduce_resolution(image_data * self) {
 
     int step = 2;
 
-    if (image->channels == 1) {
+    if (self->channels == 1) {
 
-        matrix * tmp = image->greyscale;
-        image->greyscale = max_pool_image(image->greyscale, step);
+        matrix * tmp = self->greyscale;
+        self->greyscale = max_pool_image(self->greyscale, step);
         free(tmp);
 
-    } else if (image->channels == 3) {
+    } else if (self->channels == 3) {
 
         matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
-        tmp[0] = image->R; tmp[1] = image->G; tmp[2] = image->B;
+        tmp[0] = self->R; tmp[1] = self->G; tmp[2] = self->B;
 
-        image->R = mean_pool_image(image->R, step);
-        image->G = mean_pool_image(image->G, step);
-        image->B = mean_pool_image(image->B, step);
+        self->R = mean_pool_image(self->R, step);
+        self->G = mean_pool_image(self->G, step);
+        self->B = mean_pool_image(self->B, step);
 
         for (int i = 0; i < 3; i++) { free(tmp[i]); }
         free(tmp);
 
     }
 
-    image->height /= step;
-    image->width /= step;
+    self->height /= step;
+    self->width /= step;
 
     return;
 }
 
-void invert(image_data * image) {
+void invert(image_data * self) {
 
-    for (int y = 0; y < image->height; y ++){
-        for (int x = 0; x < image->width; x ++){
+    for (int y = 0; y < self->height; y ++){
+        for (int x = 0; x < self->width; x ++){
 
-            if (image->channels == 3) {
+            if (self->channels == 3) {
 
-                image->R->array[(y * image->width) + x] = 255.0 - image->R->array[(y * image->width) + x];
-                image->G->array[(y * image->width) + x] = 255.0 - image->G->array[(y * image->width) + x];
-                image->B->array[(y * image->width) + x] = 255.0 - image->B->array[(y * image->width) + x];
+                self->R->array[(y * self->width) + x] = 255.0 - self->R->array[(y * self->width) + x];
+                self->G->array[(y * self->width) + x] = 255.0 - self->G->array[(y * self->width) + x];
+                self->B->array[(y * self->width) + x] = 255.0 - self->B->array[(y * self->width) + x];
 
-            } else if (image->channels == 1) {
+            } else if (self->channels == 1) {
 
-                image->greyscale->array[(y * image->width) + x] = 255.0 - image->greyscale->array[(y * image->width) + x];
+                self->greyscale->array[(y * self->width) + x] = 255.0 - self->greyscale->array[(y * self->width) + x];
 
             }
 
@@ -253,40 +253,119 @@ void invert(image_data * image) {
         
 }
 
-void resize(image_data * image, float scale_factor) {
+void resize(image_data * self, float scale_factor) {
 
-    if (image->channels == 1) {
+    if (self->channels == 1) {
 
-        matrix * tmp = image->greyscale;
-        image->greyscale = scale_matrix(image->greyscale, scale_factor);
+        matrix * tmp = self->greyscale;
+        self->greyscale = scale_matrix(self->greyscale, scale_factor);
         free(tmp);
 
-        image->height = image->greyscale->y;
-        image->width = image->greyscale->x;
+        self->height = self->greyscale->y;
+        self->width = self->greyscale->x;
 
-    } else if (image->channels == 3) {
+    } else if (self->channels == 3) {
 
         matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
-        tmp[0] = image->R; tmp[1] = image->G; tmp[2] = image->B;
+        tmp[0] = self->R; tmp[1] = self->G; tmp[2] = self->B;
 
-        image->R = scale_matrix(image->R, scale_factor);
-        image->G = scale_matrix(image->G, scale_factor);
-        image->B = scale_matrix(image->B, scale_factor);
+        self->R = scale_matrix(self->R, scale_factor);
+        self->G = scale_matrix(self->G, scale_factor);
+        self->B = scale_matrix(self->B, scale_factor);
 
         for (int i = 0; i < 3; i++) { free(tmp[i]); }
         free(tmp);
 
-        image->height = image->R->y;
-        image->width = image->R->x;
+        self->height = self->R->y;
+        self->width = self->R->x;
 
     }
 
 };
 
-void locate_characters(image_data * image) {
+void locate_characters(image_data * self) {
 
-    matrix * historgram = horiz_density(image->greyscale);
-    for (int i = 0; i < historgram->y; i ++) {
-        printf("%f\n", historgram->array[i]);
+    float darkness = average_darkness(self->greyscale) / 255.0;
+
+    printf("\n average: %f\n", darkness);
+
+    if (darkness > 0.5) {
+
+        self->invert(self);
+
     }
+
+    matrix * historgram = horiz_density(self->greyscale);
+
+    /* for (int i = 0; i < historgram->y; i ++) { */
+    /*     printf("%f\n", historgram->array[i]); */
+    /* } */
+
+    darkness = average_darkness(historgram);
+
+    printf("\n average line intensity: %f\n", darkness);
+
+    int possible_lines[500][2] = {};
+
+    int line_counter = 0; // points to the next empty space
+    int height_counter = 0;
+    float average_height = 0;
+
+    for (int i = 0; i < historgram->y; i ++) {
+
+        if (historgram->array[i] >= darkness) {
+            printf("+++ ");
+        } else {
+
+            printf("- ");
+        }
+
+        if (historgram->array[i] >= darkness) {
+
+            if (height_counter == 0) { printf(" new_line\n"); } else { printf(" part of line\n");};
+            height_counter ++;
+
+        } else {
+
+            if (height_counter > 0) {
+
+                // check that the next lines are also below average.
+                
+                int sum_below_average = 0;
+                for (int j = 0; j < 3; j ++) {
+
+                    if (historgram->array[i + j] < darkness) {
+
+                        sum_below_average ++;
+
+                    }
+
+                }
+
+                if (sum_below_average == 3) {
+
+                    possible_lines[line_counter][0] = i - height_counter;
+                    possible_lines[line_counter][1] = i - 1;
+                    average_height += height_counter;
+                    height_counter = 0;
+                    line_counter ++;
+                    printf(" begin line break\n");
+
+                } else {
+                    
+                    printf(" continuing.\n");
+
+                }
+            } else {
+                printf("\n");
+            }
+        }
+    }
+
+    average_height /= (line_counter);
+
+    fprintf(stdout, "num lines: %d\n", line_counter);
+    fprintf(stdout, "average height: %f\n", average_height);
+
+
 };

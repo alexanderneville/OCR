@@ -31,5 +31,6 @@
     void adjust_scale_factor(float * height, float * width, float * scale_factor, float step);
 
     matrix * scale_matrix(matrix * matrix_p, float scale_factor);
+    matrix * select_region(matrix * matrix_p, int x, int y, int w, int h);
 
 #endif

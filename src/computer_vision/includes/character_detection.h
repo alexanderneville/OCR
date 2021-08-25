@@ -5,6 +5,12 @@
 #include "../includes/matrix.h"
 #include <pthread.h>
 
+typedef enum doc_types_E {
+    Character,
+    Word,
+    Line
+} doc_types;
+
 typedef struct character_T {
 
     matrix * pixels;
@@ -45,12 +51,15 @@ typedef struct document_T {
 
 // initialiser functions
 document * new_document();
-line * new_line();
-word * new_word();
-character * new_character();
+line * new_line(matrix * matrix_p, int x, int y, int w, int h);
+word * new_word(matrix * matrix_p, int x, int y, int w, int h);
+character * new_character(matrix * matrix_p, int x, int y, int w, int h);
+
+void append_list(void * current, void * new_element, doc_types type);
 
 // processing functions
 matrix * horiz_density(matrix * matrix_p);
 matrix * vert_density(matrix * matrix_p);
+float average_darkness(matrix * matrix_p);
 
 #endif

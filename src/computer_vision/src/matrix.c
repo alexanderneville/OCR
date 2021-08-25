@@ -129,3 +129,18 @@ matrix * scale_matrix(matrix * matrix_p, float scale_factor) {
     return scaled_matrix;
 
 };
+
+matrix * select_region(matrix * matrix_p, int x, int y, int w, int h) {
+
+    matrix * new_matrix_p = create_matrix(h, w);
+
+    for (int i = 0; i < new_matrix_p->y; i ++) {
+        for (int j = 0; j < new_matrix_p->x; j ++) {
+            
+            new_matrix_p->array[(i * new_matrix_p->x) + j] = matrix_p->array[((y + i) * matrix_p->x) + x + j];
+
+        }
+    }
+    return new_matrix_p;
+
+}

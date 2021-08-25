@@ -31,7 +31,7 @@ int main(int argc, char ** argv) {
 
     /* (* image_p).process(image_p, Mean, 5); */
     /* (* image_p).reduce_resolution(image_p); */
-    /* (* image_p).invert(image_p); */
+    (* image_p).invert(image_p);
 
     (* image_p).resize(image_p, 1.2);
     (* image_p).resize(image_p, 0.6);
