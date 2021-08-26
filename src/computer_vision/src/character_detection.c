@@ -17,6 +17,8 @@ document * initialise_document() {
     new_document_p->detect_words      =    &detect_words;
     new_document_p->detect_characters =    &detect_characters;
 
+    new_document_p->lines = NULL;
+
     return new_document_p;
 
 };
@@ -101,9 +103,13 @@ void detect_lines(document * self, matrix * image){
         adjusted_lines[i].y -= padding;
         adjusted_lines[i].h += padding * 2;
 
-        /* line * line_p = (line *) doc_type_constructor(Line, image, 0, adjusted_lines[i].y, image->x, adjusted_lines[i].h); */
+        line * line_p = (line *) doc_type_constructor(Line, image, 0, adjusted_lines[i].y, image->x, adjusted_lines[i].h);
 
-        /* append_list(self->lines, line_p, Line); */
+        if (!self->lines) {
+            self->lines = line_p;
+        } else {
+            append_list(self->lines, line_p, Line);
+        }
 
     }
 
@@ -194,42 +200,12 @@ void * doc_type_constructor(doc_types required_type, matrix * matrix_p, int x, i
 void append_list(void * current, void * new_element, doc_types type){
 
     // append a new entry to a linked list.
+    node * node_p = (node *) current;
 
-    character * character_p;
-    word * word_p;
-    line * line_p;
-
-    switch(type){
-
-        case Character: 
-
-            character_p = ((character *) current);
-            if (character_p->next) {
-                append_list(character_p->next, new_element, type);
-            } else {
-                character_p->next = new_element;
-            }
-            break;
-
-        case Word:
-
-            word_p = ((word *) current);
-            if (word_p->next) {
-                append_list(word_p->next, new_element, type);
-            } else {
-                word_p->next = new_element;
-            }
-            break;
-
-        case Line:
-
-            line_p = ((line *) current);
-            if (line_p->next) {
-                append_list(line_p->next, new_element, type);
-            } else {
-                line_p->next = new_element;
-            }
-            break;
+    if (node_p->next) {
+        append_list(node_p->next, new_element, type);
+    } else {
+        node_p->next = new_element;
     }
 
 

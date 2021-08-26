@@ -306,6 +306,6 @@ void locate_characters(image_data * self) {
 
     /* doc->scan_image(doc, self->greyscale); */
     doc->detect_lines(doc, self->greyscale);
-    /* doc->draw_outlines(doc, self->greyscale); */
+    doc->draw_outlines(doc, self->greyscale);
 
 };
