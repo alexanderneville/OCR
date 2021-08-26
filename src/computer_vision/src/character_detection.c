@@ -91,6 +91,7 @@ void detect_lines(document * self, matrix * image){
 
 
     adjusted_lines = realloc(adjusted_lines, sizeof(tmp_feature) * adjusted_line_counter);
+    printf("\n%d\n", adjusted_line_counter);
 
     // now add some top and bottom padding to the lines.
 
@@ -108,6 +109,7 @@ void detect_lines(document * self, matrix * image){
         if (!self->lines) {
             self->lines = line_p;
         } else {
+            printf("appending");
             append_list(self->lines, line_p, Line);
         }
 
@@ -132,12 +134,19 @@ void draw_outlines(document * self, matrix * image){
     if (self->lines == NULL) return;
 
     line * current_line_p = self->lines;
+    int counter = 0;
 
     while (current_line_p) {
 
+        counter ++;
+        printf("%d\n", counter);
         for (int i = 0; i < image->x; i++) {
             image->array[(current_line_p->y * image->x) + i] = 255.0;
             image->array[((current_line_p->y + current_line_p->pixels->y - 1) * image->x) + i] = 255.0;
+        }
+
+        if (!current_line_p->next) {
+            printf("only: %d\n", counter);
         }
 
         current_line_p = current_line_p->next;
@@ -200,13 +209,42 @@ void * doc_type_constructor(doc_types required_type, matrix * matrix_p, int x, i
 void append_list(void * current, void * new_element, doc_types type){
 
     // append a new entry to a linked list.
-    node * node_p = (node *) current;
+    line * line_p;
+    word * word_p;
+    character * character_p;
 
-    if (node_p->next) {
-        append_list(node_p->next, new_element, type);
-    } else {
-        node_p->next = new_element;
+    switch(type){
+
+        case Line:
+
+            line_p = (line *) current;
+            if (line_p->next) {
+                append_list(line_p->next, new_element, type);
+            } else {
+                line_p->next = new_element;
+            }
+            break;
+
+        case Word:
+
+            word_p = (word *) current;
+            if (word_p->next) {
+                append_list(word_p->next, new_element, type);
+            } else {
+                word_p->next = new_element;
+            }
+            break;
+
+        case Character:
+
+            character_p = (character *) current;
+            if (character_p->next) {
+                append_list(character_p->next, new_element, type);
+            } else {
+                character_p->next = new_element;
+            }
+            break;
+ 
     }
-
 
 };
