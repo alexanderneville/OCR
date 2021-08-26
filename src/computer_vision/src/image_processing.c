@@ -12,7 +12,7 @@
 
 #include "../includes/image_processing.h"
 #include "../includes/matrix.h"
-#include "../includes/tree.h"
+/* #include "../includes/tree.h" */
 #include "../includes/convolution.h"
 #include "../includes/character_detection.h"
 
@@ -287,120 +287,25 @@ void locate_characters(image_data * self) {
 
     float darkness = average_darkness(self->greyscale) / 255.0;
 
-    printf("\n average: %f\n", darkness);
+    printf("choosing whether to invert or not.");
+    printf("average: %f\n", darkness);
+    printf("choosing whether to invert or not.");
 
     if (darkness > 0.5) {
 
+        printf("about to invert.");
         self->invert(self);
+        printf("have inverted.");
 
+    } else {
+        printf("decided not to invert");
     }
+    
+    printf("preparing to initialise doc.");
+    document * doc = initialise_document();
 
-    matrix * historgram = horiz_density(self->greyscale);
-
-    /* for (int i = 0; i < historgram->y; i ++) { */
-    /*     printf("%f\n", historgram->array[i]); */
-    /* } */
-
-    darkness = average_darkness(historgram);
-
-    printf("\n average line intensity: %f\n", darkness);
-
-    tmp_feature * possible_lines = (tmp_feature *) malloc(sizeof(tmp_feature) * 500);
-
-    int line_counter = 0; // points to the next empty space
-    int height_counter = 0;
-    float average_height = 0;
-
-    for (int i = 0; i < historgram->y; i ++) {
-
-        if (historgram->array[i] >= darkness) {
-            printf("+++ ");
-        } else {
-
-            printf("- ");
-        }
-
-        if (historgram->array[i] >= darkness) {
-
-            if (height_counter == 0) { printf(" new_line\n"); } else { printf(" part of line\n");};
-            height_counter ++;
-
-        } else {
-
-            if (height_counter > 0) {
-
-                // check that the next lines are also below average.
-                
-                int sum_below_average = 0;
-                for (int j = 0; j < 3; j ++) {
-
-                    if (historgram->array[i + j] < darkness) {
-
-                        sum_below_average ++;
-
-                    }
-
-                }
-
-                if (sum_below_average == 3) {
-
-                    possible_lines[line_counter].y = i - height_counter;
-                    possible_lines[line_counter].h = height_counter;
-                    average_height += height_counter;
-                    height_counter = 0;
-                    line_counter ++;
-                    printf(" begin line break\n");
-
-                } else {
-                    
-                    printf("  continuing.\n");
-
-                }
-            } else {
-                printf("\n");
-            }
-        }
-    }
-
-    average_height /= (line_counter);
-
-    fprintf(stdout, "num lines: %d\n", line_counter);
-    fprintf(stdout, "average height: %f\n", average_height);
-
-    tmp_feature * adjusted_lines = (tmp_feature *) malloc(sizeof(tmp_feature) * line_counter);
-    int adjusted_line_counter = 0;
-
-    for (int i = 0; i <  line_counter; i ++) {
-        if (possible_lines[i].h > (0.6 * average_height)) {
-            adjusted_lines[adjusted_line_counter].y = possible_lines[i].y;
-            adjusted_lines[adjusted_line_counter].h = possible_lines[i].h;
-            adjusted_line_counter ++;
-        }
-    }
-
-
-    adjusted_lines = realloc(adjusted_lines, sizeof(tmp_feature) * adjusted_line_counter);
-
-    // now add some top and bottom padding to the lines.
-
-    float padding_f = 0.4 * average_height;
-    int padding = padding_f;
-    padding ++;
-
-    for (int i = 0; i <  adjusted_line_counter; i ++) {
-        adjusted_lines[i].y -= padding;
-        adjusted_lines[i].h += padding * 2;
-    }
-
-    for (int i = 0; i <  adjusted_line_counter; i ++) {
-
-        for (int j = 0; j < self->greyscale->x; j ++) {
-
-            self->greyscale->array[(adjusted_lines[i].y * self->greyscale->x) + j] = 255;
-            self->greyscale->array[((adjusted_lines[i].y + adjusted_lines[i].h - 1) * self->greyscale->x) + j] = 255;
-
-        }
-    }
-
+    /* doc->scan_image(doc, self->greyscale); */
+    doc->detect_lines(doc, self->greyscale);
+    /* doc->draw_outlines(doc, self->greyscale); */
 
 };

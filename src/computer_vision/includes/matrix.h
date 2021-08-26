@@ -13,6 +13,15 @@
     typedef struct matrix_T {
         float * array;
         int x, y;
+        
+
+        // methods
+        struct matrix_T * (* scale_matrix)  (struct matrix_T * matrix_p, float scale_factor);
+        struct matrix_T * (* select_region) (struct matrix_T * matrix_p, int x, int y, int w, int h);
+        struct matrix_T * (* horiz_density) (struct matrix_T * matrix_p);
+        struct matrix_T * (* vert_density)  (struct matrix_T * matrix_p);
+        float (* average_darkness)          (struct matrix_T * matrix_p);
+
     } matrix;
 
     typedef struct pos_T {
@@ -32,5 +41,9 @@
 
     matrix * scale_matrix(matrix * matrix_p, float scale_factor);
     matrix * select_region(matrix * matrix_p, int x, int y, int w, int h);
+
+    matrix * horiz_density(matrix * matrix_p);
+    matrix * vert_density(matrix * matrix_p);
+    float average_darkness(matrix * matrix_p);
 
 #endif

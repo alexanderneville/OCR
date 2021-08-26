@@ -6,11 +6,21 @@
 
 matrix * create_matrix(int height, int width) {
     
-    matrix * new_matrix = (matrix *) malloc(sizeof(matrix));
-    new_matrix->array = (float *) malloc(sizeof(float) * height * width);
-    new_matrix->x = width;
-    new_matrix->y = height;
-    return new_matrix;
+    matrix * new_matrix_p = (matrix *) malloc(sizeof(matrix));
+    new_matrix_p->array = (float *) malloc(sizeof(float) * height * width);
+    new_matrix_p->x = width;
+    new_matrix_p->y = height;
+
+
+    //methods
+
+    new_matrix_p->scale_matrix       =     &scale_matrix;
+    new_matrix_p->select_region      =     &select_region;
+    new_matrix_p->average_darkness   =     &average_darkness;
+    new_matrix_p->horiz_density      =     &horiz_density;
+    new_matrix_p->vert_density       =     &vert_density;
+
+    return new_matrix_p;
 
 }
 
@@ -142,5 +152,58 @@ matrix * select_region(matrix * matrix_p, int x, int y, int w, int h) {
         }
     }
     return new_matrix_p;
+
+}
+
+matrix * horiz_density(matrix * matrix_p){
+    
+    matrix * densities = create_matrix(matrix_p->y, 1);
+
+    for (int y = 0; y < matrix_p->y; y++) {
+        float sum = 0;
+        for (int x = 0; x < matrix_p->x; x++) {
+            sum += matrix_p->array[(y * matrix_p->x) + x];
+        }
+        sum /= matrix_p->x;
+        sum /= 255.0;
+        densities->array[y] = sum;
+    }
+
+    return densities;
+
+}
+
+matrix * vert_density(matrix * matrix_p){
+
+    matrix * densities = create_matrix(1, matrix_p->x);
+
+    for (int x = 0; x < matrix_p->x; x++) {
+        float sum = 0;
+        for (int y = 0; y < matrix_p->y; y++) {
+            sum += matrix_p->array[(y * matrix_p->x) + x];
+        }
+        sum /= matrix_p->y;
+        sum /= 255.0;
+        densities->array[x] = sum;
+    }
+
+    return densities;
+
+}
+
+
+float average_darkness(matrix * matrix_p) {
+
+    float sum = 0.0;
+
+    for (int i = 0; i < (matrix_p->x * matrix_p->y); i ++) {
+
+        sum += matrix_p->array[i];
+
+    }
+
+    sum /= (matrix_p->x * matrix_p->y);
+
+    return sum;
 
 }

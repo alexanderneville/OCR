@@ -33,13 +33,14 @@ int main(int argc, char ** argv) {
     /* (* image_p).reduce_resolution(image_p); */
     /* (* image_p).invert(image_p); */
 
-    (* image_p).resize(image_p, 1.2);
-    (* image_p).resize(image_p, 0.6);
+    /* (* image_p).resize(image_p, 1.2); */
+    /* (* image_p).resize(image_p, 0.6); */
 
     (* image_p).locate_characters(image_p);
-    (* image_p).invert(image_p);
 
+    (* image_p).invert(image_p);
     (* image_p).greyscale_to_rgb(image_p);
+
     pixels = (* image_p).export_pixels(image_p);
 
 

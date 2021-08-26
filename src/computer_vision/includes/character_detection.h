@@ -5,18 +5,23 @@
 #include "../includes/matrix.h"
 #include <pthread.h>
 
+// used for iterating through linked list.
 typedef enum doc_types_E {
     Character,
     Word,
     Line
 } doc_types;
 
+typedef struct node_T {
+
+   void * next; 
+
+} node;
+
 // used to store all possible data while lines, chars etc are located.
 typedef struct tmp_feature_T {
     int x, y, w, h;
 } tmp_feature;
-
-
 
 typedef struct character_T {
 
@@ -54,19 +59,29 @@ typedef struct document_T {
     line * lines;
     pthread_mutex_t document_lock;
 
+    // methods
+
+    void (* scan_image) (struct document_T * self, matrix * image);
+    void (* draw_outlines) (struct document_T * self, matrix * image);
+
+    void (* detect_lines) (struct document_T * self, matrix * image);
+    void (* detect_words) (line * current_line);
+    void (* detect_characters) (word * current_word);
+
 } document;
 
 // initialiser functions
-document * new_document();
-line * new_line(matrix * matrix_p, int x, int y, int w, int h);
-word * new_word(matrix * matrix_p, int x, int y, int w, int h);
-character * new_character(matrix * matrix_p, int x, int y, int w, int h);
+void * doc_type_constructor(doc_types required_type, matrix * matrix_p, int x, int y, int w, int h);
+document * initialise_document();
 
-void append_list(void * current, void * new_element, doc_types type);
+// regular methods
+void scan_image(document * self, matrix * image);
+void detect_lines(document * self, matrix * image);
+void detect_words(line * current_line);
+void detect_characters(word * current_word);
+void draw_outlines(document * self, matrix * image);
 
-// processing functions
-matrix * horiz_density(matrix * matrix_p);
-matrix * vert_density(matrix * matrix_p);
-float average_darkness(matrix * matrix_p);
+// static methods
+void append_list(void * void_p, void * new_element, doc_types type);
 
 #endif
