@@ -132,7 +132,7 @@ void detect_words(line * self) {
 
     printf("in the detect words function\n");
     // rough working
-    int rough_char_width = self->pixels->y * 0.8; // characters are not usually wider than they are tall
+    int rough_char_width = self->pixels->y * 0.6; // characters are not usually wider than they are tall
     printf("rough char_width = %d\n", rough_char_width);
     int max_possible_characters = self->pixels->x / rough_char_width;
     tmp_feature * possible_words = (tmp_feature *) malloc(sizeof(tmp_feature) * max_possible_characters);
@@ -150,7 +150,7 @@ void detect_words(line * self) {
             character_counter++;
         } else {
             printf("-");
-            if (word_counter > 0){
+            if (character_counter > 0){
 
                 int sum_below_average = 0;
                 for (int j = 0; j < rough_char_width; j++) {
@@ -160,9 +160,11 @@ void detect_words(line * self) {
                 if (sum_below_average == rough_char_width) {
                     possible_words[word_counter].x = i - character_counter;
                     possible_words[word_counter].w = character_counter;
+                    printf("\n eow %d\n", character_counter);
                     character_counter = 0;
-                    printf("eow\n");
                     word_counter++;
+                } else {
+                    character_counter ++;
                 }
             }
         }
@@ -171,8 +173,12 @@ void detect_words(line * self) {
     printf("num words: %d\n", word_counter);
     possible_words = realloc(possible_words, sizeof(tmp_feature) * word_counter);
 
+    // apply some L, R padding to the words and append to linked list.
+
     for (int i = 0; i < word_counter; i++) {
         
+        possible_words[i].x -= 0.3 * rough_char_width;
+        possible_words[i].w += 0.6 * rough_char_width;
         word * word_p = (word *) doc_type_constructor(Word, self->pixels, possible_words[i].x, 0, possible_words[i].w, self->pixels->y);
         if (!self->words) {
             self->words = word_p;
