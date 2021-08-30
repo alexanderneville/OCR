@@ -34,6 +34,21 @@ void scan_image(document * self, matrix * image){
         while (current_line_p) {
 
             self->detect_words(current_line_p);
+
+            if (current_line_p->words) {
+
+                word * current_word_p = current_line_p->words;
+
+                while (current_word_p) {
+
+                    self->detect_characters(current_word_p);
+
+                    current_word_p = current_word_p->next;
+
+                }
+
+            }
+
             current_line_p = current_line_p->next;
 
         }
@@ -103,7 +118,7 @@ void detect_lines(document * self, matrix * image){
 
 
     adjusted_lines = realloc(adjusted_lines, sizeof(tmp_feature) * adjusted_line_counter);
-    printf("\n%d\n", adjusted_line_counter);
+    /* printf("\n%d\n", adjusted_line_counter); */
 
     // now add some top and bottom padding to the lines.
 
@@ -130,10 +145,9 @@ void detect_lines(document * self, matrix * image){
 
 void detect_words(line * self) {
 
-    printf("in the detect words function\n");
     // rough working
     int rough_char_width = self->pixels->y * 0.6; // characters are not usually wider than they are tall
-    printf("rough char_width = %d\n", rough_char_width);
+    /* printf("rough char_width = %d\n", rough_char_width); */
     int max_possible_characters = self->pixels->x / rough_char_width;
     tmp_feature * possible_words = (tmp_feature *) malloc(sizeof(tmp_feature) * max_possible_characters);
 
@@ -146,10 +160,10 @@ void detect_words(line * self) {
 
     for (int i = 0; i < historgram->x; i++) {
         if (historgram->array[i] >= average_column_intensity) {
-            printf("+");
+            /* printf("+"); */
             character_counter++;
         } else {
-            printf("-");
+            /* printf("-"); */
             if (character_counter > 0){
 
                 int sum_below_average = 0;
@@ -160,7 +174,7 @@ void detect_words(line * self) {
                 if (sum_below_average == rough_char_width) {
                     possible_words[word_counter].x = i - character_counter;
                     possible_words[word_counter].w = character_counter;
-                    printf("\n eow %d\n", character_counter);
+                    /* printf("\n eow %d\n", character_counter); */
                     character_counter = 0;
                     word_counter++;
                 } else {
@@ -170,7 +184,7 @@ void detect_words(line * self) {
         }
     }
 
-    printf("num words: %d\n", word_counter);
+    /* printf("num words: %d\n", word_counter); */
     possible_words = realloc(possible_words, sizeof(tmp_feature) * word_counter);
 
     // apply some L, R padding to the words and append to linked list.
@@ -189,9 +203,47 @@ void detect_words(line * self) {
 
 };
 
-void detect_characters(word * current_word) {
+void detect_characters(word * self) {
 
-    return;
+    int rough_char_width = 0.6 * self->pixels->y;
+
+    matrix * historgram = vert_density(self->pixels);
+    float average_column_intensity = average_darkness(historgram);
+    float average_word_intenstiy = average_darkness(self->pixels);
+
+    tmp_feature * characters = (tmp_feature *) malloc(sizeof(tmp_feature) * 50); // unlikely to be more than 50 characters in a single word!
+    int width = 0;
+    int character_counter = 0;
+
+    for (int i = 0; i < historgram->x; i++) {
+
+        if (historgram->array[i] >= (average_column_intensity - (average_column_intensity * 0.75))) {
+            width++;
+        } else {
+            if (width > 0) {
+               characters[character_counter].x = i - width; 
+               characters[character_counter].w = width; 
+               width = 0;
+               character_counter ++;
+            }
+        }
+    }
+
+    characters = (tmp_feature *) realloc(characters, sizeof(tmp_feature) * character_counter);
+
+    for (int i = 0; i < character_counter; i++) {
+        
+        characters[i].x -= 0.1 * characters[i].w;
+        characters[i].w += 0.2 * characters[i].w;
+        characters[i].w ++;
+        character * character_p = (character *) doc_type_constructor(Character, self->pixels, characters[i].x, 0, characters[i].w, self->pixels->y);
+
+        if (!self->characters) {
+            self->characters = character_p;
+        } else {
+            append_list(self->characters, character_p, Character);
+        }
+    }
 
 }
 
@@ -209,7 +261,25 @@ void draw_outlines(document * self, matrix * image){
 
             while (current_word_p) {
 
-                printf("drawing outline of word\n");
+                if (current_word_p->characters) {
+
+                    character * current_characrer_p = current_word_p->characters;
+
+                    while (current_characrer_p) {
+
+                        for ( int i = 0; i < current_characrer_p->pixels->y; i++) {
+
+                            image->array[((current_line_p->y + i) * image->x) + current_word_p->x + current_characrer_p->x] = 255.0;
+                            image->array[((current_line_p->y + i) * image->x) + (current_word_p->x + current_characrer_p->x + current_characrer_p->pixels->x  - 2)] = 255.0;
+
+                        }
+
+                        current_characrer_p = current_characrer_p->next;
+                    }
+
+                }
+
+                /* printf("drawing outline of word\n"); */
 
                 for (int i = 0; i < current_word_p->pixels->y; i++) {
                     image->array[((current_line_p->y + i) * image->x) + current_word_p->x] = 255.0;

@@ -37,9 +37,9 @@ float * create_kernel(kernel_configuration type, int kernel_dimensions) {
     } else if (type == Sharpen) {
         
         //radius must equal 3
-        float weights[] = {0.0,  -1.0, 0.0,
-                           -1.0, 5.0,  -1.0,
-                           0.0,  -1.0, 0.0};
+        float weights[] = { 0.0,  -1.0,  0.0,
+                           -1.0,   5.0, -1.0,
+                            0.0,  -1.0,  0.0 };
 
         memcpy(kernel, weights, sizeof(float) * 9);
         
