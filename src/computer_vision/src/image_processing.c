@@ -287,25 +287,18 @@ void locate_characters(image_data * self) {
 
     float darkness = average_darkness(self->greyscale) / 255.0;
 
-    printf("choosing whether to invert or not.");
     printf("average: %f\n", darkness);
-    printf("choosing whether to invert or not.");
 
     if (darkness > 0.5) {
 
-        printf("about to invert.");
         self->invert(self);
-        printf("have inverted.");
 
-    } else {
-        printf("decided not to invert");
     }
     
-    printf("preparing to initialise doc.");
     document * doc = initialise_document();
 
-    /* doc->scan_image(doc, self->greyscale); */
-    doc->detect_lines(doc, self->greyscale);
+    doc->scan_image(doc, self->greyscale);
+    /* doc->detect_lines(doc, self->greyscale); */
     doc->draw_outlines(doc, self->greyscale);
 
 };

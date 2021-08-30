@@ -8,7 +8,6 @@
 
 document * initialise_document() {
 
-    printf("entered initialise_document function.");
     document * new_document_p = (document *) malloc(sizeof(document));
 
     new_document_p->scan_image        =    &scan_image;
@@ -26,14 +25,27 @@ document * initialise_document() {
 
 void scan_image(document * self, matrix * image){
 
-    printf("entered scan_image function.");
     self->detect_lines(self, image);
+
+    if (self->lines) {
+
+        line * current_line_p = self->lines;
+
+        while (current_line_p) {
+
+            self->detect_words(current_line_p);
+            current_line_p = current_line_p->next;
+
+        }
+
+    }
+
+    return;
 
 }
 
 void detect_lines(document * self, matrix * image){
 
-    printf("entered detect lines function.");
     matrix * historgram = horiz_density(image);
     float typical_line_intensity = average_darkness(historgram);
 
@@ -109,7 +121,6 @@ void detect_lines(document * self, matrix * image){
         if (!self->lines) {
             self->lines = line_p;
         } else {
-            printf("appending");
             append_list(self->lines, line_p, Line);
         }
 
@@ -117,11 +128,61 @@ void detect_lines(document * self, matrix * image){
 
 }
 
-void detect_words(line * current_line) {
+void detect_words(line * self) {
 
-    return;
+    printf("in the detect words function\n");
+    // rough working
+    int rough_char_width = self->pixels->y * 0.8; // characters are not usually wider than they are tall
+    printf("rough char_width = %d\n", rough_char_width);
+    int max_possible_characters = self->pixels->x / rough_char_width;
+    tmp_feature * possible_words = (tmp_feature *) malloc(sizeof(tmp_feature) * max_possible_characters);
+
+    matrix * historgram = vert_density(self->pixels);
+    float average_column_intensity = average_darkness(historgram);
+    /* printf("average: %f\n", average_column_intensity); */
+
+    int character_counter = 0; // keep track of how many characters there are in the current word.
+    int word_counter = 0; // keep track of how many words have been found.
+
+    for (int i = 0; i < historgram->x; i++) {
+        if (historgram->array[i] >= average_column_intensity) {
+            printf("+");
+            character_counter++;
+        } else {
+            printf("-");
+            if (word_counter > 0){
+
+                int sum_below_average = 0;
+                for (int j = 0; j < rough_char_width; j++) {
+                    if (historgram->array[i + j] < average_column_intensity)
+                        sum_below_average ++;
+                }
+                if (sum_below_average == rough_char_width) {
+                    possible_words[word_counter].x = i - character_counter;
+                    possible_words[word_counter].w = character_counter;
+                    character_counter = 0;
+                    printf("eow\n");
+                    word_counter++;
+                }
+            }
+        }
+    }
+
+    printf("num words: %d\n", word_counter);
+    possible_words = realloc(possible_words, sizeof(tmp_feature) * word_counter);
+
+    for (int i = 0; i < word_counter; i++) {
+        
+        word * word_p = (word *) doc_type_constructor(Word, self->pixels, possible_words[i].x, 0, possible_words[i].w, self->pixels->y);
+        if (!self->words) {
+            self->words = word_p;
+        } else {
+            append_list(self->words, word_p, Word);
+        }
+    }
 
 };
+
 void detect_characters(word * current_word) {
 
     return;
@@ -130,23 +191,34 @@ void detect_characters(word * current_word) {
 
 void draw_outlines(document * self, matrix * image){
 
-    printf("entered draw_outlines function");
-    if (self->lines == NULL) return;
+    if (!self->lines) return;
 
     line * current_line_p = self->lines;
-    int counter = 0;
 
     while (current_line_p) {
 
-        counter ++;
-        printf("%d\n", counter);
+        if (current_line_p->words) {
+
+            word * current_word_p = current_line_p->words;
+
+            while (current_word_p) {
+
+                printf("drawing outline of word\n");
+
+                for (int i = 0; i < current_word_p->pixels->y; i++) {
+                    image->array[((current_line_p->y + i) * image->x) + current_word_p->x] = 255.0;
+                    image->array[((current_line_p->y + i) * image->x) + (current_word_p->x + current_word_p->pixels->x - 1)] = 255.0;
+
+                }
+
+                current_word_p = current_word_p->next;
+            }
+
+        }
+
         for (int i = 0; i < image->x; i++) {
             image->array[(current_line_p->y * image->x) + i] = 255.0;
             image->array[((current_line_p->y + current_line_p->pixels->y - 1) * image->x) + i] = 255.0;
-        }
-
-        if (!current_line_p->next) {
-            printf("only: %d\n", counter);
         }
 
         current_line_p = current_line_p->next;
