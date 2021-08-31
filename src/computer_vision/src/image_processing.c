@@ -260,7 +260,7 @@ void resize(image_data * self, float scale_factor) {
     if (self->channels == 1) {
 
         matrix * tmp = self->greyscale;
-        self->greyscale = scale_matrix(self->greyscale, scale_factor);
+        self->greyscale = scale_matrix(self->greyscale, scale_factor, true);
         free(tmp);
 
         self->height = self->greyscale->y;
@@ -271,9 +271,9 @@ void resize(image_data * self, float scale_factor) {
         matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
         tmp[0] = self->R; tmp[1] = self->G; tmp[2] = self->B;
 
-        self->R = scale_matrix(self->R, scale_factor);
-        self->G = scale_matrix(self->G, scale_factor);
-        self->B = scale_matrix(self->B, scale_factor);
+        self->R = scale_matrix(self->R, scale_factor, true);
+        self->G = scale_matrix(self->G, scale_factor, true);
+        self->B = scale_matrix(self->B, scale_factor, true);
 
         for (int i = 0; i < 3; i++) { free(tmp[i]); }
         free(tmp);
@@ -303,5 +303,11 @@ void locate_characters(image_data * self) {
     self->document_p->draw_outlines(self->document_p, self->greyscale);
 
     int total_characters = count_characters_in_document(self->document_p);
+
+    dataset_element * data = doc_to_dataset(self->document_p);
+
+    for (int i = 0; i < total_characters; i++) {
+        printf("Line: %d, Word: %d, Character: %d\n", data[i].line_number, data[i].word_number, data[i].character_number);
+    }
 
 };

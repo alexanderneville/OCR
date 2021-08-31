@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include "../includes/matrix.h"
 
 
@@ -77,7 +78,7 @@ void adjust_scale_factor(float * height, float * width, float * scale_factor, fl
 
         if (valid_height && valid_width) valid_factor = true;
 
-        if (valid_width && escape_counter > 2000000) {
+        if (valid_width && escape_counter > 1000000) {
 
             valid_factor = true;
 
@@ -91,23 +92,21 @@ void adjust_scale_factor(float * height, float * width, float * scale_factor, fl
 
 }
 
-matrix * scale_matrix(matrix * matrix_p, float scale_factor) {
+matrix * scale_matrix(matrix * matrix_p, float scale_factor, bool adjust) {
 
     float new_height = matrix_p->y;
     float new_width = matrix_p->x;
 
-    printf("entered scale matrix function\n");
 
-    // adjust the scale factor so it produces an exact scale
-
-    if (scale_factor > 1) {
-
-        adjust_scale_factor(&new_height, &new_width, &scale_factor, 0.0000001);
-
-    } else if (scale_factor < 1) {
-
-        adjust_scale_factor(&new_height, &new_width, &scale_factor, -0.0000001);
-
+    if (adjust) {
+        if (scale_factor > 1) {
+            adjust_scale_factor(&new_height, &new_width, &scale_factor, 0.0000001);
+        } else if (scale_factor < 1) {
+            adjust_scale_factor(&new_height, &new_width, &scale_factor, -0.0000001);
+        }
+    } else {
+        new_height *= scale_factor;
+        new_width *= scale_factor;
     }
 
     printf("scale factor: %f, x: %f, y: %f \n", scale_factor, new_width, new_height);
@@ -141,6 +140,8 @@ matrix * scale_matrix(matrix * matrix_p, float scale_factor) {
 };
 
 matrix * select_region(matrix * matrix_p, int x, int y, int w, int h) {
+
+    // select a portion of an exiting matrix
 
     matrix * new_matrix_p = create_matrix(h, w);
 
@@ -206,4 +207,32 @@ float average_darkness(matrix * matrix_p) {
 
     return sum;
 
+}
+
+matrix * paste(matrix* fg, matrix * bg) {
+
+    // past the fg matrix centrally on top of the bg matrix.
+    printf("entered paste function\n");
+
+    matrix * new_matrix = create_matrix(bg->y, bg->x);
+
+    printf("created new matrix. %d x %d\n", new_matrix->x, new_matrix->y);
+    printf("%d x %d\n", fg->x, fg->y);
+
+    memcpy(new_matrix->array, bg->array, sizeof(float) * bg->y * bg->x);
+    
+    int x_offset = (bg->x - fg->x) / 2;
+    int y_offset = (bg->y - fg->y) / 2;
+
+    printf("y: %d, x: %d\n", y_offset, x_offset);
+
+    for (int y = 0; y < fg->y; y++) {
+        for (int x = 0; x < fg->x; x++) {
+
+            new_matrix->array[((y_offset + y) * new_matrix->x) + x_offset + x] = fg->array[(y * fg->x) + x];
+
+        }
+    }
+
+    return new_matrix;
 }
