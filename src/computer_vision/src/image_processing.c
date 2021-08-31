@@ -24,6 +24,7 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->width = width;
     new_image_p->channels = channels;
     new_image_p->document_p = initialise_document();
+    new_image_p->rgb_to_greyscale = NULL;
 
     new_image_p->R = NULL;
     new_image_p->G = NULL;
@@ -287,31 +288,26 @@ void resize(image_data * self, float scale_factor) {
 
 void locate_characters(image_data * self) {
 
-    self->greyscale = translation(self->greyscale, 40, 40);
+    /* self->greyscale = translation(self->greyscale, 40, 40); */
 
     float darkness = average_darkness(self->greyscale) / 255.0;
 
     printf("average darkness: %f\n", darkness);
 
-    if (darkness > 0.5) {
-
+    if (darkness > 0.5)
         self->invert(self);
-
-    }
     
     /* document * doc = initialise_document(); */
 
     self->document_p->scan_image(self->document_p, self->greyscale);
     self->document_p->draw_outlines(self->document_p, self->greyscale);
-
     int total_characters = count_characters_in_document(self->document_p);
+    self->data = doc_to_dataset(self->document_p);
 
-    dataset_element * data = doc_to_dataset(self->document_p);
+    for (int i = 0; i < total_characters; i++)
+        printf("Line: %d, Word: %d, Character: %d\n", self->data[i].line_number, self->data[i].word_number, self->data[i].character_number);
 
-    for (int i = 0; i < total_characters; i++) {
-        printf("Line: %d, Word: %d, Character: %d\n", data[i].line_number, data[i].word_number, data[i].character_number);
-    }
-
-    /* extend_dataset(data, total_characters); */
+    extend_dataset(self->data, total_characters);
+    export_dataset(self->data, total_characters, "output.json");
 
 };

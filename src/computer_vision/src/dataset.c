@@ -1,5 +1,9 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <stdbool.h>
 #include "../includes/dataset.h"
 #include "../includes/character_detection.h"
@@ -91,6 +95,68 @@ dataset_element * doc_to_dataset(document * doc) {
 }
 
 void extend_dataset(dataset_element * dataset, int length) {
+
+    // slightly modify a character so it can be used as many training inputs
+
+    for (int i = 0; i < length; i++) {
+
+        dataset[i].images[1] =  translation(dataset[i].images[0],  2,  0);
+        dataset[i].images[2] =  translation(dataset[i].images[0],  0, -2);
+        dataset[i].images[3] =  translation(dataset[i].images[0], -2,  0);
+        dataset[i].images[4] =  translation(dataset[i].images[0],  0,  2);
+        dataset[i].images[5] = scale_matrix(dataset[i].images[0], 0.9, true);
+        dataset[i].images[6] =  translation(dataset[i].images[5],  2,  0);
+        dataset[i].images[7] =  translation(dataset[i].images[5],  0, -2);
+        dataset[i].images[8] =  translation(dataset[i].images[5], -2,  0);
+        dataset[i].images[9] =  translation(dataset[i].images[5],  0,  2);
+
+    }
+
 }
-void export_dataset(dataset_element * dataset, char * path) {
+
+void export_dataset(dataset_element * dataset, int length, char * path) {
+
+    FILE * fp = fopen(path, "w");
+
+    fprintf(fp, "{\n");
+    fprintf(fp, "    \"characters\": [");
+
+    for (int i = 0; i < length; i++) {
+        // for every char
+        fprintf(fp, "        {\n");
+        fprintf(fp, "            \"position\": %d,\n", i);
+        fprintf(fp, "            \"line_number\": %d,\n", dataset[i].line_number);
+        fprintf(fp, "            \"word_number\": %d,\n", dataset[i].word_number);
+        fprintf(fp, "            \"character_number\": %d,\n", dataset[i].character_number);
+        fprintf(fp, "            \"x\": %d,\n", dataset[i].x);
+        fprintf(fp, "            \"y\": %d,\n", dataset[i].y);
+        fprintf(fp, "            \"w\": 32,\n");
+        fprintf(fp, "            \"h\": 32,\n");
+        fprintf(fp, "            \"pixels\": [\n");
+
+        for (int j = 0; j < 10; j++) {
+            // for every matrix
+            fprintf(fp, "                [\n"); 
+            for (int y = 0; y < dataset[i].images[j]->y; y++){
+                fprintf(fp, "                    [");
+                for (int x = 0; x < dataset[i].images[j]->x; x++){
+                    fprintf(fp, "%f, ", dataset[i].images[j]->array[(y * dataset[i].images[j]->x) + x]);
+                }
+                fprintf(fp, "],\n");
+            }
+            fprintf(fp, "                ],\n"); 
+        }
+
+        fprintf(fp, "            ],\n");
+        fprintf(fp, "            \"label\": null\n");
+        fprintf(fp, "");
+        fprintf(fp, "");
+        fprintf(fp, "        },\n");
+    }
+
+    fprintf(fp, "    ]\n");
+    fprintf(fp, "}\n");
+
+    fclose(fp);
+
 }
