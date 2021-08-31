@@ -287,9 +287,11 @@ void resize(image_data * self, float scale_factor) {
 
 void locate_characters(image_data * self) {
 
+    self->greyscale = translation(self->greyscale, 40, 40);
+
     float darkness = average_darkness(self->greyscale) / 255.0;
 
-    printf("average: %f\n", darkness);
+    printf("average darkness: %f\n", darkness);
 
     if (darkness > 0.5) {
 
@@ -309,5 +311,7 @@ void locate_characters(image_data * self) {
     for (int i = 0; i < total_characters; i++) {
         printf("Line: %d, Word: %d, Character: %d\n", data[i].line_number, data[i].word_number, data[i].character_number);
     }
+
+    /* extend_dataset(data, total_characters); */
 
 };

@@ -21,6 +21,8 @@
         struct matrix_T * (* horiz_density) (struct matrix_T * matrix_p);
         struct matrix_T * (* vert_density)  (struct matrix_T * matrix_p);
         float (* average_darkness)          (struct matrix_T * matrix_p);
+        struct matrix_T * (* paste) (struct matrix_T * fg, struct matrix_T * bg);
+        struct matrix_T * (* translation) (struct matrix_T * matrix_p, int x_offset, int y_offset);
 
     } matrix;
 
@@ -47,5 +49,6 @@
     float average_darkness(matrix * matrix_p);
 
     matrix * paste(matrix* fg, matrix * bg);
+    matrix * translation(matrix * matrix_p, int x_offset, int y_offset);
 
 #endif

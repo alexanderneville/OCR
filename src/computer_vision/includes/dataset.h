@@ -15,7 +15,7 @@
 
 int count_characters_in_document(document * doc);
 dataset_element * doc_to_dataset(document * doc);
-void extend_dataset(dataset_element * dataset);
+void extend_dataset(dataset_element * dataset, int length);
 void export_dataset(dataset_element * dataset, char * path);
 
 #endif

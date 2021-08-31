@@ -20,6 +20,8 @@ matrix * create_matrix(int height, int width) {
     new_matrix_p->average_darkness   =     &average_darkness;
     new_matrix_p->horiz_density      =     &horiz_density;
     new_matrix_p->vert_density       =     &vert_density;
+    new_matrix_p->paste              =     &paste;
+    new_matrix_p->translation        =     &translation;
 
     return new_matrix_p;
 
@@ -212,24 +214,37 @@ float average_darkness(matrix * matrix_p) {
 matrix * paste(matrix* fg, matrix * bg) {
 
     // past the fg matrix centrally on top of the bg matrix.
-    printf("entered paste function\n");
 
     matrix * new_matrix = create_matrix(bg->y, bg->x);
-
-    printf("created new matrix. %d x %d\n", new_matrix->x, new_matrix->y);
-    printf("%d x %d\n", fg->x, fg->y);
 
     memcpy(new_matrix->array, bg->array, sizeof(float) * bg->y * bg->x);
     
     int x_offset = (bg->x - fg->x) / 2;
     int y_offset = (bg->y - fg->y) / 2;
 
-    printf("y: %d, x: %d\n", y_offset, x_offset);
-
     for (int y = 0; y < fg->y; y++) {
         for (int x = 0; x < fg->x; x++) {
 
             new_matrix->array[((y_offset + y) * new_matrix->x) + x_offset + x] = fg->array[(y * fg->x) + x];
+
+        }
+    }
+
+    return new_matrix;
+}
+
+
+matrix * translation(matrix * matrix_p, int x_offset, int y_offset) {
+
+    matrix * new_matrix = create_matrix(matrix_p->y, matrix_p->x);
+
+    for (int y = 0; y < matrix_p->y; y ++) {
+        for (int x = 0; x < matrix_p->x; x ++) {
+
+            int x_pos = (matrix_p->x + x + x_offset) % matrix_p->x;
+            int y_pos = (matrix_p->y + y + y_offset) % matrix_p->y;
+
+            new_matrix->array[(y * new_matrix->x) + x] = matrix_p->array[(y_pos * matrix_p->x) + x_pos];
 
         }
     }
