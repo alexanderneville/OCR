@@ -119,7 +119,7 @@ void export_dataset(dataset_element * dataset, int length, char * path) {
     FILE * fp = fopen(path, "w");
 
     fprintf(fp, "{\n");
-    fprintf(fp, "    \"characters\": [");
+    fprintf(fp, "    \"characters\": [\n");
 
     for (int i = 0; i < length; i++) {
         // for every char
@@ -140,22 +140,39 @@ void export_dataset(dataset_element * dataset, int length, char * path) {
             for (int y = 0; y < dataset[i].images[j]->y; y++){
                 fprintf(fp, "                    [");
                 for (int x = 0; x < dataset[i].images[j]->x; x++){
-                    fprintf(fp, "%f, ", dataset[i].images[j]->array[(y * dataset[i].images[j]->x) + x]);
+                    if (x == dataset[i].images[j]->x - 1) {
+                        fprintf(fp, "%f", dataset[i].images[j]->array[(y * dataset[i].images[j]->x) + x]);
+                    } else {
+                        fprintf(fp, "%f, ", dataset[i].images[j]->array[(y * dataset[i].images[j]->x) + x]);
+                    }
                 }
-                fprintf(fp, "],\n");
+                if (y == dataset[i].images[j]->y - 1) {
+                    fprintf(fp, "]\n");
+                } else {
+                    fprintf(fp, "],\n");
+                }
             }
-            fprintf(fp, "                ],\n"); 
+            if (j == 9) {
+                fprintf(fp, "                ]\n"); 
+            } else {
+                fprintf(fp, "                ],\n"); 
+            }
         }
 
         fprintf(fp, "            ],\n");
         fprintf(fp, "            \"label\": null\n");
         fprintf(fp, "");
         fprintf(fp, "");
-        fprintf(fp, "        },\n");
+
+        if (i == length - 1) {
+            fprintf(fp, "        }\n");
+        } else {
+            fprintf(fp, "        },\n");
+        }
     }
 
     fprintf(fp, "    ]\n");
-    fprintf(fp, "}\n");
+    fprintf(fp, "}\n\n");
 
     fclose(fp);
 
