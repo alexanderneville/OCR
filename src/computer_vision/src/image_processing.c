@@ -15,6 +15,7 @@
 /* #include "../includes/tree.h" */
 #include "../includes/convolution.h"
 #include "../includes/character_detection.h"
+#include "../includes/dataset.h"
 
 image_data * initialise_data(unsigned char ** pixels, int height, int width, int channels) {
 
@@ -22,6 +23,7 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->height = height;
     new_image_p->width = width;
     new_image_p->channels = channels;
+    new_image_p->document_p = initialise_document();
 
     new_image_p->R = NULL;
     new_image_p->G = NULL;
@@ -295,10 +297,11 @@ void locate_characters(image_data * self) {
 
     }
     
-    document * doc = initialise_document();
+    /* document * doc = initialise_document(); */
 
-    doc->scan_image(doc, self->greyscale);
-    /* doc->detect_lines(doc, self->greyscale); */
-    doc->draw_outlines(doc, self->greyscale);
+    self->document_p->scan_image(self->document_p, self->greyscale);
+    self->document_p->draw_outlines(self->document_p, self->greyscale);
+
+    int total_characters = count_characters_in_document(self->document_p);
 
 };

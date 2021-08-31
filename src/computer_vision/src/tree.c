@@ -3,9 +3,9 @@
 #include "../includes/tree.h"
 #include "../includes/image_processing.h"
 
-node * create_node() {
+tree_node * create_node() {
 
-  node * new_node_p = (node *) malloc(sizeof(node));
+  tree_node * new_node_p = (tree_node *) malloc(sizeof(tree_node));
   new_node_p->data = NULL;
   new_node_p->left = NULL;
   new_node_p->right = NULL;
@@ -14,7 +14,7 @@ node * create_node() {
 
 }
 
-void insert_data(node * node_p, node_data * data) {
+void insert_data(tree_node * node_p, node_data * data) {
 
     if (node_p->data) {
 
@@ -34,7 +34,7 @@ void insert_data(node * node_p, node_data * data) {
 
 }
 
-void traverse_tree(node * node_p, image_data * image) {
+void traverse_tree(tree_node * node_p, image_data * image) {
 
     if (node_p->left){ traverse_tree(node_p->left, image); }
     image->greyscale->array[node_p->data->position] = node_p->data->intensity;
@@ -42,7 +42,7 @@ void traverse_tree(node * node_p, image_data * image) {
 
 }
 
-void destroy_tree(node * node_p) {
+void destroy_tree(tree_node * node_p) {
 
     if (node_p->left){ destroy_tree(node_p->left); }
     if (node_p->right){ destroy_tree(node_p->right); }

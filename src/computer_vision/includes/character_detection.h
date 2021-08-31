@@ -12,12 +12,6 @@ typedef enum doc_types_E {
     Line
 } doc_types;
 
-typedef struct node_T {
-
-   void * next; 
-
-} node;
-
 // used to store all possible data while lines, chars etc are located.
 typedef struct tmp_feature_T {
     int x, y, w, h;

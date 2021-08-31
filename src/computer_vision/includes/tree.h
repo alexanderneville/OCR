@@ -10,17 +10,17 @@ typedef struct node_data_T {
 
 } node_data;
 
-typedef struct node_T {
+typedef struct tree_node_T {
 
     node_data * data;
-    struct node_T * left;
-    struct node_T * right;
+    struct tree_node_T * left;
+    struct tree_node_T * right;
 
-} node;
+} tree_node;
 
-node * create_node();
-void insert_data(node * node_p, node_data * data);
-void traverse_tree(node * node_p, image_data * image);
-void destroy_tree(node * node_p);
+tree_node * create_node();
+void insert_data(tree_node * node_p, node_data * data);
+void traverse_tree(tree_node * node_p, image_data * image);
+void destroy_tree(tree_node * node_p);
 
 #endif // !tree_H

@@ -6,6 +6,7 @@
 #include "../includes/character_detection.h"
 #include "../includes/matrix.h"
 
+
 document * initialise_document() {
 
     document * new_document_p = (document *) malloc(sizeof(document));
@@ -236,6 +237,8 @@ void detect_characters(word * self) {
         characters[i].x -= 0.1 * characters[i].w;
         characters[i].w += 0.2 * characters[i].w;
         characters[i].w ++;
+        characters[i].w ++;
+        characters[i].w ++;
         character * character_p = (character *) doc_type_constructor(Character, self->pixels, characters[i].x, 0, characters[i].w, self->pixels->y);
 
         if (!self->characters) {
@@ -300,6 +303,7 @@ void draw_outlines(document * self, matrix * image){
         current_line_p = current_line_p->next;
     }
 
+    
     return;
 
 }

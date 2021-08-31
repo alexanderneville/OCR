@@ -3,6 +3,7 @@
 
 #include "./matrix.h"
 #include "./convolution.h"
+#include "./character_detection.h"
 
 
 typedef struct image_data_T {
@@ -13,6 +14,7 @@ typedef struct image_data_T {
     matrix * R;
     matrix * G;
     matrix * B;
+    document * document_p;
 
     unsigned char ** (* export_pixels) (struct image_data_T * image);
 
