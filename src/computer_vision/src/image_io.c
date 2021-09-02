@@ -2,6 +2,21 @@
 #include <png.h>
 #include "../includes/image_io.h"
 
+int check_header(char * file_name) {
+
+    FILE *fp = fopen(file_name, "rb");
+    if (!fp)
+        return 0;
+
+    unsigned char header[8];
+    fread(header, 1, 8, fp);
+    if (png_sig_cmp(header, 0, SIGNATURE)) return -1;
+
+    fclose(fp);
+    return 0;
+
+}
+
 unsigned char ** read_image(char * file_name, int * height, int * width, int * channels, int * bit_depth, int * color_type) {
 
     FILE *fp = fopen(file_name, "rb");

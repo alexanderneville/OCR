@@ -7,6 +7,7 @@
 unsigned char ** read_image(char * file_name, int * height, int * width, int * channels, int * bit_depth, int * color_type);
 void inspect_image(unsigned char ** pixels, int height, int width);
 void write_image(char * file_name, unsigned char ** pixels, int height, int width, int channels, int bit_depth, int color_type);
+int check_header(char * file_name);
 
 #endif // !handling_H
 

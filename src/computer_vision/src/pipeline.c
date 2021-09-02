@@ -1,8 +1,12 @@
 #define PY_SSIZE_T_CLEAN
 #include <python3.9/Python.h>
 #include "structmember.h"
+#include "../includes/image_io.h"
+#include "../includes/image_processing.h"
 
 #include "../includes/image_processing.h"
+
+static PyObject *PipeLineError;
 
 typedef struct {
     PyObject_HEAD
@@ -10,6 +14,7 @@ typedef struct {
     PyObject *outfile;
     PyObject *dumpfile;
     image_data * image;
+    int height, width, channels, color_type, bit_depth;
 } PipelineObject;
 
 static void
@@ -42,12 +47,17 @@ Custom_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             return NULL;
         }
         self->image = NULL;
+        self->height = 0;
+        self->width = 0;
+        self->channels = 0;
+        self->color_type = 0;
+        self->bit_depth = 0;
     }
     return (PyObject *) self;
 }
 
 static int
-Custom_init(PipelineObject *self, PyObject *args, PyObject *kwds)
+Pipeline_init(PipelineObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"infile", "outfile", "dumpfile", NULL};
     PyObject *infile = NULL, *outfile = NULL, *dumpfile = NULL, *tmp;
@@ -67,24 +77,46 @@ Custom_init(PipelineObject *self, PyObject *args, PyObject *kwds)
         self->outfile = outfile;
         Py_XDECREF(tmp);
     }
+    if (dumpfile) {
+        tmp = self->dumpfile;
+        Py_INCREF(dumpfile);
+        self->dumpfile = dumpfile;
+        Py_XDECREF(tmp);
+    }
     return 0;
 }
+/* static int */
+/* Pipeline_check_header(PipelineObject *self, PyObject *args, PyObject *kwds) */
+/* { */
+/*     return 0; */
+/* } */
 
-static PyMemberDef Custom_members[] = {
+static PyMemberDef Pipeline_members[] = {
     {"infile", T_OBJECT_EX, offsetof(PipelineObject, infile), 0,
      "the input file"},
     {"outfile", T_OBJECT_EX, offsetof(PipelineObject, outfile), 0,
      "the output file"},
     {"dumpfile", T_OBJECT_EX, offsetof(PipelineObject, dumpfile), 0,
      "where to dump the json data"},
+    /* {"height", T_INT, offsetof(PipelineObject, height), */
+    /*  "height of the image in pixels"}, */
+    /* {"width", T_INT, offsetof(PipelineObject, width), */
+    /*  "width of the image in pixels"}, */
+    /* {"channels", T_INT, offsetof(PipelineObject, channels), */
+    /*  "number of channels"}, */
+    /* {"color_type", T_INT, offsetof(PipelineObject, color_type), */
+    /*  "refer to libpng documentation"}, */
+    /* {"bit_depth", T_INT, offsetof(PipelineObject, bit_depth), */
+    /*  "bit depth per channel"}, */
     {NULL}  /* Sentinel */
 };
 
+// methods
 static PyObject *
-Custom_files(PipelineObject *self, PyObject *Py_UNUSED(ignored))
+Pipeline_files(PipelineObject *self, PyObject *Py_UNUSED(ignored))
 {
     if (self->infile == NULL) {
-        PyErr_SetString(PyExc_AttributeError, "input file missing");
+        PyErr_SetString(PipeLineError, "input file missing");
         return NULL;
     }
     if (self->outfile == NULL) {
@@ -98,30 +130,32 @@ Custom_files(PipelineObject *self, PyObject *Py_UNUSED(ignored))
     return PyUnicode_FromFormat("%S %S %S", self->infile, self->outfile, self->dumpfile);
 }
 
-static PyMethodDef Custom_methods[] = {
-    {"files", (PyCFunction) Custom_files, METH_NOARGS,
-     "return the names of the files that the object will use / is using."
-    },
+
+static PyMethodDef Pipeline_methods[] = {
+    {"files", (PyCFunction) Pipeline_files, METH_NOARGS,
+     "return the names of the files that the object will use / is using."},
+    /* {"test", (PyCFunction) Pipeline_test_exception, METH_NOARGS, */
+    /*  "test exception"}, */
     {NULL}  /* Sentinel */
 };
 
 static PyTypeObject CustomType = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    .tp_name = "custom2.Custom",
-    .tp_doc = "Custom objects",
+    .tp_name = "pipeline.Pipeline",
+    .tp_doc = "object for interfacing with the image pipeline",
     .tp_basicsize = sizeof(PipelineObject),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_new = Custom_new,
-    .tp_init = (initproc) Custom_init,
+    .tp_init = (initproc) Pipeline_init,
     .tp_dealloc = (destructor) Custom_dealloc,
-    .tp_members = Custom_members,
-    .tp_methods = Custom_methods,
+    .tp_members = Pipeline_methods,
+    .tp_methods = Pipeline_methods,
 };
 
 static PyModuleDef custommodule = {
     PyModuleDef_HEAD_INIT,
-    .m_name = "custom2",
+    .m_name = "pipeline",
     .m_doc = "extension type for interfacing with the image processing pipeline.",
     .m_size = -1,
 };
@@ -140,6 +174,15 @@ PyInit_pipeline(void)
     Py_INCREF(&CustomType);
     if (PyModule_AddObject(m, "Pipeline", (PyObject *) &CustomType) < 0) {
         Py_DECREF(&CustomType);
+        Py_DECREF(m);
+        return NULL;
+    }
+
+    PipeLineError = PyErr_NewException("pipeline.error", NULL, NULL);
+    Py_XINCREF(PipeLineError);
+    if (PyModule_AddObject(m, "error", PipeLineError) < 0) {
+        Py_XDECREF(PipeLineError);
+        Py_CLEAR(PipeLineError);
         Py_DECREF(m);
         return NULL;
     }
