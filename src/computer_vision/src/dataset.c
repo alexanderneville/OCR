@@ -104,7 +104,20 @@ void extend_dataset(dataset_element * dataset, int length) {
         dataset[i].images[2] =  translation(dataset[i].images[0],  0, -2);
         dataset[i].images[3] =  translation(dataset[i].images[0], -2,  0);
         dataset[i].images[4] =  translation(dataset[i].images[0],  0,  2);
-        dataset[i].images[5] = scale_matrix(dataset[i].images[0], 0.9, true);
+
+        // create a blank 32x32 matrix to paste a small image onto
+        matrix * tmp_bg = create_matrix(32, 32);
+        float bg_colour = dataset[i].images[0]->array[0];
+        for (int i = 0; i < 32*32; i++)
+            tmp_bg->array[i] = bg_colour;
+
+        // shrink the original image and paste it onto the 32x32 background.
+        matrix * tmp_fg = scale_matrix(dataset[i].images[0], 0.95, true); 
+        dataset[i].images[5] = paste(tmp_fg, tmp_bg);
+
+        free(tmp_bg);
+        free(tmp_fg);
+
         dataset[i].images[6] =  translation(dataset[i].images[5],  2,  0);
         dataset[i].images[7] =  translation(dataset[i].images[5],  0, -2);
         dataset[i].images[8] =  translation(dataset[i].images[5], -2,  0);

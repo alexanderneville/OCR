@@ -8,6 +8,8 @@ from keras.datasets import mnist
 import matplotlib.pyplot as plt
 import numpy as np
 
+from dataset_functions import *
+
 def visualise_inputs(x_train):
 
     plt.subplot(2,2,1)
@@ -21,27 +23,6 @@ def visualise_inputs(x_train):
 
     plt.show()
 
-def calc_y_activations(y_train):
-
-    y_activations = [[[0 for _ in range(10)]] for _ in range(60000)]
-
-    for i in range(len(y_train)):
-
-        y_activations[i][0][y_train[i]] = 1
-
-    return np.array(y_activations)
-
-def calc_output(activations) -> int:
-
-    """return predicted value from list of activations."""
- 
-    index: int = 0
-    activations = activations.flatten()
-    for i in range(len(activations)):
-        if activations[i] >= activations[index]:
-            index = i
-
-    return index
 
 def test_SGD(x_train, y_train, x_test, y_test, network: nn.Network):
 
@@ -55,21 +36,6 @@ def test_batch_learning(x_train, y_train, x_test, y_test, network: nn.Network):
     output = network.predict(x_test)
     evaluate(output, y_test)
 
-def evaluate(predictions, labels: list[int]) -> None:
-
-    """Calculate predictions and measure accuracy."""
-
-    total = 0
-
-    for label, layer_activations in zip(labels, predictions):
-
-        value = calc_output(layer_activations)
-        message = "pass" if value == label else "fail"
-        if value == label: total += 1
-        print(f"Correct: {label}, Predicted: {value}, {message}")
-
-    percentage = (total / len(predictions)) * 100
-    print(f"\nAccuracy: {percentage}%\n")
 
 def main():
 
@@ -82,8 +48,8 @@ def main():
 
     # instantiate a network
     network = nn.Network([784, 50, 50 ,10])
-    # test_SGD(x_train[:2000], y_train_activations[:2000], x_test[:2000], y_test[:2000], network)
-    test_batch_learning(x_train[:2000], y_train_activations[:2000], x_test[:2000], y_test[:2000], network)
+    test_SGD(x_train[:2000], y_train_activations[:2000], x_test[:2000], y_test[:2000], network)
+    # test_batch_learning(x_train[:2000], y_train_activations[:2000], x_test[:2000], y_test[:2000], network)
 
 
 if __name__ == "__main__":

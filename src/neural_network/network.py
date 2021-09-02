@@ -143,6 +143,11 @@ class Network(object):
 
                 for sample_num in range(len(input_data)):
 
+                    # print(type(input_data[sample_num]))
+                    # print(input_data[sample_num].shape)
+                    # print(input_data[sample_num].flatten())
+                    # print(np.array([input_data[sample_num].flatten()]).shape)
+
                     current_sample = np.array([input_data[sample_num].flatten()])
                     output = self.predict(current_sample, single_sample=True)
 

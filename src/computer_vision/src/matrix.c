@@ -111,7 +111,7 @@ matrix * scale_matrix(matrix * matrix_p, float scale_factor, bool adjust) {
         new_width *= scale_factor;
     }
 
-    printf("scale factor: %f, x: %f, y: %f \n", scale_factor, new_width, new_height);
+    /* printf("scale factor: %f, x: %f, y: %f \n", scale_factor, new_width, new_height); */
     
     matrix * scaled_matrix = create_matrix(new_height, new_width);
 

@@ -18,6 +18,20 @@ typedef struct {
     int height, width, channels, color_type, bit_depth;
 } PipelineObject;
 
+static PyMemberDef Pipeline_members[] = {
+
+    {"infile",      T_OBJECT_EX,    offsetof(PipelineObject, infile),       0, "the input file"                 },
+    {"outfile",     T_OBJECT_EX,    offsetof(PipelineObject, outfile),      0, "the output file"                },
+    {"dumpfile",    T_OBJECT_EX,    offsetof(PipelineObject, dumpfile),     0, "where to dump the json data"    },
+    {"height",      T_INT,          offsetof(PipelineObject, height),       0, "height of the image in pixels"  },
+    {"width",       T_INT,          offsetof(PipelineObject, width),        0, "width of the image in pixels"   },
+    {"channels",    T_INT,          offsetof(PipelineObject, channels),     0, "number of channels"             },
+    {"color_type",  T_INT,          offsetof(PipelineObject, color_type),   0, "refer to libpng documentation"  },
+    {"bit_depth",   T_INT,          offsetof(PipelineObject, bit_depth),    0, "bit depth per channel"          },
+
+    {NULL}  // null terminator
+};
+
 static void
 Pipeline_dealloc(PipelineObject *self)
 {
@@ -87,21 +101,12 @@ Pipeline_init(PipelineObject *self, PyObject *args, PyObject *kwds)
     return 0;
 }
 
-static PyMemberDef Pipeline_members[] = {
-    {"infile", T_OBJECT_EX, offsetof(PipelineObject, infile), 0, "the input file"},
-    {"outfile", T_OBJECT_EX, offsetof(PipelineObject, outfile), 0, "the output file"},
-    {"dumpfile", T_OBJECT_EX, offsetof(PipelineObject, dumpfile), 0, "where to dump the json data"},
-    {"height", T_INT, offsetof(PipelineObject, height), 0, "height of the image in pixels"},
-    {"width", T_INT, offsetof(PipelineObject, width), 0, "width of the image in pixels"},
-    {"channels", T_INT, offsetof(PipelineObject, channels), 0, "number of channels"},
-    {"color_type", T_INT, offsetof(PipelineObject, color_type), 0, "refer to libpng documentation"},
-    {"bit_depth", T_INT, offsetof(PipelineObject, bit_depth), 0, "bit depth per channel"},
-    {NULL}  /* Sentinel */
-};
 
-//============
-// methods
-//============
+/*
+||=================||
+|| object methods  ||
+||=================||
+*/
 
 static PyObject *
 Pipeline_files(PipelineObject *self, PyObject *Py_UNUSED(ignored))
@@ -175,14 +180,14 @@ Pipeline_save_to_file(PipelineObject *self, PyObject * args) {
         return NULL;
     }
     unsigned char ** pixels = self->image->export_pixels(self->image);
-    write_image(outfile, pixels, self->height, self->width, self->channels, self->bit_depth, self->color_type);
+    write_image(outfile, pixels, self->image->height, self->image->width, self->channels, self->bit_depth, self->color_type);
 
     return PyLong_FromLong(1);
 
 }
 
 static PyObject *
-Pipeline_scan_image(PipelineObject *self, PyObject * args) {
+Pipeline_scan_image(PipelineObject *self, PyObject *Py_UNUSED(ignored)) {
 
     if (self->image == NULL) {
         PyErr_SetString(Pipeline_Error, "file must be loaded first.");
@@ -218,13 +223,93 @@ Pipeline_generate_dataset(PipelineObject *self, PyObject * args) {
 }
 
 static PyObject *
-Pipeline_convolution(PipelineObject *self, PyObject * args) {}
+Pipeline_convolution(PipelineObject *self, PyObject * args) {
+
+    int type, dimensions;
+    if(!PyArg_ParseTuple(args, "i i", &type, &dimensions)){
+        PyErr_SetString(Pipeline_Error, "path arguement required.");
+        return NULL;
+    }
+
+    if (self->image == NULL) {
+        PyErr_SetString(Pipeline_Error, "file must be loaded first.");
+        return NULL;
+    }
+
+    switch(type){
+        case 1:
+            self->image->process(self->image, Mean, dimensions);
+            break;
+        case 2:
+            self->image->process(self->image, Gaussian, dimensions);
+            break;
+        case3:
+            self->image->process(self->image, Gaussian, dimensions);
+            break;
+    }
+
+    return PyLong_FromLong(1);
+
+}
 
 static PyObject *
-Pipeline_resize(PipelineObject *self, PyObject * args) {}
+Pipeline_resize(PipelineObject *self, PyObject * args) {
+
+    float scale_factor;
+    if(!PyArg_ParseTuple(args, "f", &scale_factor)){
+        PyErr_SetString(Pipeline_Error, "path arguement required.");
+        return NULL;
+    }
+
+    if (self->image == NULL) {
+        PyErr_SetString(Pipeline_Error, "file must be loaded first.");
+        return NULL;
+    }
+
+    self->image->resize(self->image, scale_factor);
+
+    self->height = self->image->height;
+    self->width = self->image->width;
+    return PyLong_FromLong(1);
+
+}
 
 static PyObject *
-Pipeline_translation(PipelineObject *self, PyObject * args) {}
+Pipeline_translate(PipelineObject *self, PyObject * args) {
+
+    return PyLong_FromLong(1);
+
+}
+
+static PyObject *
+Pipeline_invert_colours(PipelineObject *self, PyObject *Py_UNUSED(ignored)) {
+
+    if (self->image == NULL) {
+        PyErr_SetString(Pipeline_Error, "file must be loaded first.");
+        return NULL;
+    }
+
+    self->image->invert(self->image);
+
+    return PyLong_FromLong(1);
+
+}
+
+static PyObject *
+Pipeline_switch_channel_num(PipelineObject *self, PyObject *Py_UNUSED(ignored)) {
+
+    if (self->image == NULL) {
+        PyErr_SetString(Pipeline_Error, "file must be loaded first.");
+        return NULL;
+    }
+
+    if (self->image->channels == 3) {
+        self->image->rgb_to_greyscale(self->image);
+    } else {
+        self->image->greyscale_to_rgb(self->image);
+    }
+
+}
 
 static PyMethodDef Pipeline_methods[] = {
 
@@ -245,10 +330,15 @@ static PyMethodDef Pipeline_methods[] = {
 
     {"convolution", (PyCFunction) Pipeline_convolution, METH_VARARGS,
      "perform a convolution on the loaded file."},
-    {"resize", (PyCFunction) Pipeline_convolution, METH_VARARGS, 
+    {"resize", (PyCFunction) Pipeline_resize, METH_VARARGS, 
      "resize the input image."},
-    {"translate", (PyCFunction) Pipeline_convolution, METH_VARARGS, 
+    {"translate", (PyCFunction) Pipeline_translate, METH_VARARGS, 
      "'move' the input image contents, wrapping on the corners."},
+
+    {"switch_channel_num", (PyCFunction) Pipeline_switch_channel_num, METH_NOARGS, 
+     "greyscale/rgb inversion"},
+    {"invert_colours", (PyCFunction) Pipeline_invert_colours, METH_NOARGS, 
+     "greyscale/rgb inversion"},
 
     {0, 0},        /* Null terminator */
 };
