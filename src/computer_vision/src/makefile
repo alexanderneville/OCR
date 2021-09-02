@@ -22,4 +22,4 @@ main: $(OBJ)
 
 .PHONY: clean
 clean:
-	rm -rf $(ODIR)/*.o outfile.png a.out main open_close.cpython-39-x86_64-linux-gnu.so build/ output.json
+	rm -rf $(ODIR)/*.o outfile.png a.out main *.so build/ output.json
