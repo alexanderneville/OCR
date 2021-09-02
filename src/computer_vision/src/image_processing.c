@@ -75,8 +75,8 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->invert = &invert;
     new_image_p->process = &process;
     new_image_p->resize = &resize;
-    new_image_p->locate_characters = &locate_characters;
-
+    new_image_p->create_document_outline = &create_document_outline;
+    new_image_p->generate_dataset_from_image = &generate_dataset_from_image;
 
     return new_image_p;
 
@@ -286,28 +286,34 @@ void resize(image_data * self, float scale_factor) {
 
 };
 
-void locate_characters(image_data * self) {
+void create_document_outline(image_data * self) {
 
     /* self->greyscale = translation(self->greyscale, 40, 40); */
 
+    if (self->greyscale == NULL)
+        self->rgb_to_greyscale(self);
+
     float darkness = average_darkness(self->greyscale) / 255.0;
 
-    printf("average darkness: %f\n", darkness);
+    /* printf("average darkness: %f\n", darkness); */
 
     if (darkness > 0.5)
         self->invert(self);
     
-    /* document * doc = initialise_document(); */
-
     self->document_p->scan_image(self->document_p, self->greyscale);
     self->document_p->draw_outlines(self->document_p, self->greyscale);
+
+};
+
+void generate_dataset_from_image(image_data * self, char * path) {
+    
     int total_characters = count_characters_in_document(self->document_p);
     self->data = doc_to_dataset(self->document_p);
 
-    for (int i = 0; i < total_characters; i++)
-        printf("Line: %d, Word: %d, Character: %d\n", self->data[i].line_number, self->data[i].word_number, self->data[i].character_number);
+    /* for (int i = 0; i < total_characters; i++) */
+    /*     printf("Line: %d, Word: %d, Character: %d\n", self->data[i].line_number, self->data[i].word_number, self->data[i].character_number); */
 
     extend_dataset(self->data, total_characters);
-    export_dataset(self->data, total_characters, "output.json");
+    export_dataset(self->data, total_characters, path);
 
-};
+}

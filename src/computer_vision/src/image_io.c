@@ -6,7 +6,7 @@ int check_header(char * file_name) {
 
     FILE *fp = fopen(file_name, "rb");
     if (!fp)
-        return 0;
+        return -1;
 
     unsigned char header[8];
     fread(header, 1, 8, fp);

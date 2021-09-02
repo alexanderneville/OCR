@@ -20,26 +20,28 @@ typedef struct image_data_T {
 
     unsigned char ** (* export_pixels) (struct image_data_T * image);
 
-    void (* rgb_to_greyscale) (struct image_data_T * image);
-    void (* greyscale_to_rgb) (struct image_data_T * image);
-    void (* reduce_resolution) (struct image_data_T * image);
-    void (* invert) (struct image_data_T * image);
+    void (* rgb_to_greyscale) (struct image_data_T * self);
+    void (* greyscale_to_rgb) (struct image_data_T * self);
+    void (* reduce_resolution) (struct image_data_T * self);
+    void (* invert) (struct image_data_T * self);
     void (* process) (struct image_data_T *, kernel_configuration type, int kernel_dimensions);
-    void (* resize) (struct image_data_T * image, float scale_factor);
-    void (* locate_characters) (struct image_data_T * image);
+    void (* resize) (struct image_data_T * self, float scale_factor);
+    void (* create_document_outline) (struct image_data_T * self);
+    void (* generate_dataset_from_image) (struct image_data_T * self, char * path);
 
 } image_data;
 
 image_data * initialise_data(unsigned char ** pixels, int height, int width, int channels);
 
-unsigned char ** export_pixels(image_data * image);
+unsigned char ** export_pixels(image_data * self);
 
-void rgb_to_greyscale(image_data * image);
-void greyscale_to_rgb(image_data * image);
-void reduce_resolution(image_data * image);
-void invert(image_data * image);
-void process(image_data * image, kernel_configuration type, int kernel_dimensions);
-void resize(image_data * image, float scale_factor);
-void locate_characters(image_data * image);
+void rgb_to_greyscale(image_data * self);
+void greyscale_to_rgb(image_data * self);
+void reduce_resolution(image_data * self);
+void invert(image_data * self);
+void process(image_data * self, kernel_configuration type, int kernel_dimensions);
+void resize(image_data * self, float scale_factor);
+void create_document_outline(image_data * self);
+void generate_dataset_from_image(image_data * self, char * path);
 
 #endif 

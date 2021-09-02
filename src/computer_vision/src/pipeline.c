@@ -1,12 +1,13 @@
 #define PY_SSIZE_T_CLEAN
 #include <python3.9/Python.h>
 #include "structmember.h"
+#include <stddef.h>
+
 #include "../includes/image_io.h"
 #include "../includes/image_processing.h"
 
-#include "../includes/image_processing.h"
 
-static PyObject *PipeLineError;
+static PyObject *Pipeline_Error;
 
 typedef struct {
     PyObject_HEAD
@@ -18,7 +19,7 @@ typedef struct {
 } PipelineObject;
 
 static void
-Custom_dealloc(PipelineObject *self)
+Pipeline_dealloc(PipelineObject *self)
 {
     Py_XDECREF(self->infile);
     Py_XDECREF(self->outfile);
@@ -26,7 +27,7 @@ Custom_dealloc(PipelineObject *self)
 }
 
 static PyObject *
-Custom_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+Pipeline_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PipelineObject *self;
     self = (PipelineObject *) type->tp_alloc(type, 0);
@@ -85,38 +86,28 @@ Pipeline_init(PipelineObject *self, PyObject *args, PyObject *kwds)
     }
     return 0;
 }
-/* static int */
-/* Pipeline_check_header(PipelineObject *self, PyObject *args, PyObject *kwds) */
-/* { */
-/*     return 0; */
-/* } */
 
 static PyMemberDef Pipeline_members[] = {
-    {"infile", T_OBJECT_EX, offsetof(PipelineObject, infile), 0,
-     "the input file"},
-    {"outfile", T_OBJECT_EX, offsetof(PipelineObject, outfile), 0,
-     "the output file"},
-    {"dumpfile", T_OBJECT_EX, offsetof(PipelineObject, dumpfile), 0,
-     "where to dump the json data"},
-    /* {"height", T_INT, offsetof(PipelineObject, height), */
-    /*  "height of the image in pixels"}, */
-    /* {"width", T_INT, offsetof(PipelineObject, width), */
-    /*  "width of the image in pixels"}, */
-    /* {"channels", T_INT, offsetof(PipelineObject, channels), */
-    /*  "number of channels"}, */
-    /* {"color_type", T_INT, offsetof(PipelineObject, color_type), */
-    /*  "refer to libpng documentation"}, */
-    /* {"bit_depth", T_INT, offsetof(PipelineObject, bit_depth), */
-    /*  "bit depth per channel"}, */
+    {"infile", T_OBJECT_EX, offsetof(PipelineObject, infile), 0, "the input file"},
+    {"outfile", T_OBJECT_EX, offsetof(PipelineObject, outfile), 0, "the output file"},
+    {"dumpfile", T_OBJECT_EX, offsetof(PipelineObject, dumpfile), 0, "where to dump the json data"},
+    {"height", T_INT, offsetof(PipelineObject, height), 0, "height of the image in pixels"},
+    {"width", T_INT, offsetof(PipelineObject, width), 0, "width of the image in pixels"},
+    {"channels", T_INT, offsetof(PipelineObject, channels), 0, "number of channels"},
+    {"color_type", T_INT, offsetof(PipelineObject, color_type), 0, "refer to libpng documentation"},
+    {"bit_depth", T_INT, offsetof(PipelineObject, bit_depth), 0, "bit depth per channel"},
     {NULL}  /* Sentinel */
 };
 
+//============
 // methods
+//============
+
 static PyObject *
 Pipeline_files(PipelineObject *self, PyObject *Py_UNUSED(ignored))
 {
     if (self->infile == NULL) {
-        PyErr_SetString(PipeLineError, "input file missing");
+        PyErr_SetString(Pipeline_Error, "input file missing");
         return NULL;
     }
     if (self->outfile == NULL) {
@@ -130,26 +121,149 @@ Pipeline_files(PipelineObject *self, PyObject *Py_UNUSED(ignored))
     return PyUnicode_FromFormat("%S %S %S", self->infile, self->outfile, self->dumpfile);
 }
 
+static PyObject *
+Pipeline_check_header(PipelineObject *self, PyObject * args)
+{
+    char * file;
+    if(!PyArg_ParseTuple(args, "s", &file)){
+        PyErr_SetString(Pipeline_Error, "path arguement required.");
+        return NULL;
+    }
+    int rc = check_header(file);
+    if (rc == 0) {
+        return PyLong_FromLong(1);
+    } else {
+        return PyLong_FromLong(0);
+    }
+
+}
+
+static PyObject *
+Pipeline_load_file(PipelineObject *self, PyObject * args) {
+
+    char * infile;
+    if(!PyArg_ParseTuple(args, "s", &infile)){
+        PyErr_SetString(Pipeline_Error, "path arguement required.");
+        return NULL;
+    }
+    self->infile = PyUnicode_FromString(infile);
+
+    if(check_header(infile) != 0) {
+        PyErr_SetString(Pipeline_Error, "invalid file.");
+        return NULL;
+    }
+
+    unsigned char ** pixels = read_image(infile, &(self->height), &(self->width), &(self->channels), &(self->bit_depth), &(self->color_type));
+    self->image = initialise_data(pixels, self->height, self->width, self->channels);
+
+    return PyLong_FromLong(1);
+
+}
+
+static PyObject *
+Pipeline_save_to_file(PipelineObject *self, PyObject * args) {
+
+    char * outfile;
+    if(!PyArg_ParseTuple(args, "s", &outfile)){
+        PyErr_SetString(Pipeline_Error, "path arguement required.");
+        return NULL;
+    }
+    self->outfile = PyUnicode_FromString(outfile);
+
+    if (self->image == NULL) {
+        PyErr_SetString(Pipeline_Error, "Call to 'save_to_file' must follow 'load_file'.");
+        return NULL;
+    }
+    unsigned char ** pixels = self->image->export_pixels(self->image);
+    write_image(outfile, pixels, self->height, self->width, self->channels, self->bit_depth, self->color_type);
+
+    return PyLong_FromLong(1);
+
+}
+
+static PyObject *
+Pipeline_scan_image(PipelineObject *self, PyObject * args) {
+
+    if (self->image == NULL) {
+        PyErr_SetString(Pipeline_Error, "file must be loaded first.");
+        return NULL;
+    }
+
+    self->image->create_document_outline(self->image);
+
+    return PyLong_FromLong(1);
+
+}
+
+static PyObject *
+Pipeline_generate_dataset(PipelineObject *self, PyObject * args) {
+
+    char * outfile;
+    if(!PyArg_ParseTuple(args, "s", &outfile)){
+        PyErr_SetString(Pipeline_Error, "path arguement required.");
+        return NULL;
+    }
+
+    self->dumpfile = PyUnicode_FromString(outfile);
+
+    if (self->image == NULL) {
+        PyErr_SetString(Pipeline_Error, "file must be loaded first.");
+        return NULL;
+    }
+
+    self->image->generate_dataset_from_image(self->image, outfile);
+
+    return PyLong_FromLong(1);
+
+}
+
+static PyObject *
+Pipeline_convolution(PipelineObject *self, PyObject * args) {}
+
+static PyObject *
+Pipeline_resize(PipelineObject *self, PyObject * args) {}
+
+static PyObject *
+Pipeline_translation(PipelineObject *self, PyObject * args) {}
 
 static PyMethodDef Pipeline_methods[] = {
-    {"files", (PyCFunction) Pipeline_files, METH_NOARGS,
+
+    {"print_files", (PyCFunction) Pipeline_files, METH_NOARGS, 
      "return the names of the files that the object will use / is using."},
-    /* {"test", (PyCFunction) Pipeline_test_exception, METH_NOARGS, */
-    /*  "test exception"}, */
-    {NULL}  /* Sentinel */
+    {"check_header", (PyCFunction) Pipeline_check_header, METH_VARARGS, 
+     "return the names of the files that the object will use / is using."},
+
+    {"load_file", (PyCFunction) Pipeline_load_file, METH_VARARGS, 
+     "load the contents of the specified file into the object."},
+    {"save_to_file", (PyCFunction) Pipeline_save_to_file, METH_VARARGS, 
+     "save the contents of the current instance to the specified file."},
+
+    {"scan_image", (PyCFunction) Pipeline_scan_image, METH_NOARGS, 
+     "create an internal document structure, identifying where character reside in the input image."},
+    {"generate_dataset", (PyCFunction) Pipeline_generate_dataset, METH_VARARGS, 
+     "generate a json dataset from the input image. Takes the file to save to."},
+
+    {"convolution", (PyCFunction) Pipeline_convolution, METH_VARARGS,
+     "perform a convolution on the loaded file."},
+    {"resize", (PyCFunction) Pipeline_convolution, METH_VARARGS, 
+     "resize the input image."},
+    {"translate", (PyCFunction) Pipeline_convolution, METH_VARARGS, 
+     "'move' the input image contents, wrapping on the corners."},
+
+    {0, 0},        /* Null terminator */
 };
 
-static PyTypeObject CustomType = {
+static PyTypeObject PipelineType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "pipeline.Pipeline",
     .tp_doc = "object for interfacing with the image pipeline",
     .tp_basicsize = sizeof(PipelineObject),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    .tp_new = Custom_new,
+    .tp_new = Pipeline_new,
     .tp_init = (initproc) Pipeline_init,
-    .tp_dealloc = (destructor) Custom_dealloc,
-    .tp_members = Pipeline_methods,
+    .tp_dealloc = (destructor) Pipeline_dealloc,
+    .tp_members = Pipeline_members,
     .tp_methods = Pipeline_methods,
 };
 
@@ -164,25 +278,25 @@ PyMODINIT_FUNC
 PyInit_pipeline(void)
 {
     PyObject *m;
-    if (PyType_Ready(&CustomType) < 0)
+    if (PyType_Ready(&PipelineType) < 0)
         return NULL;
 
     m = PyModule_Create(&custommodule);
     if (m == NULL)
         return NULL;
 
-    Py_INCREF(&CustomType);
-    if (PyModule_AddObject(m, "Pipeline", (PyObject *) &CustomType) < 0) {
-        Py_DECREF(&CustomType);
+    Py_INCREF(&PipelineType);
+    if (PyModule_AddObject(m, "Pipeline", (PyObject *) &PipelineType) < 0) {
+        Py_DECREF(&PipelineType);
         Py_DECREF(m);
         return NULL;
     }
 
-    PipeLineError = PyErr_NewException("pipeline.error", NULL, NULL);
-    Py_XINCREF(PipeLineError);
-    if (PyModule_AddObject(m, "error", PipeLineError) < 0) {
-        Py_XDECREF(PipeLineError);
-        Py_CLEAR(PipeLineError);
+    Pipeline_Error = PyErr_NewException("pipeline.error", NULL, NULL);
+    Py_XINCREF(Pipeline_Error);
+    if (PyModule_AddObject(m, "PipelineErrror", Pipeline_Error) < 0) {
+        Py_XDECREF(Pipeline_Error);
+        Py_CLEAR(Pipeline_Error);
         Py_DECREF(m);
         return NULL;
     }
