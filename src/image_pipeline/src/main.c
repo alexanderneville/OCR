@@ -36,7 +36,7 @@ int main(int argc, char ** argv) {
     /* (* image_p).resize(image_p, 1.2); */
     /* (* image_p).resize(image_p, 0.6); */
 
-    (* image_p).locate_characters(image_p);
+    (* image_p).generate_dataset_from_image(image_p, "file.json");
 
     (* image_p).invert(image_p);
     (* image_p).greyscale_to_rgb(image_p);

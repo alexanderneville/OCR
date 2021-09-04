@@ -6,7 +6,6 @@
 #include "../includes/image_io.h"
 #include "../includes/image_processing.h"
 
-
 static PyObject *Pipeline_Error;
 
 typedef struct {

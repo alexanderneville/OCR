@@ -14,7 +14,6 @@ int check_header(char * file_name) {
 
     fclose(fp);
     return 0;
-
 }
 
 unsigned char ** read_image(char * file_name, int * height, int * width, int * channels, int * bit_depth, int * color_type) {

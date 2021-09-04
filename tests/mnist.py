@@ -23,34 +23,32 @@ def visualise_inputs(x_train):
 
     plt.show()
 
-
-def test_SGD(x_train, y_train, x_test, y_test, network: nn.Network):
+def test_SGD(x_train, y_train, x_test, y_test, y_values, network: nn.Network):
 
     network.train(x_train, y_train, 200, 0.1)
     output = network.predict(x_test)
-    evaluate(output, y_test)
+    evaluate(output, y_test, y_values)
 
-def test_batch_learning(x_train, y_train, x_test, y_test, network: nn.Network):
+def test_batch_learning(x_train, y_train, x_test, y_test, y_values, network: nn.Network):
+
+    """supply the optional mini-batch-size arguement"""
 
     network.train(x_train, y_train, 200, 0.1, 200)
     output = network.predict(x_test)
-    evaluate(output, y_test)
-
+    evaluate(output, y_test, y_values)
 
 def main():
 
+    y_values = [i for i in range(10)]
     (x_train, y_train), (x_test, y_test) = mnist.load_data() # load dataset
-    y_train_activations = calc_y_activations(y_train)
+    y_train_activations = calc_y_activations(y_train, y_values)
 
-    #activations between 0 and 1 makes training more predictable
     x_train = x_train/255
     x_test = x_test/255
 
-    # instantiate a network
     network = nn.Network([784, 50, 50 ,10])
-    test_SGD(x_train[:2000], y_train_activations[:2000], x_test[:2000], y_test[:2000], network)
-    # test_batch_learning(x_train[:2000], y_train_activations[:2000], x_test[:2000], y_test[:2000], network)
-
+    test_SGD(x_train[:2000], y_train_activations[:2000], x_test[:2000], y_test[:2000], y_values, network)
+    # test_batch_learning(x_train[:2000], y_train_activations[:2000], x_test[:2000], y_test[:2000], y_values network)
 
 if __name__ == "__main__":
     main()
