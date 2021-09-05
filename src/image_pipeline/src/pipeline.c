@@ -228,7 +228,7 @@ Pipeline_convolution(PipelineObject *self, PyObject * args) {
     int type, dimensions;
     float strength;
     if(!PyArg_ParseTuple(args, "i i f", &type, &dimensions, &strength)){
-        PyErr_SetString(Pipeline_Error, "takes 3 arguements");
+        PyErr_SetString(Pipeline_Error, "takes 3 arguements.");
         return NULL;
     }
 
@@ -239,13 +239,13 @@ Pipeline_convolution(PipelineObject *self, PyObject * args) {
 
     switch(type){
         case 1:
-            self->image->process(self->image, Mean, dimensions);
+            self->image->process(self->image, Mean, dimensions, strength);
             break;
         case 2:
-            self->image->process(self->image, Gaussian, dimensions);
+            self->image->process(self->image, Gaussian, dimensions, strength);
             break;
         case3:
-            self->image->process(self->image, Gaussian, dimensions);
+            self->image->process(self->image, Gaussian, dimensions, strength);
             break;
     }
 
@@ -258,7 +258,7 @@ Pipeline_resize(PipelineObject *self, PyObject * args) {
 
     float scale_factor;
     if(!PyArg_ParseTuple(args, "f", &scale_factor)){
-        PyErr_SetString(Pipeline_Error, "path arguement required.");
+        PyErr_SetString(Pipeline_Error, "scale factor must be specified.");
         return NULL;
     }
 
@@ -277,6 +277,17 @@ Pipeline_resize(PipelineObject *self, PyObject * args) {
 
 static PyObject *
 Pipeline_translate(PipelineObject *self, PyObject * args) {
+
+    int x, y;
+    if(!PyArg_ParseTuple(args, "i i", &x, &y)){
+        PyErr_SetString(Pipeline_Error, "scale factor must be specified.");
+        return NULL;
+    }
+
+    if (self->image == NULL) {
+        PyErr_SetString(Pipeline_Error, "file must be loaded first.");
+        return NULL;
+    }
 
     return PyLong_FromLong(1);
 

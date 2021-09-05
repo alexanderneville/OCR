@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
@@ -203,6 +204,7 @@ unsigned char ** export_pixels(image_data * self) {
 void process(image_data * self, kernel_configuration type, int kernel_dimensions, float strength) {
 
     matrix * kernel = create_kernel(type, kernel_dimensions, strength);
+    pthread_t threads[9];
 
     if (strength >= 1.0) {
         strength = 0;
@@ -210,30 +212,78 @@ void process(image_data * self, kernel_configuration type, int kernel_dimensions
         strength = 1 - strength;
         strength += 1;
     }
-    for (int y = 0; y < kernel->y; y++) {
-        for (int x = 0; x < kernel->x; x++) {
-            printf("%f, ", kernel->array[(y * kernel->x) + x]);
-        }
-        printf("\n");
-    }
+    /* for (int y = 0; y < kernel->y; y++) { */
+    /*     for (int x = 0; x < kernel->x; x++) { */
+    /*         printf("%f, ", kernel->array[(y * kernel->x) + x]); */
+    /*     } */
+    /*     printf("\n"); */
+    /* } */
 
     if (self->channels == 1) {
 
         matrix * tmp = self->greyscale;
-        self->greyscale = apply_convolution(self->greyscale, type, kernel, kernel->x);
+        matrix * dest = create_matrix(self->greyscale->y, self->greyscale->x);
+
+        convultion_arg arguements[3];
+
+        for (int i = 0; i < 3; i ++) {
+
+            arguements[i].matrix_p = self->greyscale;
+            arguements[i].dest = dest;
+            arguements[i].kernel = kernel;
+            arguements[i].type = type;
+            arguements[i].offset = i;
+            arguements[i].step = 3;
+            arguements[i].kernel_dimensions = kernel_dimensions;
+
+            pthread_create(&(threads[i]), NULL, &convultion_thread_func, &(arguements[i]));
+        }
+        for (int i = 0; i < 3; i ++)
+            pthread_join(threads[i], NULL);
+
         destroy_matrix(tmp);
+        self->greyscale = dest;
 
     } else if (self->channels == 3) {
 
-        matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
-        tmp[0] = self->R; tmp[1] = self->G; tmp[2] = self->B;
+        matrix * R_dest = create_matrix(self->R->y, self->R->x);
+        matrix * G_dest = create_matrix(self->G->y, self->G->x);
+        matrix * B_dest = create_matrix(self->B->y, self->B->x);
 
-        self->R = apply_convolution(self->R, type, kernel, kernel_dimensions);
-        self->G = apply_convolution(self->G, type, kernel, kernel_dimensions);
-        self->B = apply_convolution(self->B, type, kernel, kernel_dimensions);
+        matrix ** source_channels = (matrix **) malloc(sizeof(matrix*) * 3);
+        matrix ** dest_channels = (matrix **) malloc(sizeof(matrix*) * 3);
 
-        for (int i = 0; i < 3; i++) { destroy_matrix(tmp[i]); }
-        free(tmp);
+        source_channels[0] = self->R; source_channels[1] = self->G; source_channels[2] = self->B;
+        dest_channels[0] = R_dest; dest_channels[1] = G_dest; dest_channels[2] = B_dest;
+
+        matrix ** tmp = source_channels;
+
+        convultion_arg arguements[9];
+
+        for (int i = 0; i < 3; i ++) {
+            for (int j = 0; j < 3; j ++) {
+                arguements[(i * 3) + j].matrix_p = source_channels[i];
+                arguements[(i * 3) + j].dest = dest_channels[i];
+                arguements[(i * 3) + j].kernel = kernel;
+                arguements[(i * 3) + j].type = type;
+                arguements[(i * 3) + j].offset = j;
+                arguements[(i * 3) + j].step = 3;
+                arguements[(i * 3) + j].kernel_dimensions = kernel_dimensions;
+                pthread_create(&(threads[(i * 3) + j]), NULL, &convultion_thread_func, &(arguements[(i * 3) + j]));
+            }
+        }
+        for (int i = 0; i < 3; i ++) {
+            for (int j = 0; j < 3; j ++) {
+                pthread_join(threads[(i * 3) + j], NULL);
+            }
+        }
+
+        self->R = dest_channels[0]; 
+        self->G = dest_channels[1];
+        self->B = dest_channels[2];
+
+        for (int i = 0; i < 3; i++) { destroy_matrix(source_channels[i]); }
+        free(source_channels);
     }
 
     return;
@@ -354,3 +404,26 @@ void generate_dataset_from_image(image_data * self, char * path) {
 
 }
 
+void image_translation(image_data * self, int x, int y) {
+
+    if (self->channels == 1) {
+
+        matrix * tmp = self->greyscale;
+        self->greyscale = translation(self->greyscale, x, y);
+        free(tmp);
+
+    } else if (self->channels == 3) {
+
+        matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
+        tmp[0] = self->R; tmp[1] = self->G; tmp[2] = self->B;
+
+        self->R = translation(self->R, x, y);
+        self->G = translation(self->G, x, y);
+        self->B = translation(self->B, x, y);
+
+        for (int i = 0; i < 3; i++) { destroy_matrix(tmp[i]); }
+        free(tmp);
+
+    }
+
+}

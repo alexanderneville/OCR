@@ -106,6 +106,53 @@ matrix * apply_convolution(matrix * matrix_p, kernel_configuration type, matrix 
     /* return root; */
 };
 
+void * convultion_thread_func(void * arg) {
+
+    convultion_arg * arguements = (convultion_arg *) arg;
+    /* printf("%d\n", arguements->offset); */
+
+    int kernel_center = ((arguements->kernel_dimensions + 1) / 2) - 1;
+
+    for (int y = arguements->offset; y < arguements->matrix_p->y; y += arguements->step) {
+        for (int x = 0; x < arguements->matrix_p->x; x++) { // for every pixel
+
+            float sum_used_weights = 0;
+            float weighted_sum = 0;
+
+            for (int j = 0; j < arguements->kernel_dimensions * arguements->kernel_dimensions; j++) {
+                /* printf("%f\n", kernel[j]); */
+                // get x and y displacement from center (within the kernel)
+                int x_pos = j % arguements->kernel_dimensions;
+                int y_pos = j / arguements->kernel_dimensions;
+                x_pos = x_pos - kernel_center;
+                y_pos = y_pos - kernel_center;
+
+                // if parts of the kernel fall outside the image boundaries
+                // those parts are ignored when calculating the convolved value
+                if( y+y_pos >= 0 &&
+                    y+y_pos < arguements->matrix_p->y &&
+                    x+x_pos >= 0 &&
+                    x+x_pos < arguements->matrix_p->x ) {
+
+                    sum_used_weights += arguements->kernel->array[j];
+                    weighted_sum += (arguements->matrix_p->array[((y+y_pos) * arguements->matrix_p->x) + (x+x_pos)] * arguements->kernel->array[j]);
+
+                }
+            }
+            float intensity;
+
+            if (arguements->type == Gaussian || arguements->type == Mean) {
+                intensity = weighted_sum / sum_used_weights;
+            } else if (arguements->type == Sharpen){
+                intensity = weighted_sum;
+            } 
+            arguements->dest->array[(y * arguements->dest->x) + x] = intensity;
+        }
+    }
+
+    return NULL;
+}
+
 matrix * mean_pool_image(matrix * matrix_p, int step) {
 
     int new_height = matrix_p->y / step;
