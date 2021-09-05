@@ -16,8 +16,7 @@ typedef struct image_data_T {
     matrix * G;
     matrix * B;
     document * document_p;
-    dataset_element * data;
-    int total_characters;
+    dataset * set;
 
     unsigned char ** (* export_pixels) (struct image_data_T * image);
 

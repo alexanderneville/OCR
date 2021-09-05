@@ -346,7 +346,7 @@ void * doc_type_constructor(doc_types required_type, matrix * matrix_p, int x, i
 
 
         case Line:
-            
+
             free(new_word_p);
             free(new_character_p);
             new_line_p->x = x;
@@ -367,6 +367,9 @@ void * doc_type_constructor(doc_types required_type, matrix * matrix_p, int x, i
             new_word_p->pixels = select_region(matrix_p, x, y, w, h);
             new_word_p->next = NULL;
             new_word_p->characters = NULL;
+
+            new_word_p->exported = 0;
+            sem_init(&new_word_p->semaphore, 0, 1);
 
             return new_word_p;
             break;

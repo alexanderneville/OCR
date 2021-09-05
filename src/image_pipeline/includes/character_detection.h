@@ -4,6 +4,7 @@
 #define CHAR_DIMENSIONS 32
 #include "../includes/matrix.h"
 #include <pthread.h>
+#include <semaphore.h>
 
 // used for iterating through linked list.
 typedef enum doc_types_E {
@@ -33,7 +34,10 @@ typedef struct word_T {
 
     character * characters;
     struct word_T * next;
-    pthread_mutex_t word_lock;
+
+    // for exporting the dataset:
+    sem_t semaphore;
+    int exported;
 
 } word;
 
@@ -44,7 +48,6 @@ typedef struct line_T {
 
     word * words;
     struct line_T * next;
-    pthread_mutex_t line_lock;
 
 } line;
 
@@ -52,7 +55,6 @@ typedef struct document_T {
 
     int total_characters;
     line * lines;
-    pthread_mutex_t document_lock;
 
     // methods
 

@@ -25,8 +25,7 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->width = width;
     new_image_p->channels = channels;
     new_image_p->document_p = initialise_document();
-    new_image_p->total_characters = 0;
-    new_image_p->data = NULL;
+    new_image_p->set = NULL;
 
     new_image_p->R = NULL;
     new_image_p->G = NULL;
@@ -93,13 +92,8 @@ void destroy_image_data(image_data * old_image) {
     destroy_matrix(old_image->B);
     destroy_matrix(old_image->greyscale);
     destroy_document(old_image->document_p);
+    destroy_dataset(old_image->set);
 
-    if (old_image->total_characters != 0) {
-        for (int i = 0; i < old_image->total_characters; i++)
-            destroy_dataset_element(old_image->data[i]);
-    }
-
-    free(old_image->data);
     free(old_image);
     return;
 }
@@ -371,39 +365,6 @@ void resize(image_data * self, float scale_factor) {
 
 };
 
-void create_document_outline(image_data * self) {
-
-    /* self->greyscale = translation(self->greyscale, 40, 40); */
-
-    if (self->greyscale == NULL)
-        self->rgb_to_greyscale(self);
-
-    float darkness = average_darkness(self->greyscale) / 255.0;
-
-    if (darkness > 0.5)
-        self->invert(self);
-
-    self->document_p->scan_image(self->document_p, self->greyscale);
-    self->document_p->draw_outlines(self->document_p, self->greyscale);
-
-};
-
-void generate_dataset_from_image(image_data * self, char * path) {
-
-    if (!self->document_p)
-        return;
-
-    int total_characters = count_characters_in_document(self->document_p);
-    self->data = doc_to_dataset(self->document_p);
-
-    /* for (int i = 0; i < total_characters; i++) */
-    /*     printf("Line: %d, Word: %d, Character: %d\n", self->data[i].line_number, self->data[i].word_number, self->data[i].character_number); */
-
-    extend_dataset(self->data, total_characters);
-    export_dataset(self->data, total_characters, path);
-
-}
-
 void image_translation(image_data * self, int x, int y) {
 
     if (self->channels == 1) {
@@ -427,3 +388,36 @@ void image_translation(image_data * self, int x, int y) {
     }
 
 }
+
+void create_document_outline(image_data * self) {
+
+    /* self->greyscale = translation(self->greyscale, 40, 40); */
+
+    if (self->greyscale == NULL)
+        self->rgb_to_greyscale(self);
+
+    float darkness = average_darkness(self->greyscale) / 255.0;
+
+    if (darkness > 0.5)
+        self->invert(self);
+
+    self->document_p->scan_image(self->document_p, self->greyscale);
+    self->document_p->draw_outlines(self->document_p, self->greyscale);
+
+};
+
+void generate_dataset_from_image(image_data * self, char * path) {
+
+    if (!self->document_p)
+        return;
+
+    self->set = doc_to_dataset(self->document_p);
+
+    /* for (int i = 0; i < total_characters; i++) */
+    /*     printf("Line: %d, Word: %d, Character: %d\n", self->data[i].line_number, self->data[i].word_number, self->data[i].character_number); */
+
+    extend_dataset(self->set);
+    export_dataset(self->set, path);
+
+}
+
