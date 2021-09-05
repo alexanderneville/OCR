@@ -26,14 +26,13 @@ matrix * create_kernel(kernel_configuration type, int kernel_dimensions, float s
                            4.0,  16.0, 24.0, 16.0, 4.0,
                            1.0,  4.0,  6.0,  4.0,  1.0};
 
-        /* memcpy(kernel, weights, sizeof(float) * 25); */
         for (int i = 0; i < 25; i++) {
-            weights[i] = weights[i] + weights[i] * strength;
+            weights[i] = weights[i] + (weights[i] * strength);
         }
         float scale_factor = kernel_dimensions / 5.0;
         matrix * tmp_kernel = create_matrix(5, 5);
         memcpy(tmp_kernel->array, weights, sizeof(float) * 25);
-        kernel_matrix = tmp_kernel->scale_matrix(tmp_kernel, scale_factor, false);
+        kernel_matrix = scale_matrix(tmp_kernel, scale_factor, false);
 
     } else if (type == Sharpen) {
 
@@ -51,6 +50,7 @@ matrix * create_kernel(kernel_configuration type, int kernel_dimensions, float s
         kernel_matrix = tmp_kernel->scale_matrix(tmp_kernel, scale_factor, false);
 
     }
+
     return kernel_matrix;
 }
 
@@ -59,7 +59,7 @@ matrix * apply_convolution(matrix * matrix_p, kernel_configuration type, matrix 
     // create a tree to store the data
     /* node * root = create_node(); */
     matrix * blurred_image = create_matrix(matrix_p->y, matrix_p->x);
-    int kernel_center = ((kernel_dimensions + 1) / 2) -1;
+    int kernel_center = ((kernel_dimensions + 1) / 2) - 1;
 
     for (int y = 0; y < matrix_p->y; y++) {
         for (int x = 0; x < matrix_p->x; x++) { // for every pixel

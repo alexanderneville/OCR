@@ -24,6 +24,10 @@ document * initialise_document() {
 };
 
 void destroy_document(document * old_document) {
+
+    if (!old_document)
+        return;
+
     line * current_line_p = old_document->lines;
     while (current_line_p) {
         word * current_word_p = current_line_p->words;
@@ -31,16 +35,19 @@ void destroy_document(document * old_document) {
             character * current_character_p = current_word_p->characters;
             while (current_character_p) {
                 destroy_matrix(current_character_p->pixels);
+                character * tmp_character = current_character_p;
                 current_character_p = current_character_p->next;
-                free(current_character_p);
+                free(tmp_character);
             }
             destroy_matrix(current_word_p->pixels);
+            word * tmp_word = current_word_p;
             current_word_p = current_word_p->next;
-            free(current_word_p);
+            free(tmp_word);
         }
         destroy_matrix(current_line_p->pixels);
+        line * tmp_line = current_line_p;
         current_line_p = current_line_p->next;
-        free(current_line_p);
+        free(tmp_line);
     }
     free(old_document);
 }

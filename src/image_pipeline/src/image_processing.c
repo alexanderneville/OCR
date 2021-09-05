@@ -24,6 +24,7 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->width = width;
     new_image_p->channels = channels;
     new_image_p->document_p = initialise_document();
+    new_image_p->total_characters = 0;
     new_image_p->data = NULL;
 
     new_image_p->R = NULL;
@@ -83,19 +84,21 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
 
 void destroy_image_data(image_data * old_image) {
 
+    if (!old_image)
+        return;
+
     destroy_matrix(old_image->R);
     destroy_matrix(old_image->G);
     destroy_matrix(old_image->B);
     destroy_matrix(old_image->greyscale);
     destroy_document(old_image->document_p);
 
-    for (int i = 0; i < old_image->total_characters; i++) {
-        destroy_dataset_element(old_image->data[i]);
+    if (old_image->total_characters != 0) {
+        for (int i = 0; i < old_image->total_characters; i++)
+            destroy_dataset_element(old_image->data[i]);
     }
 
     free(old_image->data);
-    destroy_document(old_image->document_p);
-
     free(old_image);
     return;
 }
@@ -201,10 +204,23 @@ void process(image_data * self, kernel_configuration type, int kernel_dimensions
 
     matrix * kernel = create_kernel(type, kernel_dimensions, strength);
 
+    if (strength >= 1.0) {
+        strength = 0;
+    } else {
+        strength = 1 - strength;
+        strength += 1;
+    }
+    for (int y = 0; y < kernel->y; y++) {
+        for (int x = 0; x < kernel->x; x++) {
+            printf("%f, ", kernel->array[(y * kernel->x) + x]);
+        }
+        printf("\n");
+    }
+
     if (self->channels == 1) {
 
         matrix * tmp = self->greyscale;
-        self->greyscale = apply_convolution(self->greyscale, type, kernel, kernel_dimensions);
+        self->greyscale = apply_convolution(self->greyscale, type, kernel, kernel->x);
         destroy_matrix(tmp);
 
     } else if (self->channels == 3) {
@@ -220,6 +236,7 @@ void process(image_data * self, kernel_configuration type, int kernel_dimensions
         free(tmp);
     }
 
+    return;
 }
 
 void reduce_resolution(image_data * self) {

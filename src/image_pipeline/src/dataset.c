@@ -195,7 +195,6 @@ void destroy_dataset_element(dataset_element old_element) {
     for (int i = 0; i < 10; i++){
         destroy_matrix(old_element.images[i]);
     }
-    if (old_element.label) {
+    if (old_element.label)
         free(old_element.label);
-    }
 }

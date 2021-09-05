@@ -27,6 +27,7 @@ matrix * create_matrix(int height, int width) {
 
 }
 void destroy_matrix(matrix * old_matrix) {
+
     if (!old_matrix)
         return;
 
