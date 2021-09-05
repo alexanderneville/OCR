@@ -24,7 +24,7 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->width = width;
     new_image_p->channels = channels;
     new_image_p->document_p = initialise_document();
-    new_image_p->rgb_to_greyscale = NULL;
+    new_image_p->data = NULL;
 
     new_image_p->R = NULL;
     new_image_p->G = NULL;
@@ -79,7 +79,25 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->generate_dataset_from_image = &generate_dataset_from_image;
 
     return new_image_p;
+}
 
+void destroy_image_data(image_data * old_image) {
+
+    destroy_matrix(old_image->R);
+    destroy_matrix(old_image->G);
+    destroy_matrix(old_image->B);
+    destroy_matrix(old_image->greyscale);
+    destroy_document(old_image->document_p);
+
+    for (int i = 0; i < old_image->total_characters; i++) {
+        destroy_dataset_element(old_image->data[i]);
+    }
+
+    free(old_image->data);
+    destroy_document(old_image->document_p);
+
+    free(old_image);
+    return;
 }
 
 void rgb_to_greyscale(image_data * self) {
@@ -108,14 +126,14 @@ void rgb_to_greyscale(image_data * self) {
     // update the image struct
 
     self->channels = 1;
-    free(self->R);
-    free(self->G);
-    free(self->B);
+    destroy_matrix(self->R);
+    destroy_matrix(self->G);
+    destroy_matrix(self->B);
     self->R = self->G = self->B = NULL;
 
     self->greyscale = create_matrix(self->height, self->width);
     memcpy(self->greyscale->array, tmp_greyscale->array, sizeof(float) * self->height * self->width * self->channels);
-    free(tmp_greyscale);
+    destroy_matrix(tmp_greyscale);
 
 }
 
@@ -141,7 +159,7 @@ void greyscale_to_rgb(image_data * self){
 
     // update the image struct
     self->channels = 3;
-    free(self->greyscale);
+    destroy_matrix(self->greyscale);
     self->greyscale = NULL;
 
 };
@@ -179,15 +197,15 @@ unsigned char ** export_pixels(image_data * self) {
 
 }
 
-void process(image_data * self, kernel_configuration type, int kernel_dimensions) {
+void process(image_data * self, kernel_configuration type, int kernel_dimensions, float strength) {
 
-    float * kernel = create_kernel(type, kernel_dimensions);
+    matrix * kernel = create_kernel(type, kernel_dimensions, strength);
 
     if (self->channels == 1) {
 
         matrix * tmp = self->greyscale;
         self->greyscale = apply_convolution(self->greyscale, type, kernel, kernel_dimensions);
-        free(tmp);
+        destroy_matrix(tmp);
 
     } else if (self->channels == 3) {
 
@@ -198,7 +216,7 @@ void process(image_data * self, kernel_configuration type, int kernel_dimensions
         self->G = apply_convolution(self->G, type, kernel, kernel_dimensions);
         self->B = apply_convolution(self->B, type, kernel, kernel_dimensions);
 
-        for (int i = 0; i < 3; i++) { free(tmp[i]); }
+        for (int i = 0; i < 3; i++) { destroy_matrix(tmp[i]); }
         free(tmp);
     }
 
@@ -212,7 +230,7 @@ void reduce_resolution(image_data * self) {
 
         matrix * tmp = self->greyscale;
         self->greyscale = max_pool_image(self->greyscale, step);
-        free(tmp);
+        destroy_matrix(tmp);
 
     } else if (self->channels == 3) {
 
@@ -223,7 +241,7 @@ void reduce_resolution(image_data * self) {
         self->G = mean_pool_image(self->G, step);
         self->B = mean_pool_image(self->B, step);
 
-        for (int i = 0; i < 3; i++) { free(tmp[i]); }
+        for (int i = 0; i < 3; i++) { destroy_matrix(tmp[i]); }
         free(tmp);
 
     }
@@ -253,7 +271,7 @@ void invert(image_data * self) {
 
         }
     }
-        
+
 }
 
 void resize(image_data * self, float scale_factor) {
@@ -262,7 +280,7 @@ void resize(image_data * self, float scale_factor) {
 
         matrix * tmp = self->greyscale;
         self->greyscale = scale_matrix(self->greyscale, scale_factor, true);
-        free(tmp);
+        destroy_matrix(tmp);
 
         self->height = self->greyscale->y;
         self->width = self->greyscale->x;
@@ -276,7 +294,7 @@ void resize(image_data * self, float scale_factor) {
         self->G = scale_matrix(self->G, scale_factor, true);
         self->B = scale_matrix(self->B, scale_factor, true);
 
-        for (int i = 0; i < 3; i++) { free(tmp[i]); }
+        for (int i = 0; i < 3; i++) { destroy_matrix(tmp[i]); }
         free(tmp);
 
         self->height = self->R->y;
@@ -295,18 +313,19 @@ void create_document_outline(image_data * self) {
 
     float darkness = average_darkness(self->greyscale) / 255.0;
 
-    /* printf("average darkness: %f\n", darkness); */
-
     if (darkness > 0.5)
         self->invert(self);
-    
+
     self->document_p->scan_image(self->document_p, self->greyscale);
     self->document_p->draw_outlines(self->document_p, self->greyscale);
 
 };
 
 void generate_dataset_from_image(image_data * self, char * path) {
-    
+
+    if (!self->document_p)
+        return;
+
     int total_characters = count_characters_in_document(self->document_p);
     self->data = doc_to_dataset(self->document_p);
 
@@ -317,3 +336,4 @@ void generate_dataset_from_image(image_data * self, char * path) {
     export_dataset(self->data, total_characters, path);
 
 }
+

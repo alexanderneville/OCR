@@ -5,50 +5,56 @@
 #include "../includes/convolution.h"
 #include "../includes/matrix.h"
 
-float * create_kernel(kernel_configuration type, int kernel_dimensions) {
+matrix * create_kernel(kernel_configuration type, int kernel_dimensions, float strength) {
 
-    float * kernel = (float *) malloc(sizeof(float) * kernel_dimensions * kernel_dimensions);
-    /* float kernel[kernel_dimensions * kernel_dimensions]; */
+    if ((kernel_dimensions % 2) == 0)
+        kernel_dimensions ++;
+
+    matrix * kernel_matrix;
 
     if (type == Mean) {
+        kernel_matrix = create_matrix(kernel_dimensions, kernel_dimensions);
         for (int i = 0; i < kernel_dimensions * kernel_dimensions; i++) {
-            kernel[i] = 1;
+            kernel_matrix->array[i] = 1;
         }
 
     } else if (type == Gaussian) {
 
-        if (kernel_dimensions == 3) {
-            float weights[] = {1.0,2.0,1.0,
-                               2.0,4.0,2.0,
-                               1.0,2.0,1.0};
+        float weights[] = {1.0,  4.0,  6.0,  4.0,  1.0,
+                           4.0,  16.0, 24.0, 16.0, 4.0, 
+                           6.0,  24.0, 36.0, 24.0, 6.0,
+                           4.0,  16.0, 24.0, 16.0, 4.0,
+                           1.0,  4.0,  6.0,  4.0,  1.0};
 
-            memcpy(kernel, weights, sizeof(float) * 9);
-
-        } else if (kernel_dimensions == 5) {
-            float weights[] = {1.0,  4.0,  6.0,  4.0,  1.0,
-                               4.0,  16.0, 24.0, 16.0, 4.0, 
-                               6.0,  24.0, 36.0, 24.0, 6.0,
-                               4.0,  16.0, 24.0, 16.0, 4.0,
-                               1.0,  4.0,  6.0,  4.0,  1.0};
-
-            memcpy(kernel, weights, sizeof(float) * 25);
+        /* memcpy(kernel, weights, sizeof(float) * 25); */
+        for (int i = 0; i < 25; i++) {
+            weights[i] = weights[i] + weights[i] * strength;
         }
+        float scale_factor = kernel_dimensions / 5.0;
+        matrix * tmp_kernel = create_matrix(5, 5);
+        memcpy(tmp_kernel->array, weights, sizeof(float) * 25);
+        kernel_matrix = tmp_kernel->scale_matrix(tmp_kernel, scale_factor, false);
 
     } else if (type == Sharpen) {
-        
+
         //radius must equal 3
         float weights[] = { 0.0,  -1.0,  0.0,
                            -1.0,   5.0, -1.0,
                             0.0,  -1.0,  0.0 };
 
-        memcpy(kernel, weights, sizeof(float) * 9);
-        
-    }
+        for (int i = 0; i < 9; i++) {
+            weights[i] = weights[i] + weights[i] * strength;
+        }
+        float scale_factor = kernel_dimensions / 3.0;
+        matrix * tmp_kernel = create_matrix(3, 3);
+        memcpy(tmp_kernel->array, weights, sizeof(float) * 9);
+        kernel_matrix = tmp_kernel->scale_matrix(tmp_kernel, scale_factor, false);
 
-    return kernel;
+    }
+    return kernel_matrix;
 }
 
-matrix * apply_convolution(matrix * matrix_p, kernel_configuration type, float * kernel, int kernel_dimensions) {
+matrix * apply_convolution(matrix * matrix_p, kernel_configuration type, matrix * kernel, int kernel_dimensions) {
 
     // create a tree to store the data
     /* node * root = create_node(); */
@@ -76,8 +82,8 @@ matrix * apply_convolution(matrix * matrix_p, kernel_configuration type, float *
                     x+x_pos >= 0 &&
                     x+x_pos < matrix_p->x ) {
 
-                    sum_used_weights += kernel[j];
-                    weighted_sum += (matrix_p->array[((y+y_pos) * matrix_p->x) + (x+x_pos)] * kernel[j]);
+                    sum_used_weights += kernel->array[j];
+                    weighted_sum += (matrix_p->array[((y+y_pos) * matrix_p->x) + (x+x_pos)] * kernel->array[j]);
 
                 }
             }

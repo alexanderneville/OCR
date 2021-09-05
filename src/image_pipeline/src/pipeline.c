@@ -36,6 +36,7 @@ Pipeline_dealloc(PipelineObject *self)
 {
     Py_XDECREF(self->infile);
     Py_XDECREF(self->outfile);
+    destroy_image_data(self->image);
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
@@ -179,7 +180,7 @@ Pipeline_save_to_file(PipelineObject *self, PyObject * args) {
         return NULL;
     }
     unsigned char ** pixels = self->image->export_pixels(self->image);
-    write_image(outfile, pixels, self->image->height, self->image->width, self->channels, self->bit_depth, self->color_type);
+    write_image(outfile, pixels, self->image->height, self->image->width, self->image->channels, self->bit_depth, self->color_type);
 
     return PyLong_FromLong(1);
 
@@ -225,8 +226,9 @@ static PyObject *
 Pipeline_convolution(PipelineObject *self, PyObject * args) {
 
     int type, dimensions;
-    if(!PyArg_ParseTuple(args, "i i", &type, &dimensions)){
-        PyErr_SetString(Pipeline_Error, "path arguement required.");
+    float strength;
+    if(!PyArg_ParseTuple(args, "i i f", &type, &dimensions, &strength)){
+        PyErr_SetString(Pipeline_Error, "takes 3 arguements");
         return NULL;
     }
 

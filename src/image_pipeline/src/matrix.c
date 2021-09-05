@@ -26,6 +26,14 @@ matrix * create_matrix(int height, int width) {
     return new_matrix_p;
 
 }
+void destroy_matrix(matrix * old_matrix) {
+    if (!old_matrix)
+        return;
+
+    free(old_matrix->array);
+    free(old_matrix);
+    return;
+}
 
 float bilinear_approximation(float * known_points, float x, float y) {
 

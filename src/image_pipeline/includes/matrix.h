@@ -13,7 +13,6 @@
     typedef struct matrix_T {
         float * array;
         int x, y;
-        
 
         // methods
         struct matrix_T * (* scale_matrix)  (struct matrix_T * matrix_p, float scale_factor, bool adjust);
@@ -36,6 +35,7 @@
 
 
     matrix * create_matrix(int height, int width);
+    void destroy_matrix(matrix * old_matrix);
 
     pos calc_pos(float N);
     bool test_float(float x);

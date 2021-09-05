@@ -50,6 +50,7 @@ typedef struct line_T {
 
 typedef struct document_T {
 
+    int total_characters;
     line * lines;
     pthread_mutex_t document_lock;
 
@@ -67,6 +68,7 @@ typedef struct document_T {
 // initialiser functions
 void * doc_type_constructor(doc_types required_type, matrix * matrix_p, int x, int y, int w, int h);
 document * initialise_document();
+void destroy_document(document * old_document);
 
 // regular methods
 void scan_image(document * self, matrix * image);

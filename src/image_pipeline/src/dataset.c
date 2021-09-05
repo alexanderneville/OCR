@@ -190,3 +190,12 @@ void export_dataset(dataset_element * dataset, int length, char * path) {
     fclose(fp);
 
 }
+
+void destroy_dataset_element(dataset_element old_element) {
+    for (int i = 0; i < 10; i++){
+        destroy_matrix(old_element.images[i]);
+    }
+    if (old_element.label) {
+        free(old_element.label);
+    }
+}

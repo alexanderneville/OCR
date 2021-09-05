@@ -23,6 +23,27 @@ document * initialise_document() {
 
 };
 
+void destroy_document(document * old_document) {
+    line * current_line_p = old_document->lines;
+    while (current_line_p) {
+        word * current_word_p = current_line_p->words;
+        while (current_word_p) {
+            character * current_character_p = current_word_p->characters;
+            while (current_character_p) {
+                destroy_matrix(current_character_p->pixels);
+                current_character_p = current_character_p->next;
+                free(current_character_p);
+            }
+            destroy_matrix(current_word_p->pixels);
+            current_word_p = current_word_p->next;
+            free(current_word_p);
+        }
+        destroy_matrix(current_line_p->pixels);
+        current_line_p = current_line_p->next;
+        free(current_line_p);
+    }
+    free(old_document);
+}
 
 void scan_image(document * self, matrix * image){
 
