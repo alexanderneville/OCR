@@ -320,6 +320,8 @@ Pipeline_switch_channel_num(PipelineObject *self, PyObject *Py_UNUSED(ignored)) 
         self->image->greyscale_to_rgb(self->image);
     }
 
+    return PyLong_FromLong(1);
+
 }
 
 static PyMethodDef Pipeline_methods[] = {
