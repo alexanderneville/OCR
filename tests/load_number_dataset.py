@@ -19,25 +19,8 @@ def visualise_inputs(characters):
 
 def main():
 
-    with open("data/numbers.json") as f:
+    with open("datasets/numbers.json") as f:
         data = json.load(f)
-
-#     with open("letters.json", "w") as f:
-#         json.dump(data, f, indent=4)
-# 
-#     print("the type of the config var is: ", type(data))
-#     print("the type of the characters var is: ", type(data['characters']))
-#     print("the type of the characters var[0] is: ", type(data['characters'][0]))
-# 
-#     characters_to_display = []
-# 
-#     for i in range(10):
-#         characters_to_display.append(data["characters"][i]["pixels"][0])
-# 
-#     visualise_inputs(characters_to_display)
-
-    # print(len(data["characters"][0]["pixels"][0]))
-    # print(len(data["characters"][0]["pixels"][0][0]))
 
     y_values = [i for i in range(10)]
 
@@ -56,8 +39,8 @@ def main():
     y_predicted = network.predict(x_dataset)
     evaluate(y_predicted, y_dataset, y_values)
 
-    network.export_layout("data/numbers_model.json")
-    new_network = nn.Network.import_layout("data/numbers_model.json")
+    network.export_layout("models/numbers_model.json")
+    new_network = nn.Network.import_layout("models/numbers_model.json")
 
     y_predicted = new_network.predict(x_dataset)
     evaluate(y_predicted, y_dataset, y_values)

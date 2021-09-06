@@ -76,6 +76,7 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->invert = &invert;
     new_image_p->process = &process;
     new_image_p->resize = &resize;
+    new_image_p->image_translation = &image_translation;
     new_image_p->create_document_outline = &create_document_outline;
     new_image_p->generate_dataset_from_image = &generate_dataset_from_image;
 
@@ -197,7 +198,6 @@ unsigned char ** export_pixels(image_data * self) {
 
 void process(image_data * self, kernel_configuration type, int kernel_dimensions, float strength) {
 
-    matrix * kernel = create_kernel(type, kernel_dimensions, strength);
     pthread_t threads[9];
 
     if (strength >= 1.0) {
@@ -206,6 +206,7 @@ void process(image_data * self, kernel_configuration type, int kernel_dimensions
         strength = 1 - strength;
         strength += 1;
     }
+    matrix * kernel = create_kernel(type, kernel_dimensions, strength);
     /* for (int y = 0; y < kernel->y; y++) { */
     /*     for (int x = 0; x < kernel->x; x++) { */
     /*         printf("%f, ", kernel->array[(y * kernel->x) + x]); */

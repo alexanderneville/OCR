@@ -26,11 +26,13 @@ int main(int argc, char ** argv) {
 
     /* (* image_p).rgb_to_greyscale(image_p); */
     /* (* image_p).greyscale_to_rgb(image_p); */
-    /* (* image_p).process(image_p, Gaussian, 19, 0.1); */
+    (* image_p).resize(image_p, 0.5);
+    /* (* image_p).process(image_p, Gaussian, 19, 0.9); */
     /* (* image_p).invert(image_p); */
+    /* (* image_p).resize(image_p, 0.5); */
 
-    (* image_p).create_document_outline(image_p);
-    (* image_p).generate_dataset_from_image(image_p, "output.json");
+    /* (* image_p).create_document_outline(image_p); */
+    /* (* image_p).generate_dataset_from_image(image_p, "output.json"); */
 
 
     pixels = (* image_p).export_pixels(image_p);

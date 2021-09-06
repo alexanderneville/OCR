@@ -227,8 +227,8 @@ Pipeline_convolution(PipelineObject *self, PyObject * args) {
 
     int type, dimensions;
     float strength;
-    if(!PyArg_ParseTuple(args, "i i f", &type, &dimensions, &strength)){
-        PyErr_SetString(Pipeline_Error, "takes 3 arguements.");
+    if(!PyArg_ParseTuple(args, "iif", &type, &dimensions, &strength)){
+        PyErr_SetString(Pipeline_Error, "takes 3 arguements, type, dimensions & strength");
         return NULL;
     }
 
@@ -279,8 +279,8 @@ static PyObject *
 Pipeline_translate(PipelineObject *self, PyObject * args) {
 
     int x, y;
-    if(!PyArg_ParseTuple(args, "i i", &x, &y)){
-        PyErr_SetString(Pipeline_Error, "scale factor must be specified.");
+    if(!PyArg_ParseTuple(args, "ii", &x, &y)){
+        PyErr_SetString(Pipeline_Error, "takes two arguements: x and y");
         return NULL;
     }
 
@@ -314,7 +314,6 @@ Pipeline_switch_channel_num(PipelineObject *self, PyObject *Py_UNUSED(ignored)) 
         PyErr_SetString(Pipeline_Error, "file must be loaded first.");
         return NULL;
     }
-
     if (self->image->channels == 3) {
         self->image->rgb_to_greyscale(self->image);
     } else {
