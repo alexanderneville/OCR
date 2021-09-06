@@ -412,6 +412,7 @@ void generate_dataset_from_image(image_data * self, char * path) {
         return;
 
     self->set = doc_to_dataset(self->document_p);
+    sort(self->set, 0, self->set->num_elements -1);
 
     /* for (int i = 0; i < total_characters; i++) */
     /*     printf("Line: %d, Word: %d, Character: %d\n", self->data[i].line_number, self->data[i].word_number, self->data[i].character_number); */

@@ -142,6 +142,52 @@ dataset * doc_to_dataset(document * doc) {
 
 }
 
+void sort(dataset * unsorted, int low, int high) {
+    if (low < high) {
+
+        int pivot = find_partition(unsorted, low, high);
+        sort(unsorted, low, pivot -1);
+        sort(unsorted, pivot + 1, high);
+
+    }
+}
+int find_partition(dataset * unsorted, int low, int high) {
+
+    dataset_element * pivot = unsorted->elements[high];
+    int pivot_value = 
+        pivot->line_number * 1000 +
+        pivot->word_number * 100 +
+        pivot->character_number;
+
+    int new_partition_position = low - 1;
+    for (int iterator = low; iterator < high; iterator ++) {
+
+        int current_value = 
+            unsorted->elements[iterator]->line_number * 1000 +
+            unsorted->elements[iterator]->word_number * 100 + 
+            unsorted->elements[iterator]->character_number;
+
+        if (current_value < pivot_value) {
+
+            new_partition_position ++;
+            swap(unsorted->elements[iterator], unsorted->elements[new_partition_position]);
+
+        }
+
+
+    }
+    new_partition_position ++;
+    swap(unsorted->elements[new_partition_position], unsorted->elements[high]);
+    return new_partition_position;
+
+}
+
+void swap(dataset_element * a, dataset_element * b) {
+    dataset_element tmp = * a;
+    * a = * b;
+    * b = tmp;
+}
+
 void extend_dataset(dataset * set) {
 
     // slightly modify a character so it can be used as many training inputs

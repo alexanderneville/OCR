@@ -34,10 +34,13 @@ dataset * create_dataset(int num_elements);
 int count_characters_in_document(document * doc);
 dataset * doc_to_dataset(document * doc);
 void * dataset_thread_func(void * args);
-dataset * sort_dataset(dataset * unsorted);
 void extend_dataset(dataset * set);
 void export_dataset(dataset* set, char * path);
 void destroy_dataset(dataset * set);
 void destroy_dataset_element(dataset_element * old_element);
+
+void sort(dataset * unsorted, int low, int high);
+int find_partition(dataset * unsorted, int low, int high);
+void swap(dataset_element * a, dataset_element * b);
 
 #endif
