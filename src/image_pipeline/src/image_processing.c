@@ -207,12 +207,13 @@ void process(image_data * self, kernel_configuration type, int kernel_dimensions
         strength += 1;
     }
     matrix * kernel = create_kernel(type, kernel_dimensions, strength);
-    /* for (int y = 0; y < kernel->y; y++) { */
-    /*     for (int x = 0; x < kernel->x; x++) { */
-    /*         printf("%f, ", kernel->array[(y * kernel->x) + x]); */
-    /*     } */
-    /*     printf("\n"); */
-    /* } */
+
+    for (int y = 0; y < kernel->y; y++) {
+        for (int x = 0; x < kernel->x; x++) {
+            printf("%f, ", kernel->array[(y * kernel->x) + x]);
+        }
+        printf("\n");
+    }
 
     if (self->channels == 1) {
 

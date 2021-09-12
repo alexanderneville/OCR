@@ -151,6 +151,7 @@ void sort(dataset * unsorted, int low, int high) {
 
     }
 }
+
 int find_partition(dataset * unsorted, int low, int high) {
 
     dataset_element * pivot = unsorted->elements[high];
@@ -173,7 +174,6 @@ int find_partition(dataset * unsorted, int low, int high) {
             swap(unsorted->elements[iterator], unsorted->elements[new_partition_position]);
 
         }
-
 
     }
     new_partition_position ++;
@@ -293,6 +293,7 @@ void destroy_dataset(dataset * set){
         destroy_dataset_element(set->elements[i]);
     }
     free(set->elements);
+    free(set);
     return;
 }
 
@@ -303,8 +304,8 @@ void destroy_dataset_element(dataset_element * old_element) {
     for (int i = 0; i < 10; i++){
         destroy_matrix(old_element->images[i]);
     }
-    if (old_element->label)
-        free(old_element->label);
+    /* if (old_element->label) */
+    /*     free(old_element->label); */
 
     return;
 }

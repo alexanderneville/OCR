@@ -1,0 +1,11 @@
+when there are three channels:
+
+rgb->grey, grey->rgb, resize appear to be working
+
+then there is on channel:
+
+invert, resize appear to work
+
+resize does not work after invert, but invert does work after resize
+
+convolution does not appear to work with dimensions larger than 5

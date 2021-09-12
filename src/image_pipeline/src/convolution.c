@@ -5,9 +5,10 @@
 #include "../includes/convolution.h"
 #include "../includes/matrix.h"
 
-matrix * create_kernel(kernel_configuration type, int kernel_dimensions, float strength) {
+matrix * create_kernel(kernel_configuration type, float kernel_dimensions, float strength) {
 
-    if ((kernel_dimensions % 2) == 0)
+    int trunc_dimensions = kernel_dimensions;
+    if ((trunc_dimensions % 2) == 0)
         kernel_dimensions ++;
 
     matrix * kernel_matrix;
@@ -32,7 +33,24 @@ matrix * create_kernel(kernel_configuration type, int kernel_dimensions, float s
         float scale_factor = kernel_dimensions / 5.0;
         matrix * tmp_kernel = create_matrix(5, 5);
         memcpy(tmp_kernel->array, weights, sizeof(float) * 25);
-        kernel_matrix = scale_matrix(tmp_kernel, scale_factor, false);
+
+        for (int y = 0; y < tmp_kernel->y; y++) {
+            for (int x = 0; x < tmp_kernel->x; x++) {
+                printf("%f, ", tmp_kernel->array[(y * tmp_kernel->x) + x]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+
+        kernel_matrix = scale_matrix(tmp_kernel, scale_factor, true);
+
+        for (int y = 0; y < kernel_matrix->y; y++) {
+            for (int x = 0; x < kernel_matrix->x; x++) {
+                printf("%f, ", kernel_matrix->array[(y * kernel_matrix->x) + x]);
+            }
+            printf("\n");
+        }
+        printf("\n");
 
     } else if (type == Sharpen) {
 
