@@ -2,9 +2,18 @@
 
 import hashlib
 import random
+import re
 from typing import Tuple
 from . import models as db_class
 from . import config
+
+def valid_password(password):
+    # result = re.search("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", password)
+    result = "true"
+    if result:
+        return True
+    else:
+        return False
 
 def new_hash(plaintext)-> Tuple[str, str]:
 
@@ -20,7 +29,6 @@ def hash(plaintext:str, salt:str) -> str:
     hashed = hashlib.sha256(salted.encode("utf-8")).hexdigest()
 
     return hashed
-    
 
 def login_user(username: str, password: str):
 
@@ -37,6 +45,4 @@ def login_user(username: str, password: str):
 
             return db_class.create_user_object(conn, data[0])
 
-    else: # if no user with that username is found
-
-        return None
+    raise db_class.Invalid_Credentials()

@@ -1,10 +1,3 @@
-import orm, os, sqlite3
-
-# replace with the path to the data directory
-
-data_path = orm.data_path
-db_path = orm.db_path
-secret_key = '1234'
 
 def create_tables():
 

@@ -1,5 +1,6 @@
 import sqlite3
 
+secret_key = '1234'
 data_path = "/home/alex/code/nea/data/"
 db_path = data_path+'application_data.db'
 

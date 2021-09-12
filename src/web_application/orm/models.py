@@ -3,10 +3,12 @@
 import abc, sqlite3, random
 from . import authenticate
 
-def check_exists(conn: sqlite3.Connection, username: str):
+def check_username_unused(conn: sqlite3.Connection, username: str):
 
+    """return none if there is no user with that name, else return the record."""
     cursor = conn.cursor()
-    return cursor.execute('SELECT id FROM user WHERE username =?', [username]).fetchone()
+    if cursor.execute('SELECT id FROM user WHERE username =?', [username]).fetchone() != None:
+        raise Existing_Username
 
 def create_user_object(conn: sqlite3.Connection, id: int):
 
@@ -15,8 +17,11 @@ def create_user_object(conn: sqlite3.Connection, id: int):
     role = data[0]
     if role == "teacher":
         return Teacher(conn, id)
-    else:
+    elif role == "student":
         return Student(conn, id)
+    else:
+        raise No_Such_ID("no user with that ID is found")
+
 
 class entity_model(abc.ABC):
 
@@ -24,6 +29,9 @@ class entity_model(abc.ABC):
     def __init__(self, conn: sqlite3.Connection, id: int):
         self.conn = conn
         self._id = id
+        self._username = None
+        self._full_name = None
+        self._role = None
 
     @staticmethod
     @abc.abstractmethod
@@ -33,6 +41,24 @@ class entity_model(abc.ABC):
     @abc.abstractmethod
     def delete(self):
         pass
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def username(self):
+        return self._username
+
+    @property
+    def full_name(self):
+        return self._full_name
+
+    @property
+    def role(self):
+        return self._role
+
+
 
 
 class Teacher(entity_model):
@@ -46,7 +72,7 @@ class Teacher(entity_model):
 
         if not data:
 
-            raise Exception("user not found")
+            raise No_Such_ID("no user associated with that username.")
 
         elif data[2] != "teacher":
 
@@ -64,14 +90,9 @@ class Teacher(entity_model):
 
         cursor = conn.cursor()
 
-        if check_exists(conn, username):
+        try:
 
-            # an entity with that username already exists
-            return None
-
-        else:
-
-            # good to create new user
+            check_username_unused(conn, username)
             hashed, salt = authenticate.new_hash(password)
             cursor.execute('INSERT into user (username, password, salt, full_name, role) VALUES (?, ?, ?, ?, ?);', [username, hashed, salt, full_name, 'teacher'])
             new_user_id = cursor.execute('SELECT id FROM user WHERE username =?', [username]).fetchone()
@@ -79,24 +100,13 @@ class Teacher(entity_model):
 
             return int(new_user_id[0])
 
+        except Existing_Username:
+
+            return None
+
     def delete(self):
         pass
 
-    @property
-    def id(self):
-        return self._id
-
-    @property
-    def username(self):
-        return self._username
-
-    @property
-    def full_name(self):
-        return self._full_name
-
-    @property
-    def role(self):
-        return self._role
 
 class Student(entity_model):
 
@@ -109,7 +119,7 @@ class Student(entity_model):
 
         if not data:
 
-            raise Exception("user not found")
+            raise No_Such_ID("no user associated with that username.")
 
         elif data[2] != "student":
 
@@ -127,14 +137,9 @@ class Student(entity_model):
 
         cursor = conn.cursor()
 
-        if check_exists(conn, username):
+        try:
 
-            # an entity with that username already exists
-            return None
-
-        else:
-
-            # good to create new user
+            check_username_unused(conn, username)
             hashed, salt = authenticate.new_hash(password)
             cursor.execute('INSERT into user (username, password, salt, full_name, role) VALUES (?, ?, ?, ?, ?);', [username, hashed, salt, full_name, 'student'])
             new_user_id = cursor.execute('SELECT id FROM user WHERE username =?', [username]).fetchone()
@@ -142,25 +147,36 @@ class Student(entity_model):
 
             return new_user_id[0]
 
+        except Existing_Username:
+
+            return None
+
     def delete(self):
         pass
 
-    @property
-    def id(self):
-        return self._id
 
-    @property
-    def username(self):
-        return self._username
 
-    @property
-    def full_name(self):
-        return self._full_name
-
-    @property
-    def role(self):
-        return self._role
+##############
+# EXCEPTIONS #
+##############
 
 class School_Class(entity_model):
     pass
 
+class No_Such_ID(Exception):
+    pass
+
+class No_Such_Username(Exception):
+    pass
+
+class Existing_Username(Exception):
+    pass
+
+class Invalid_Credentials(Exception):
+    pass
+
+class Insecure_Password(Exception):
+    pass
+
+class Insufficient_Data(Exception):
+    pass
