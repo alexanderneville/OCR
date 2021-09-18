@@ -1,8 +1,14 @@
-import sqlite3
+from typing import Tuple
 from datetime import datetime
-import time
+import time, random, sqlite3, config, hashlib
 
-import config
+def new_test_hash()-> Tuple[str, str]:
+
+    salt = str(random.randint(1000, 9999))
+    salted = "1234" + salt
+    hashed = hashlib.sha256(salted.encode("utf-8")).hexdigest()
+
+    return hashed, salt
 
 def init_user(conn: sqlite3.Connection):
 
@@ -129,29 +135,59 @@ def populate_tables():
 
     cursor = conn.cursor()
 
-    users = [
-            ("alex123", "1234", "1234", "Alexander Neville", "teacher"),
-            ("Sarah93", "1234", "1234", "Sarah West", "teacher"),
-            ("John56", "1234", "1234", "John Smith", "teacher"),
-            ("Kate54", "1234", "1234", "Kate Blaine", "student"),
-            ("benjamin6", "1234", "1234", "Benjamin Johnson", "student"),
-            ("thomas37", "1234", "1234", "Thomas George", "student"),
-            ("richard78", "1234", "1234", "Richard Abbey", "student"),
-            ("daniel43", "1234", "1234", "Daniel Jefferson", "student")
-            ]
+    # users = [
+    #         ["user1", " ", " ", "teacher one", "teacher"],
+    #         ["user2", " ", " ", "teacher two", "teacher"],
+    #         ["user3", " ", " ", "teacher three", "teacher"],
+    #         ["user4", " ", " ", "student one", "student"],
+    #         ["user5", " ", " ", "student two", "student"],
+    #         ["user6", " ", " ", "student three", "student"],
+    #         ["user7", " ", " ", "student four", "student"],
+    #         ["user8", " ", " ", "student five", "student"],
+    #         ["user9", " ", " ", "student six", "student"],
+    #         ["user10", " ", " ", "student seven", "student"],
+    #         ["user11", " ", " ", "student eight", "student"],
+    #         ["user12", " ", " ", "student nine", "student"],
+    #         ["user13", " ", " ", "student ten", "student"],
+    #         ["user14", " ", " ", "student eleven", "student"],
+    #         ["user15", " ", " ", "student twelve", "student"],
+    #         ["user16", " ", " ", "student thirteen", "student"],
+    #         ["user17", " ", " ", "student fourteen", "student"],
+    #         ["user18", " ", " ", "student fifteen", "student"],
+    #         ["user19", " ", " ", "student sixteen", "student"],
+    #         ["user20", " ", " ", "student seventeen", "student"],
+    #         ]
 
-    classes = [
-            (1, "Mr. Neville's class", 1234),
-            (2, "Miss. West's class", 1234),
-            (3, "Mr. Smith's class", 1234),
-            ]
-    class_students = [
-            (4, 2),
-            (4, 3),
-            (5, 1),
-            (7, 2),
-            (7, 3)
-            ]
+    users = []
+    num_teachers = 10
+    num_students = 300
+
+    for teacher in range(num_teachers):
+        hashed, salt = new_test_hash()
+        users.append(["user"+str(teacher+1), hashed, salt, "Teacher "+str(teacher+1), "teacher"])
+
+    for student in range(num_students):
+        hashed, salt = new_test_hash()
+        users.append(["user"+str(student+num_teachers+1), hashed, salt, "Student "+str(student+1), "student"])
+
+
+
+    # classes = [
+    #         (1, "class 1", 1234),
+    #         (1, "class 2", 1234),
+    #         (1, "class 3", 1234),
+    #         (2, "class 4", 1234),
+    #         (2, "class 5", 1234),
+    #         (2, "class 6", 1234),
+    #         (3, "class 7", 1234),
+    #         (3, "class 8", 1234),
+    #         (3, "class 9", 1234),
+    #         ]
+
+    classes = [((i+1), "class " + str(i+1), 1234) for i in range(10)]
+
+    class_students = [(i + 11, (i//30) + 1) for i in range(300)]
+
     current = datetime.now()
     timestamp = time.mktime(current.timetuple())
 

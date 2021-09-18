@@ -9,7 +9,7 @@ from . import config
 
 def valid_password(password):
     # result = re.search("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", password)
-    result = "true"
+    result = "TODO"
     if result:
         return True
     else:

@@ -92,7 +92,7 @@ class Teacher(entity_model):
 
         try:
 
-            check_username_unused(conn, username)
+            check_username_unused(conn, username) # will raise existing username exception if username exists
             hashed, salt = authenticate.new_hash(password)
             cursor.execute('INSERT into user (username, password, salt, full_name, role) VALUES (?, ?, ?, ?, ?);', [username, hashed, salt, full_name, 'teacher'])
             new_user_id = cursor.execute('SELECT id FROM user WHERE username =?', [username]).fetchone()

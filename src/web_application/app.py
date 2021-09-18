@@ -1,9 +1,9 @@
 from flask import Flask, session, json, render_template, request, redirect, url_for, abort, flash, get_flashed_messages
 import os
 import orm
+
 app = Flask(__name__)
 app.config.from_object(__name__)
-
 app.config.update({'SECRET_KEY': orm.secret_key })
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -18,26 +18,28 @@ def login():
 
         try:
 
-            username = request.form['username']
-            password = request.form['password'] 
+            if not request.form:
+                raise orm.Insufficient_Data()
 
-            print(username)
-            print(password)
+            keys = ["username", "password"]
+            fields = []
 
-            current_user = orm.login_user(username, password)
+            for i in range(len(keys)):
+                if keys[i] in request.form:
+                    if request.form[keys[i]] == '':
+                        raise orm.Insufficient_Data()
+                    else:
+                        fields.append(request.form[keys[i]])
+                else:
+                    raise orm.Insufficient_Data()
 
-            print('hello')
+            current_user = orm.login_user(fields[0], fields[1])
 
             if current_user is not None:
 
                 print(current_user.id)
                 session['user'] = current_user.id
                 return redirect(url_for('home'))
-
-            else:
-
-                print("current user is none")
-                raise Exception()
 
         except orm.Invalid_Credentials:
 
@@ -56,12 +58,8 @@ def register():
 
         try:
 
-            print("arrived in the function")
-
             if not request.form:
                 raise orm.Insufficient_Data()
-
-            print("there was a form")
 
             keys = ["username", "password", "full_name", "role"]
             fields = []
@@ -81,8 +79,6 @@ def register():
             print(fields[1])
             print(fields[2])
             print(fields[3])
-
-            print("have printed data")
 
             if not orm.valid_password(fields[1]):
                 raise orm.Insecure_Password()
@@ -125,12 +121,11 @@ def home():
 
     conn = orm.connect_db(orm.db_path)
     current_user = orm.create_user_object(conn, session["user"])
+
     if isinstance(current_user, orm.Teacher):
         return render_template('teacher_home.html', name = current_user.full_name)
     else:
         return render_template('student_home.html')
-
-    return current_user.username
 
 if __name__ == "__main__":
 
