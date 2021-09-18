@@ -7,13 +7,11 @@ from typing import Tuple
 from . import models as db_class
 from . import config
 
-def valid_password(password):
+def validate_password(password):
     # result = re.search("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", password)
     result = "TODO"
-    if result:
-        return True
-    else:
-        return False
+    if not result:
+        raise db_class.Insecure_Password()
 
 def new_hash(plaintext)-> Tuple[str, str]:
 
@@ -32,11 +30,9 @@ def hash(plaintext:str, salt:str) -> str:
 
 def login_user(username: str, password: str):
 
-
     conn = config.connect_db(config.db_path)
     cursor = conn.cursor()
     data = cursor.execute('SELECT id, role, password, salt FROM user WHERE username =?', [username]).fetchone()
-    print(data)
 
     if data: # if a user with that username exists
 

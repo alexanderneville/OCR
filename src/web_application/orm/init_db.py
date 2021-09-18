@@ -1,6 +1,13 @@
 from typing import Tuple
 from datetime import datetime
-import time, random, sqlite3, config, hashlib
+import time, random, sqlite3, hashlib
+
+try:
+    from . import config
+    db_path = config.db_path
+except:
+    db_path = "/home/alex/code/nea/data/application_data.db"
+
 
 def new_test_hash()-> Tuple[str, str]:
 
@@ -41,8 +48,9 @@ def init_class(conn: sqlite3.Connection):
         cursor.execute('''CREATE TABLE class (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             teacher_id INTEGER NOT NULL,
-                            class_name TEXT UNIQUE NOT NULL,
+                            class_name TEXT NOT NULL,
                             pin INTEGER NOT NULL,
+                            UNIQUE(class_name, teacher_id),
                             FOREIGN KEY (teacher_id) REFERENCES user (id) ON UPDATE CASCADE ON DELETE CASCADE);''')
 
         conn.commit()
@@ -118,7 +126,7 @@ def init_cache(conn: sqlite3.Connection):
 
 def create_tables():
 
-    conn = sqlite3.connect(config.db_path, detect_types=sqlite3.PARSE_DECLTYPES)
+    conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
 
     # run create table functions
     init_user(conn)
@@ -131,87 +139,55 @@ def create_tables():
 
 def populate_tables():
 
-    conn = sqlite3.connect(config.db_path, detect_types=sqlite3.PARSE_DECLTYPES)
+    conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
 
     cursor = conn.cursor()
-
-    # users = [
-    #         ["user1", " ", " ", "teacher one", "teacher"],
-    #         ["user2", " ", " ", "teacher two", "teacher"],
-    #         ["user3", " ", " ", "teacher three", "teacher"],
-    #         ["user4", " ", " ", "student one", "student"],
-    #         ["user5", " ", " ", "student two", "student"],
-    #         ["user6", " ", " ", "student three", "student"],
-    #         ["user7", " ", " ", "student four", "student"],
-    #         ["user8", " ", " ", "student five", "student"],
-    #         ["user9", " ", " ", "student six", "student"],
-    #         ["user10", " ", " ", "student seven", "student"],
-    #         ["user11", " ", " ", "student eight", "student"],
-    #         ["user12", " ", " ", "student nine", "student"],
-    #         ["user13", " ", " ", "student ten", "student"],
-    #         ["user14", " ", " ", "student eleven", "student"],
-    #         ["user15", " ", " ", "student twelve", "student"],
-    #         ["user16", " ", " ", "student thirteen", "student"],
-    #         ["user17", " ", " ", "student fourteen", "student"],
-    #         ["user18", " ", " ", "student fifteen", "student"],
-    #         ["user19", " ", " ", "student sixteen", "student"],
-    #         ["user20", " ", " ", "student seventeen", "student"],
-    #         ]
 
     users = []
     num_teachers = 10
     num_students = 300
 
+    # populate the user table with 10 teachers
     for teacher in range(num_teachers):
         hashed, salt = new_test_hash()
-        users.append(["user"+str(teacher+1), hashed, salt, "Teacher "+str(teacher+1), "teacher"])
+        users.append(["user"+str(teacher+1), 
+                        hashed, salt, 
+                        "Teacher "+str(teacher+1),
+                        "teacher"])
 
+    # populate the user table with 300 students
     for student in range(num_students):
         hashed, salt = new_test_hash()
-        users.append(["user"+str(student+num_teachers+1), hashed, salt, "Student "+str(student+1), "student"])
+        users.append(["user"+str(student+num_teachers+1),
+                        hashed, salt, 
+                        "Student "+str(student+1),
+                        "student"])
 
-
-
-    # classes = [
-    #         (1, "class 1", 1234),
-    #         (1, "class 2", 1234),
-    #         (1, "class 3", 1234),
-    #         (2, "class 4", 1234),
-    #         (2, "class 5", 1234),
-    #         (2, "class 6", 1234),
-    #         (3, "class 7", 1234),
-    #         (3, "class 8", 1234),
-    #         (3, "class 9", 1234),
-    #         ]
-
+    # populate the class tables and associated transaction table
     classes = [((i+1), "class " + str(i+1), 1234) for i in range(10)]
-
     class_students = [(i + 11, (i//30) + 1) for i in range(300)]
 
+    # populate the models table with 3 models for each user
+    # populate the cache table with 3 cache entries for each user
     current = datetime.now()
     timestamp = time.mktime(current.timetuple())
+    models = [(i//3 + 1, "model"+str(i+1), timestamp - (random.randint(0, 5000)* 3600)) for i in range(930)]
+    cache_data = [(i//3 + 1, "cache data belonging to user"+str(i//3+1), timestamp - (random.randint(0, 5000)* 3600)) for i in range(930)]
 
-    models = [
-            ('1', "my handwriting", "model1.json", "infile", timestamp),
-            ('1', "friend's handwriting", "model2.json", "infile", timestamp - 3600),
-            ('3', "My favourite font", "model3.json", "infile", timestamp - (3600 * 24)),
-            ('5', "Exercise book", "model4.json", "infile", timestamp - (3600 * 48)),
-            ('6', "Scanned Document", "model5.json", "infile", timestamp - (3600)),
-            ]
 
-    cache_data = []
-
+    # insert the test data into the database
     cursor.executemany('INSERT INTO user (username, password, salt, full_name, role) VALUES (?,?,?,?,?)', users)
     cursor.executemany('INSERT INTO class (teacher_id, class_name, pin) VALUES (?,?,?)', classes)
     cursor.executemany('INSERT INTO class_student (student_id, class_id) VALUES (?,?)', class_students)
-    cursor.executemany('INSERT INTO model (owner_id, name, path, infile_path, timestamp) VALUES (?,?,?,?,?)', models)
+    cursor.executemany('INSERT INTO model (owner_id, name, timestamp) VALUES (?,?,?)', models)
     cursor.executemany('INSERT INTO cache (owner_id, contents, timestamp) VALUES (?,?,?)', cache_data)
 
     conn.commit()
 
-def main():
+def new_database():
+
     create_tables()
     populate_tables()
 
 if __name__ == "__main__":
-    main()
+    new_database()

@@ -80,19 +80,15 @@ def register():
             print(fields[2])
             print(fields[3])
 
-            if not orm.valid_password(fields[1]):
-                raise orm.Insecure_Password()
+            orm.validate_password(fields[1])
 
             if fields[3] == "teacher":
                 new_user_id = orm.Teacher.create(conn, fields[0], fields[2], fields[1])
             else:
                 new_user_id = orm.Student.create(conn, fields[0], fields[2], fields[1])
 
-            if new_user_id == None:
-                raise orm.Existing_Username()
-            else: 
-                session["user"] = new_user_id
-                return redirect(url_for('home'))
+            session["user"] = new_user_id
+            return redirect(url_for('home'))
 
         except orm.Existing_Username:
 
@@ -125,7 +121,7 @@ def home():
     if isinstance(current_user, orm.Teacher):
         return render_template('teacher_home.html', name = current_user.full_name)
     else:
-        return render_template('student_home.html')
+        return render_template('student_home.html', name = current_user.full_name)
 
 if __name__ == "__main__":
 

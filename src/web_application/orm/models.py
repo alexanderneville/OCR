@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import abc, sqlite3, random
+import abc, sqlite3
 from . import authenticate
 
 def check_username_unused(conn: sqlite3.Connection, username: str):
@@ -29,9 +29,6 @@ class entity_model(abc.ABC):
     def __init__(self, conn: sqlite3.Connection, id: int):
         self.conn = conn
         self._id = id
-        self._username = None
-        self._full_name = None
-        self._role = None
 
     @staticmethod
     @abc.abstractmethod
@@ -40,6 +37,22 @@ class entity_model(abc.ABC):
 
     @abc.abstractmethod
     def delete(self):
+        pass
+
+class User(entity_model):
+
+    def __init__(self, conn: sqlite3.Connection, id: int):
+
+        self._username = None
+        self._full_name = None
+        self._role = None
+
+    def list_models(self):
+        cursor = self.conn.cursor()
+        return cursor.execute('SELECT * FROM model WHERE owner_id=?', [self.id]).fetchall()
+        
+
+    def list_classes(self):
         pass
 
     @property
@@ -60,8 +73,7 @@ class entity_model(abc.ABC):
 
 
 
-
-class Teacher(entity_model):
+class Teacher(User):
 
     def __init__(self, conn: sqlite3.Connection, id: int):
 
@@ -76,7 +88,7 @@ class Teacher(entity_model):
 
         elif data[2] != "teacher":
 
-            raise Exception("user is a student, not a teacher")
+            raise Invalid_Role("user is a student, not a teacher")
 
         else:
 
@@ -90,25 +102,51 @@ class Teacher(entity_model):
 
         cursor = conn.cursor()
 
+        check_username_unused(conn, username) # will raise existing username exception if username exists
+        hashed, salt = authenticate.new_hash(password)
+        cursor.execute('INSERT into user (username, password, salt, full_name, role) VALUES (?, ?, ?, ?, ?);', [username, hashed, salt, full_name, 'teacher'])
+        new_user_id = cursor.execute('SELECT id FROM user WHERE username =?', [username]).fetchone()
+        conn.commit()
+
+        return int(new_user_id[0])
+
+
+    def list_classes(self):
+        cursor = self.conn.cursor()
+        # get the id, name, pin and teacher name
+        data = cursor.execute("""SELECT class.id, class.class_name, class.pin, user.username
+                                 FROM class
+                                 INNER JOIN user ON class.teacher_id = user.id
+                                 WHERE class.teacher_id=?""", [self._id]).fetchall();
+        return data
+
+    def kick_student(self, student_id: int, class_id: int):
+        cursor = self.conn.cursor()
+        cursor.execute("DELETE FROM class_student WHERE student_id=? AND class_id=?", [student_id, class_id])
+        self.conn.commit()
+        pass
+
+    def create_class(self, class_name: str, pin: int):
+
+        cursor = self.conn.cursor()
         try:
+            cursor.execute('INSERT into class (class_name, pin, teacher_id) VALUES (?, ?, ?)', [class_name, pin, self.id])
+        except:
+            raise Existing_Class()
 
-            check_username_unused(conn, username) # will raise existing username exception if username exists
-            hashed, salt = authenticate.new_hash(password)
-            cursor.execute('INSERT into user (username, password, salt, full_name, role) VALUES (?, ?, ?, ?, ?);', [username, hashed, salt, full_name, 'teacher'])
-            new_user_id = cursor.execute('SELECT id FROM user WHERE username =?', [username]).fetchone()
-            conn.commit()
-
-            return int(new_user_id[0])
-
-        except Existing_Username:
-
-            return None
+    def list_all_models(self):
+        cursor = self.conn.cursor()
+        return cursor.execute("""SELECT model.name AS model_name, model.id, user.username
+                                 FROM model INNER JOIN user ON model.owner_id=user.id
+                                 WHERE owner_id in
+                                 (SELECT student_id FROM class_student WHERE class_id =
+                                 (SELECT id FROM class WHERE teacher_id=?));""", [self.id]).fetchall()
 
     def delete(self):
         pass
 
 
-class Student(entity_model):
+class Student(User):
 
     def __init__(self, conn: sqlite3.Connection, id: int):
 
@@ -123,7 +161,7 @@ class Student(entity_model):
 
         elif data[2] != "student":
 
-            raise Exception("user is a teacher, not a student")
+            raise Invalid_Role("user is a teacher, not a student")
 
         else:
 
@@ -137,23 +175,81 @@ class Student(entity_model):
 
         cursor = conn.cursor()
 
-        try:
+        check_username_unused(conn, username)
+        hashed, salt = authenticate.new_hash(password)
+        cursor.execute('INSERT into user (username, password, salt, full_name, role) VALUES (?, ?, ?, ?, ?);', [username, hashed, salt, full_name, 'student'])
+        new_user_id = cursor.execute('SELECT id FROM user WHERE username =?', [username]).fetchone()
+        conn.commit()
 
-            check_username_unused(conn, username)
-            hashed, salt = authenticate.new_hash(password)
-            cursor.execute('INSERT into user (username, password, salt, full_name, role) VALUES (?, ?, ?, ?, ?);', [username, hashed, salt, full_name, 'student'])
-            new_user_id = cursor.execute('SELECT id FROM user WHERE username =?', [username]).fetchone()
-            conn.commit()
+        return new_user_id[0]
 
-            return new_user_id[0]
+    def join_class(self, class_id: int, pin: int):
+        cursor = self.conn.cursor()
+        data = cursor.execute('SELECT pin FROM class WHERE id=?', [class_id]).fetchone()
+        if data == None:
+            raise Invalid_Credentials()
 
-        except Existing_Username:
+        if pin == data[0]:
+            cursor.execute('INSERT into class_student (class_id, student_id) VALUES (?,?)', [class_id, self._id])
+            self.conn.commit()
+        else:
+            self.conn.commit()
+            raise Invalid_Credentials()
 
-            return None
+    def leave_class(self, class_id: int):
+        cursor = self.conn.cursor()
+        cursor.execute('DELETE FROM class_student WHERE student_id=? AND class_id=?', [self._id, class_id])
+        self.conn.commit()
+
+    def list_classes(self):
+
+        cursor = self.conn.cursor()
+        data = cursor.execute("""SELECT class.id, class.class_name, class.pin, user.username
+                            FROM class_student
+                            INNER JOIN class ON class_student.class_id = class.id
+                            INNER JOIN user ON class.teacher_id = user.id
+                            WHERE class_student.student_id=?""", [self._id]).fetchall();
+
+        return data
+
 
     def delete(self):
         pass
 
+
+class ClassGroup(entity_model):
+
+    def __init__(self, conn: sqlite3.Connection, id: int):
+        super().__init__(conn, id)
+        cursor = self.conn.cursor()
+        data = cursor.execute('SELECT class_name, pin FROM class WHERE id =?', [self._id]).fetchone()
+        self._class_name = data[0]
+        self._pin = data[1]
+
+    @staticmethod
+    def create(conn: sqlite3.Connection, class_name: str, pin: int, teacher_id: int):
+
+        cursor = conn.cursor()
+        if cursor.execute('SELECT * FROM class WHERE teacher_id=? AND class_name=?', [teacher_id, class_name]).fetchone() != None:
+            raise Existing_Class()
+        cursor.execute('INSERT into class (class_name, pin, teacher_id) VALUES (?, ?, ?)', [class_name, pin, teacher_id])
+        new_class_id = cursor.execute('SELECT id FROM class WHERE teaacher_id=? AND class_name=?', [teacher_id, class_name]).fetchone()
+        conn.commit()
+        return new_class_id[0]
+
+    def list_students(self):
+        pass
+
+    def delete(self):
+        pass
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def pin(self):
+        return self._pin
 
 
 ##############
@@ -172,7 +268,13 @@ class No_Such_Username(Exception):
 class Existing_Username(Exception):
     pass
 
+class Existing_Class(Exception):
+    pass
+
 class Invalid_Credentials(Exception):
+    pass
+
+class Invalid_Role(Exception):
     pass
 
 class Insecure_Password(Exception):
