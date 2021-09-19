@@ -1,0 +1,141 @@
+* {
+    font-family: "sans-serif";
+    font-size: 16px;
+    background: #2e3440;
+    color: #d8dee9;
+}
+html, body {
+    margin: 0;
+    height: 100%;
+}
+.content {
+    margin: 5px;
+}
+.error_message {
+    color: #bf616a;
+    background: inherit;
+}
+form {
+    border-style: solid;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: #81a1c1;
+    background: #353c4a;
+    width: 60%;
+    margin-left: 20%;
+    margin-right: 20%;
+    margin-top: 100px;
+    padding: 10px;
+}
+
+input {
+    padding: 10px 10px;
+    box-sizing: border-box;
+    border-style: solid;
+    border-width: 2px;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+input[type=password] {
+    border-color: #c6735a;
+}
+input[type=text] {
+    border-color: #ebcb8b;
+}
+input[type=submit] {
+    border-color: #a3be8c;
+    color: #353c4a;
+    background: #a3be8c;
+    width: 50%;
+    margin-left: 25%;
+}
+input[type=radio] {
+    padding: initial;
+    box-sizing: initial;
+    border-style: initial;
+    border-width: initial;
+    width: initial;
+    margin-top: initial;
+    margin-bottom: initial;
+    border-radius: initial;
+}
+.model_card {
+    background: #353c4a;
+    margin: 10px;
+    padding: 10px;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 2px;
+    border-color: #88c0d0;
+}
+
+
+
+.model_info {
+    display: inline-block;
+    background: inherit;
+}
+
+.delete_model {
+    width: 100px;
+    padding: 5px;
+    border-color: #bf616a;
+    color: #353c4a;
+    background: #bf616a;
+}
+
+.class_card {
+    background: #353c4a;
+    margin: 10px;
+    padding: 10px;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 2px;
+    border-color: #b58ead;
+}
+.class_info {
+    display: inline-block;
+    background: inherit;
+}
+
+.leave_class {
+    width: 100px;
+    padding: 5px;
+    border-color: #bf616a;
+    color: #353c4a;
+    background: #bf616a;
+}
+
+.topbar {
+  background-color: #353c4a;
+  overflow: hidden;
+}
+
+.topbar_option {
+    background: #353c4a;
+}
+.topbar a {
+  float: left;
+  color: #d8dee9;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.topbar a:hover {
+  background-color: #2e3440;
+  color: #d8dee9;
+}
+
+
+.create_model_button, .join_class_button {
+    border-color: #a3be8c;
+    color: #353c4a;
+    background: #a3be8c;
+    width: 20%;
+    margin-left: 40%;
+}

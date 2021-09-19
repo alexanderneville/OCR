@@ -6,6 +6,21 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.update({'SECRET_KEY': orm.secret_key })
 
+def handle_form_data(data, keys):
+
+    fields = []
+
+    for i in range(len(keys)):
+        if keys[i] in data:
+            if request.form[keys[i]] == '':
+                raise orm.Insufficient_Data()
+            else:
+                fields.append(request.form[keys[i]])
+        else:
+            raise orm.Insufficient_Data()
+
+    return fields
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
@@ -22,16 +37,7 @@ def login():
                 raise orm.Insufficient_Data()
 
             keys = ["username", "password"]
-            fields = []
-
-            for i in range(len(keys)):
-                if keys[i] in request.form:
-                    if request.form[keys[i]] == '':
-                        raise orm.Insufficient_Data()
-                    else:
-                        fields.append(request.form[keys[i]])
-                else:
-                    raise orm.Insufficient_Data()
+            fields = handle_form_data(request.form, keys)
 
             current_user = orm.login_user(fields[0], fields[1])
 
@@ -44,6 +50,10 @@ def login():
         except orm.Invalid_Credentials:
 
             flash("Invalid login details")
+            return render_template('login.html')
+
+        except orm.Insufficient_Data:
+            flash("Fill in every field")
             return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -62,16 +72,7 @@ def register():
                 raise orm.Insufficient_Data()
 
             keys = ["username", "password", "full_name", "role"]
-            fields = []
-
-            for i in range(len(keys)):
-                if keys[i] in request.form:
-                    if request.form[keys[i]] == '':
-                        raise orm.Insufficient_Data()
-                    else:
-                        fields.append(request.form[keys[i]])
-                else:
-                    raise orm.Insufficient_Data()
+            fields = handle_form_data(request.form, keys)
 
             conn = orm.connect_db(orm.db_path)
 
@@ -101,19 +102,63 @@ def register():
             return render_template('register.html')
 
         except orm.Insufficient_Data:
-            flash("Fill out every field")
+            flash("Fill in every field")
             return render_template('register.html')
 
 @app.route('/logout')
 def logout():
     session['user'] = None
-    return "logged out"
+    return redirect(url_for('home'))
+
+@app.route('/join_class', methods=['GET', 'POST'])
+def join_class():
+
+    if not session["user"]:
+        return redirect(url_for('index'))
+
+    current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
+    if isinstance(current_user, orm.Teacher):
+        return redirect(url_for('home'))
+
+    if request.method == "GET":
+        return render_template('join_class.html')
+    else:
+
+        try:
+            if not request.form:
+                raise orm.Insufficient_Data
+
+            keys = ["class_id", "pin"]
+            fields = handle_form_data(request.form, keys)
+
+            current_user.join_class(fields[0], fields[1])
+
+            return redirect(url_for("home"))
+
+        except orm.Insufficient_Data:
+            flash("Fill in both fields")
+            return render_template('join_class.html')
+
+        except orm.Invalid_Credentials:
+            flash("Invalid join code or pin")
+            return render_template('join_class.html')
+        except orm.Existing_Member:
+            flash("Already a member of this class")
+            return render_template('join_class.html')
+
+
+@app.route('/create_model')
+def create_model():
+    if not session["user"]:
+        return redirect(url_for('index'))
+    else:
+        return render_template('create_model.html')
 
 @app.route('/home')
 def home():
 
     if not session["user"]:
-        return redirect(url_for('login'))
+        return redirect(url_for('index'))
 
     conn = orm.connect_db(orm.db_path)
     current_user = orm.create_user_object(conn, session["user"])
@@ -121,8 +166,13 @@ def home():
     if isinstance(current_user, orm.Teacher):
         return render_template('teacher_home.html', name = current_user.full_name)
     else:
-        return render_template('student_home.html', name = current_user.full_name)
+        return render_template('student_home.html', user = current_user)
+
+@app.route('/index')
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 if __name__ == "__main__":
 
-    app.run()
+    app.run(host='0.0.0.0', port=80)

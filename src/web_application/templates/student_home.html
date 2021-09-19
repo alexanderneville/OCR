@@ -1,13 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <H1>Home Page for Teachers</H1>
-        <p> hello {{ name }} </p>
+{% block topbar %}
+    <a class="topbar_option" style="float: right" href="{{ url_for('logout') }}">Logout</a>
+    <a class="topbar_option" style="float: right" href="{{ url_for('join_class') }}">Join</a>
+    <a class="topbar_option" style="float: right" href="{{ url_for('create_model') }}">Create</a>
+{% endblock %}
 
-</body>
-</html>
+{%  block content %}
+
+    <br>
+    <H2>Models:</H2>
+
+    {% with models = user.list_models() %}
+
+        {% if models %}
+
+            {% for model in models %}
+                <div class="model_card" id="model{{ model[0] }}">
+                        <div class="model_info"><p style="background-color: inherit; display: inline-block">{{ model[0] }} - {{ model[2]}}</p></div>
+                        <input class="delete_model" type="button" value="Delete" style="display: inline; float: right" onclick="delete_model({{ model[0] }})">
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+        <input class="create_model_button" type="button" onclick="window.location.href='{{ url_for('create_model') }}'" value="Create">
+
+    {% endwith %}
+    <H2>Classes:</H2>
+    {% with classes = user.list_classes() %}
+        {% if classes %}
+            {% for class in classes %}
+                <div class="class_card" id="model{{ class[0] }}">
+                    <div class="class_info"><p style="background-color: inherit; display: inline-block">{{ class[1] }} - Teaher: {{ class[3]}}</p></div>
+                    <input class="leave_class" type="button" value="Leave" style="display: inline; float: right" onclick="leave_class({{ class[0] }})">
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <input class="join_class_button" type="button" onclick="window.location.href='{{ url_for('join_class') }}'" value="Join">
+
+    {% endwith %}
+
+{% endblock %}

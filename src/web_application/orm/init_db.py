@@ -70,6 +70,7 @@ def init_class_student(conn: sqlite3.Connection):
         cursor.execute('''CREATE TABLE class_student (
                             student_id INTEGER NOT NULL,
                             class_id INTEGER NOT NULL,
+                            UNIQUE (student_id, class_id),
                             FOREIGN KEY (student_id) REFERENCES user (id) ON UPDATE CASCADE ON DELETE CASCADE,
                             FOREIGN KEY (class_id) REFERENCES class (id) ON UPDATE CASCADE ON DELETE CASCADE);''')
         conn.commit()

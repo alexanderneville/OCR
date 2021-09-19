@@ -1,7 +1,6 @@
 import orm
 conn = orm.connect_db(orm.db_path)
 
-
 def test_registration():
 
     print("attempting to register as a student with a new username ... ", end="")

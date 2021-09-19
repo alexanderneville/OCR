@@ -1,45 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-</head>
-<body>
-    <H1>Registration Page</H1>
+{% extends "base.html" %}
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <p class="error_message">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <p>Please enter your login details:</p>
+{% block content %}
 
     <form action="/register" method="post">
-
-        <label for="username">Username:</label>
-        <input type="text" name="username" placeholder="e.g. JohnSmith123"> <br>
-
-        <label for="full_name">Full Name:</label>
-        <input type="text" name="full_name"> <br>
-
-        <label for="password">Password:</label>
-        <input type="password" name="password"> <br>
-
-
-        <div>
-
-            <input type="radio" id="teacher_radio" name="role" value="teacher">
-            <label for="teacher_radio">Teacher</label>
-
-            <input type="radio" id="student_radio" name="role" value="student">
-            <label for="student_radio">Student</label>
-
-        </div>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="error_message">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <input type="text" name="username" placeholder="username"> <br>
+        <input type="text" name="full_name" placeholder="full name"> <br>
+        <input type="password" name="password" placeholder="password"> <br> <br>
+        <label style="background-color: inherit" for="teacher_radio">Teacher</label>
+        <input type="radio" id="teacher_radio" name="role" value="teacher"> <br><br>
+        <label style="background-color: inherit" for="student_radio">Student </label>
+        <input type="radio" id="student_radio" name="role" value="student"> <br> <br>
         <input type="submit" value="Register">
-
     </form>
-</body>
-</html>
+    <!--<a href="{{ url_for('login') }}" style="position: center">Register</a>-->
+{% endblock %}

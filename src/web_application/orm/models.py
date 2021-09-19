@@ -71,8 +71,6 @@ class User(entity_model):
     def role(self):
         return self._role
 
-
-
 class Teacher(User):
 
     def __init__(self, conn: sqlite3.Connection, id: int):
@@ -131,7 +129,7 @@ class Teacher(User):
         cursor = self.conn.cursor()
         try:
             cursor.execute('INSERT into class (class_name, pin, teacher_id) VALUES (?, ?, ?)', [class_name, pin, self.id])
-        except:
+        except sqlite3.IntegrityError:
             raise Existing_Class()
 
     def list_all_models(self):
@@ -189,12 +187,14 @@ class Student(User):
         if data == None:
             raise Invalid_Credentials()
 
-        if pin == data[0]:
-            cursor.execute('INSERT into class_student (class_id, student_id) VALUES (?,?)', [class_id, self._id])
-            self.conn.commit()
-        else:
-            self.conn.commit()
-            raise Invalid_Credentials()
+        try:
+            if int(pin) == data[0]:
+                cursor.execute('INSERT into class_student (class_id, student_id) VALUES (?,?)', [class_id, self._id])
+                self.conn.commit()
+            else:
+                raise Invalid_Credentials()
+        except sqlite3.IntegrityError:
+            raise Existing_Member()
 
     def leave_class(self, class_id: int):
         cursor = self.conn.cursor()
@@ -281,4 +281,7 @@ class Insecure_Password(Exception):
     pass
 
 class Insufficient_Data(Exception):
+    pass
+
+class Existing_Member(Exception):
     pass

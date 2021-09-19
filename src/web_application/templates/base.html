@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+
+<head>
+
+    <meta charset="UTF-8">
+    <title>OCR</title>
+
+    <link rel="stylesheet", href="{{ url_for('static', filename='stylesheet.css') }}">
+    <script src="{{ url_for('static', filename='test.js') }}"></script>
+
+    {% block html_head %}{% endblock %}
+
+</head>
+
+<body>
+
+    <div class="topbar">
+        <strong><a class="topbar_option" href="{{ url_for('index') }}">OCR</a></strong>
+        {% block topbar %} {% endblock %}
+    </div>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <div id="footer">
+        {% block footer %}{% endblock %}
+    </div>
+
+</body>
+
+</html>
