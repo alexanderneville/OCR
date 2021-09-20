@@ -71,19 +71,9 @@ input[type=radio] {
     border-color: #88c0d0;
 }
 
-
-
 .model_info {
     display: inline-block;
     background: inherit;
-}
-
-.delete_model {
-    width: 100px;
-    padding: 5px;
-    border-color: #bf616a;
-    color: #353c4a;
-    background: #bf616a;
 }
 
 .class_card {
@@ -100,7 +90,7 @@ input[type=radio] {
     background: inherit;
 }
 
-.leave_class {
+.leave_class, .delete_model, .delete_class, .kick_student {
     width: 100px;
     padding: 5px;
     border-color: #bf616a;
@@ -132,10 +122,38 @@ input[type=radio] {
 }
 
 
-.create_model_button, .join_class_button {
+.create_model_button, .join_class_button, .create_class_button {
     border-color: #a3be8c;
     color: #353c4a;
     background: #a3be8c;
     width: 20%;
     margin-left: 40%;
+}
+
+.teacher_class_card, .student_card {
+    background: #353c4a;
+    margin: 10px;
+    padding: 10px;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 2px;
+    border-color: #b58ead;
+}
+.student_card {
+    background: #4c566a;
+    margin: 10px;
+    padding: 10px;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 2px;
+    border-color: #ebcb8b;
+    display: none;
+}
+.toggle_student_button {
+    width: 30px;
+    padding: 5px;
+    margin-right: 10px;
+    border-color: #81a1c1;
+    color: #353c4a;
+    background: #81a1c1;
 }

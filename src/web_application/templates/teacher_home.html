@@ -1,4 +1,54 @@
 {% extends "base.html" %}
 
-{%  block content %}
+{% block topbar %}
+    <a class="topbar_option" style="float: right" href="{{ url_for('logout') }}">Logout</a>
+    <a class="topbar_option" style="float: right" href="{{ url_for('create_class') }}">+ Class</a>
+    <a class="topbar_option" style="float: right" href="{{ url_for('create_model') }}">+ Model</a>
 {% endblock %}
+
+{%  block content %}
+    <br>
+    <H2>Models:</H2>
+
+    {% with models = user.list_models() %}
+
+        {% if models %}
+
+            {% for model in models %}
+                <div class="model_card" id="model{{ model[0] }}">
+                        <div class="model_info"><p style="background-color: inherit; display: inline-block">{{ model[0] }} - {{ model[2]}}</p></div>
+                        <input class="delete_model" type="button" value="Delete" style="display: inline; float: right" onclick="delete_model({{ model[0] }}, {{ user.id }})">
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+        <input class="create_model_button" type="button" onclick="window.location.href='{{ url_for('create_model') }}'" value="Create">
+
+    {% endwith %}
+
+    <H2>Classes:</H2>
+
+    {% if classes %}
+        {% for class in classes %}
+            <div class="teacher_class_card" id="class{{ class.id }}">
+
+                <div class="class_options" style="display: inline-block; background-color: inherit"><p style="background-color: inherit; display: inline-block">{{ class.class_name }} - ({{ class.id }}, {{ class.pin }})</p></div>
+                <input class="delete_class" type="button" value="Delete" style="display: inline; float: right" onclick="delete_class({{ class.id }}, {{ user.id }})">
+                <input class="toggle_student_button" type="button" value="-" style="display: inline; float: right" onclick="toggle_students('student_card{{ class.id }}')">
+
+                {% for student in class.list_students() %}
+                    <div class="student_card student_card{{ class.id }}" id="{{ class.id }}student{{ student[0] }}">
+                        <div class="student_info" style="display: inline-block; background-color: inherit"><p style="background-color: inherit; display: inline-block">{{ student[1] }}</p></div>
+                        <input class="kick_student" type="button" value="Kick" style="display: inline; float: right" onclick="kick_student({{ student[0] }}, {{ class.id }}, {{ user.id }})">
+                    </div>
+                {% endfor %}
+
+            </div>
+        {% endfor %}
+    {% endif %}
+
+     <input class="create_class_button" type="button" onclick="window.location.href='{{ url_for('create_class') }}'" value="Create">
+{% endblock %}
+

@@ -18,7 +18,7 @@
             {% for model in models %}
                 <div class="model_card" id="model{{ model[0] }}">
                         <div class="model_info"><p style="background-color: inherit; display: inline-block">{{ model[0] }} - {{ model[2]}}</p></div>
-                        <input class="delete_model" type="button" value="Delete" style="display: inline; float: right" onclick="delete_model({{ model[0] }})">
+                        <input class="delete_model" type="button" value="Delete" style="display: inline; float: right" onclick="delete_model({{ model[0] }}, {{ user.id }})">
                 </div>
 
             {% endfor %}
@@ -32,9 +32,9 @@
     {% with classes = user.list_classes() %}
         {% if classes %}
             {% for class in classes %}
-                <div class="class_card" id="model{{ class[0] }}">
+                <div class="class_card" id="class{{ class[0] }}">
                     <div class="class_info"><p style="background-color: inherit; display: inline-block">{{ class[1] }} - Teaher: {{ class[3]}}</p></div>
-                    <input class="leave_class" type="button" value="Leave" style="display: inline; float: right" onclick="leave_class({{ class[0] }})">
+                    <input class="leave_class" type="button" value="Leave" style="display: inline; float: right" onclick="leave_class({{ class[0] }}, {{ user.id }})">
                 </div>
             {% endfor %}
         {% endif %}

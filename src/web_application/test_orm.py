@@ -87,6 +87,15 @@ def test_user_methods():
 
     print("all models available to the teacher:", teacher.list_all_models())
 
+    classes = []
+    for i in teacher_classes:
+        new = orm.ClassGroup(conn, i[0])
+        print(new.id, new.class_name)
+        print(new.list_students())
+        classes.append(new)
+        
+
+
 def main():
 
     # new dataset

@@ -22,7 +22,6 @@ def create_user_object(conn: sqlite3.Connection, id: int):
     else:
         raise No_Such_ID("no user with that ID is found")
 
-
 class entity_model(abc.ABC):
 
     @abc.abstractmethod
@@ -39,6 +38,10 @@ class entity_model(abc.ABC):
     def delete(self):
         pass
 
+    @property
+    def id(self):
+        return self._id
+
 class User(entity_model):
 
     def __init__(self, conn: sqlite3.Connection, id: int):
@@ -48,16 +51,18 @@ class User(entity_model):
         self._role = None
 
     def list_models(self):
+
         cursor = self.conn.cursor()
         return cursor.execute('SELECT * FROM model WHERE owner_id=?', [self.id]).fetchall()
-        
+
+    def delete_model(self, model_id):
+
+        cursor = self.conn.cursor()
+        cursor.execute('DELETE FROM model WHERE id=? AND owner_id=?', [model_id, self.id])
+        self.conn.commit()
 
     def list_classes(self):
         pass
-
-    @property
-    def id(self):
-        return self._id
 
     @property
     def username(self):
@@ -124,11 +129,12 @@ class Teacher(User):
         self.conn.commit()
         pass
 
-    def create_class(self, class_name: str, pin: int):
+    def create_class(self, class_name, pin):
 
         cursor = self.conn.cursor()
         try:
             cursor.execute('INSERT into class (class_name, pin, teacher_id) VALUES (?, ?, ?)', [class_name, pin, self.id])
+            self.conn.commit()
         except sqlite3.IntegrityError:
             raise Existing_Class()
 
@@ -140,9 +146,21 @@ class Teacher(User):
                                  (SELECT student_id FROM class_student WHERE class_id =
                                  (SELECT id FROM class WHERE teacher_id=?));""", [self.id]).fetchall()
 
+    def delete_class(self, class_id):
+
+        cursor = self.conn.cursor()
+        data = cursor.execute('SELECT teacher_id FROM class WHERE id=?', [class_id]).fetchone()
+        if not data:
+            raise Invalid_Credentials()
+        else:
+            if int(data[0]) == self.id:
+                cursor.execute('DELETE FROM class WHERE id=?', [class_id])
+                self.conn.commit()
+            else:
+                raise Invalid_Credentials()
+
     def delete(self):
         pass
-
 
 class Student(User):
 
@@ -212,10 +230,8 @@ class Student(User):
 
         return data
 
-
     def delete(self):
         pass
-
 
 class ClassGroup(entity_model):
 
@@ -238,7 +254,9 @@ class ClassGroup(entity_model):
         return new_class_id[0]
 
     def list_students(self):
-        pass
+        cursor = self.conn.cursor()
+        data = cursor.execute("SELECT id, full_name FROM user WHERE id IN (SELECT student_id FROM class_student WHERE class_id=?)", [self.id]).fetchall()
+        return data
 
     def delete(self):
         pass

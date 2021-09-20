@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{%  block topbar %}
+     <a class="topbar_option" style="float: right" href="{{ url_for('home') }}">Home</a>
+{% endblock %}
+
+{% block content %}
+
+    <form action="/create_class" method="post">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="error_message">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <input type="text" name="class_name" placeholder="class_name"> <br>
+        <input type="password" name="pin", placeholder="pin"> <br>
+        <input type="submit" value="Create"> <br>
+
+    </form>
+
+{% endblock %}
