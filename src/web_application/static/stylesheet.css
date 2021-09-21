@@ -38,7 +38,7 @@ input {
     margin-bottom: 10px;
     border-radius: 4px;
 }
-input[type=password] {
+input[type=password], input[type=file] {
     border-color: #c6735a;
 }
 input[type=text] {

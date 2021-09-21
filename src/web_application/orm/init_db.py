@@ -94,6 +94,7 @@ def init_model(conn: sqlite3.Connection):
                             path TEXT,
                             infile_path TEXT,
                             timestamp INTEGER,
+                            UNIQUE (owner_id, name),
                             FOREIGN KEY (owner_id) REFERENCES user (id) ON UPDATE CASCADE ON DELETE CASCADE
                             );''')
         conn.commit()

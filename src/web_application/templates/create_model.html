@@ -6,7 +6,18 @@
 
 {% block content %}
 
-<br>
-<p>create model endpoint</p>
+    <form action="/create_model" method="post" enctype="multipart/form-data">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="error_message">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <input type="text" name="model_name" placeholder="model name"> <br>
+        <input type="file" name="infile" accept="image/*">
+        <input type="submit" value="Create"> <br>
+
+    </form>
 
 {% endblock %}

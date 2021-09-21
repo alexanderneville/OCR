@@ -1,6 +1,6 @@
 from flask import Flask, session, json, render_template, request, redirect, url_for, abort, flash, get_flashed_messages, jsonify
 import os
-import orm
+import orm, pipeline
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -176,10 +176,53 @@ def join_class():
     else:
         return redirect(url_for('index'))
 
-@app.route('/create_model')
+@app.route('/create_model', methods=['GET', 'POST'])
 def create_model():
     if session["user"]:
-        return render_template('create_model.html')
+        if request.method == 'GET':
+            return render_template('create_model.html')
+        else:
+            current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
+            print(current_user.id)
+            try:
+                if not request.form:
+                    raise orm.Insufficient_Data()
+                if not request.form['model_name']:
+                    raise orm.Insufficient_Data()
+                id = current_user.create_model(request.form['model_name'])
+                file_id=str(id)+".png"
+                print(file_id)
+                uploaded = request.files['infile']
+                if uploaded.filename == '':
+                    raise orm.Insufficient_Data
+                uploaded.save(orm.tmp_path+file_id)
+                print("creating pipeline object")
+                image_checker = pipeline.Pipeline()
+                rc = image_checker.check_header(orm.tmp_path+file_id)
+                del(image_checker)
+                print("deallocated pipeline object")
+                if rc == 1:
+                    os.rename(orm.tmp_path+file_id, orm.input_path+file_id)
+                    conn = orm.connect_db(orm.db_path)
+                    cursor = conn.cursor()
+                    cursor.execute('UPDATE model SET infile_path=? WHERE id=?', [orm.input_path+file_id, id])
+                    conn.commit()
+                    return redirect(url_for('home'))
+                else:
+                    raise orm.Invalid_FileType()
+
+            except orm.Invalid_FileType:
+                os.remove(orm.tmp_path + file_id)
+                current_user.delete_model(id)
+                flash('Invalid image file (PNG only)')
+                return redirect(url_for('create_model'))
+            except orm.Insufficient_Data:
+                flash('Fill in every field')
+                return redirect(url_for('create_model'))
+            except orm.Existing_Model:
+                flash('Models must have a unique name')
+                return redirect(url_for('create_model'))
+
     else:
         return redirect(url_for('index'))
 

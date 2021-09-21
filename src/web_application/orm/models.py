@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import abc, sqlite3
+from datetime import datetime
+import abc, sqlite3, time
 from . import authenticate
-
 def check_username_unused(conn: sqlite3.Connection, username: str):
 
     """return none if there is no user with that name, else return the record."""
@@ -63,6 +63,17 @@ class User(entity_model):
 
     def list_classes(self):
         pass
+
+    def create_model(self, model_name):
+        try:
+            cursor = self.conn.cursor()
+            current = datetime.now()
+            timestamp = time.mktime(current.timetuple())
+            cursor.execute('INSERT INTO model (owner_id, name, timestamp) VALUES (?,?,?)', [self.id, model_name, timestamp])
+            self.conn.commit()
+            return cursor.execute('SELECT id FROM model WHERE owner_id=? ORDER BY id DESC limit 1', [self.id]).fetchone()[0]
+        except sqlite3.IntegrityError:
+            raise Existing_Model()
 
     @property
     def username(self):
@@ -289,6 +300,9 @@ class Existing_Username(Exception):
 class Existing_Class(Exception):
     pass
 
+class Existing_Model(Exception):
+    pass
+
 class Invalid_Credentials(Exception):
     pass
 
@@ -302,4 +316,7 @@ class Insufficient_Data(Exception):
     pass
 
 class Existing_Member(Exception):
+    pass
+
+class Invalid_FileType(Exception):
     pass
