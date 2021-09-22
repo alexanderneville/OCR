@@ -1,6 +1,7 @@
 from flask import Flask, session, json, render_template, request, redirect, url_for, abort, flash, get_flashed_messages, jsonify
-import os
-import orm, pipeline
+import os, time
+import orm, ocr, pipeline
+from datetime import datetime
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -116,7 +117,16 @@ def home():
         if isinstance(current_user, orm.Teacher):
             conn = orm.connect_db(orm.db_path)
             classes = [orm.ClassGroup(conn, i[0]) for i in current_user.list_classes()]
-            return render_template('teacher_home.html', user = current_user, classes=classes)
+            # id, name, pin , students[]
+            details = []
+            for i in classes:
+                students = [orm.create_user_object(conn, j[0]) for j in i.list_students()]
+                models = [[orm.Model(conn, model[0]) for model in student.list_models()] for student in students]
+                class_data = [[j[0], j[1]] for j in zip(students, models)]
+                print(class_data)
+                details.append([i, class_data])
+            print(details)
+            return render_template('teacher_home.html', user = current_user, details=details)
         else:
             return render_template('student_home.html', user = current_user)
 
@@ -157,7 +167,7 @@ def join_class():
             try:
 
                 if not request.form:
-                    raise orm.Insufficient_Data
+                    raise orm.Insufficient_Data()
                 keys = ["class_id", "pin"]
                 fields = handle_form_data(request.form, keys)
                 current_user.join_class(fields[0], fields[1])
@@ -194,7 +204,7 @@ def create_model():
                 print(file_id)
                 uploaded = request.files['infile']
                 if uploaded.filename == '':
-                    raise orm.Insufficient_Data
+                    raise orm.Insufficient_Data()
                 uploaded.save(orm.tmp_path+file_id)
                 print("creating pipeline object")
                 image_checker = pipeline.Pipeline()
@@ -241,7 +251,7 @@ def create_class():
             try:
 
                 if not request.form:
-                    raise orm.Insufficient_Data
+                    raise orm.Insufficient_Data()
                 keys = ["class_name", "pin"]
 
                 fields = handle_form_data(request.form, keys)
@@ -263,8 +273,78 @@ def create_class():
 
         return redirect(url_for('index'))
 
+@app.route('/train_model')
+def train_model():
+    if session['user']:
+        return render_template()
+    else:
+        return redirect(url_for('home'))
 
+@app.route('/use_model', methods=['GET', 'POST'])
+def use_model():
+    if session['user']:
+        current_user = orm.create_user_object(orm.connect_db(orm.db_path))
+        if request.method == 'GET':
 
+            model_id = request.args.get('id')
+            print(model_id)
+            if model_id == None or model_id == '':
+                return redirect(url_for('home'))
+            available_models = current_user.list_models()
+            model_ids = [str(i[0]) for i in available_models]
+            if model_id not in model_ids:
+                return redirect(url_for('home'))
+
+            return render_template('use_model.html', model_id = model_id)
+        else:
+            current = datetime.now()
+            timestamp = time.mktime(current.timetuple())
+            try:
+
+                if not request.form:
+                    raise orm.Insufficient_Data()
+                keys = ["model_id"]
+                fields = handle_form_data(request.form, keys)
+                print(fields)
+
+                uploaded = request.files['infile']
+                if uploaded.filename == '':
+                    raise orm.Insufficient_Data()
+                uploaded.save(orm.tmp_path + timestamp + ".png")
+                print("creating pipeline object")
+                image_checker = pipeline.Pipeline()
+                rc = image_checker.check_header(orm.tmp_path + file_id)
+                del (image_checker)
+                print("deallocated pipeline object")
+                if rc == 1:
+                    text = ocr.recognise(fields[0], orm.tmp_path + timestamp + ".png") # just a prototype at the moment
+                    current_user.create_cache(text) # just a prototype for now
+                else:
+                    raise orm.Invalid_FileType() # TODO move this exception to ocr package
+
+                return redirect(url_for("view_cache"))
+
+            except orm.Invalid_FileType:
+                os.remove(orm.tmp_path + timestamp + ".png")
+                current_user.delete_model(id)
+                flash('Invalid image file (PNG only)')
+                return redirect(url_for('create_model'))
+            except orm.Insufficient_Data:
+                flash("Fill in both fields")
+                return render_template('create_class.html')
+            except orm.Invalid_Credentials:
+                flash("Invalid join code or pin")
+                return render_template('create_class.html')
+            except orm.Existing_Class:
+                flash("Existing class with this name")
+                return render_template('create_class.html')
+
+    else:
+        return redirect(url_for())
+
+@app.route("/view_cache")
+def view_cache():
+    return render_template('view_cache.html') # TODO work on this function
 
 
 @app.route('/_leave_class', methods=['POST'])

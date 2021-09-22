@@ -3,6 +3,7 @@
 from datetime import datetime
 import abc, sqlite3, time
 from . import authenticate
+from . import config
 def check_username_unused(conn: sqlite3.Connection, username: str):
 
     """return none if there is no user with that name, else return the record."""
@@ -131,8 +132,9 @@ class Teacher(User):
         data = cursor.execute("""SELECT class.id, class.class_name, class.pin, user.username
                                  FROM class
                                  INNER JOIN user ON class.teacher_id = user.id
-                                 WHERE class.teacher_id=?""", [self._id]).fetchall();
+                                 WHERE class.teacher_id=?""", [self._id]).fetchall()
         return data
+
 
     def kick_student(self, student_id: int, class_id: int):
         cursor = self.conn.cursor()
@@ -280,6 +282,24 @@ class ClassGroup(entity_model):
     def pin(self):
         return self._pin
 
+class Model(entity_model):
+
+    def __init__(self, conn: sqlite3.Connection, id: int):
+        super().__init__(conn, id)
+        cursor = self.conn.cursor()
+        data = cursor.execute('SELECT name FROM model WHERE id=?', [self._id]).fetchone()
+        self._model_name = data[0]
+
+    @staticmethod
+    def create():
+        pass
+
+    def delete(self):
+        pass
+
+    @property
+    def model_name(self):
+        return self._model_name
 
 ##############
 # EXCEPTIONS #

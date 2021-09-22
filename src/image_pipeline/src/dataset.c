@@ -221,67 +221,87 @@ void extend_dataset(dataset * set) {
 
 }
 
-void export_dataset(dataset * set, char * path) {
+void export_dataset(dataset * set, char * output_path, char * thumbnail_path) {
 
-    FILE * fp = fopen(path, "w");
+    FILE * fp1 = fopen(output_path, "w");
+    FILE * fp2 = fopen(thumbnail_path, "w");
 
-    fprintf(fp, "{\n");
-    fprintf(fp, "    \"characters\": [\n");
+    fprintf(fp1, "{\n");
+    fprintf(fp1, "    \"characters\": [\n");
 
     for (int i = 0; i < set->num_elements; i++) {
-        // for every char
-        fprintf(fp, "        {\n");
-        fprintf(fp, "            \"position\": %d,\n", i);
-        fprintf(fp, "            \"line_number\": %d,\n", set->elements[i]->line_number);
-        fprintf(fp, "            \"word_number\": %d,\n", set->elements[i]->word_number);
-        fprintf(fp, "            \"character_number\": %d,\n", set->elements[i]->character_number);
-        fprintf(fp, "            \"x\": %d,\n", set->elements[i]->x);
-        fprintf(fp, "            \"y\": %d,\n", set->elements[i]->y);
-        fprintf(fp, "            \"w\": 32,\n");
-        fprintf(fp, "            \"h\": 32,\n");
-        fprintf(fp, "            \"pixels\": [\n");
+        // for every char (the output file)
+        fprintf(fp1, "        {\n");
+        fprintf(fp1, "            \"position\": %d,\n", i);
+        fprintf(fp1, "            \"line_number\": %d,\n", set->elements[i]->line_number);
+        fprintf(fp1, "            \"word_number\": %d,\n", set->elements[i]->word_number);
+        fprintf(fp1, "            \"character_number\": %d,\n", set->elements[i]->character_number);
+        fprintf(fp1, "            \"x\": %d,\n", set->elements[i]->x);
+        fprintf(fp1, "            \"y\": %d,\n", set->elements[i]->y);
+        fprintf(fp1, "            \"w\": 32,\n");
+        fprintf(fp1, "            \"h\": 32,\n");
+        fprintf(fp1, "            \"pixels\": [\n");
 
         for (int j = 0; j < 10; j++) {
             // for every matrix
-            fprintf(fp, "                [\n"); 
+            fprintf(fp1, "                [\n"); 
             for (int y = 0; y < set->elements[i]->images[j]->y; y++){
-                fprintf(fp, "                    [");
+                fprintf(fp1, "                    [");
                 for (int x = 0; x < set->elements[i]->images[j]->x; x++){
                     if (x == set->elements[i]->images[j]->x - 1) {
-                        fprintf(fp, "%f", set->elements[i]->images[j]->array[(y * set->elements[i]->images[j]->x) + x]);
+                        fprintf(fp1, "%f", set->elements[i]->images[j]->array[(y * set->elements[i]->images[j]->x) + x]);
                     } else {
-                        fprintf(fp, "%f, ", set->elements[i]->images[j]->array[(y * set->elements[i]->images[j]->x) + x]);
+                        fprintf(fp1, "%f, ", set->elements[i]->images[j]->array[(y * set->elements[i]->images[j]->x) + x]);
                     }
                 }
                 if (y == set->elements[i]->images[j]->y - 1) {
-                    fprintf(fp, "]\n");
+                    fprintf(fp1, "]\n");
                 } else {
-                    fprintf(fp, "],\n");
+                    fprintf(fp1, "],\n");
                 }
             }
             if (j == 9) {
-                fprintf(fp, "                ]\n"); 
+                fprintf(fp1, "                ]\n"); 
             } else {
-                fprintf(fp, "                ],\n"); 
+                fprintf(fp1, "                ],\n"); 
             }
         }
 
-        fprintf(fp, "            ],\n");
-        fprintf(fp, "            \"label\": null\n");
-        fprintf(fp, "");
-        fprintf(fp, "");
+        fprintf(fp1, "            ],\n");
+        fprintf(fp1, "            \"label\": null\n");
+        fprintf(fp1, "");
+        fprintf(fp1, "");
 
         if (i == set->num_elements - 1) {
-            fprintf(fp, "        }\n");
+            fprintf(fp1, "        }\n");
         } else {
-            fprintf(fp, "        },\n");
+            fprintf(fp1, "        },\n");
+        }
+
+        /* fp2 thumbnail (for each elemet)*/
+
+        for (int y = 0; y < set->elements[i]->images[0]->y; y++){
+            for (int x = 0; x < set->elements[i]->images[0]->x; x++){
+                    if (set->elements[i]->images[0]->array[(y * set->elements[i]->images[0]->x) + x] > 255.0) {
+                        printf("bigger than 255\n");
+                        set->elements[i]->images[0]->array[(y * set->elements[i]->images[0]->x) + x] = 0.0;
+                    } else if (set->elements[i]->images[0]->array[(y * set->elements[i]->images[0]->x) + x] < 0.0) {
+                        set->elements[i]->images[0]->array[(y * set->elements[i]->images[0]->x) + x] = 0.0;
+                    }
+                    if (x == set->elements[i]->images[0]->x - 1) {
+                        fprintf(fp2, "%07.3f\n", set->elements[i]->images[0]->array[(y * set->elements[i]->images[0]->x) + x]);
+                    } else {
+                        fprintf(fp2, "%07.3f,", set->elements[i]->images[0]->array[(y * set->elements[i]->images[0]->x) + x]);
+                    }
+            }
         }
     }
 
-    fprintf(fp, "    ]\n");
-    fprintf(fp, "}\n\n");
+    fprintf(fp1, "    ]\n");
+    fprintf(fp1, "}\n\n");
 
-    fclose(fp);
+    fclose(fp1);
+    fclose(fp2);
 
 }
 

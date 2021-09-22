@@ -30,18 +30,21 @@
 
     <H2>Classes:</H2>
 
-    {% if classes %}
-        {% for class in classes %}
-            <div class="teacher_class_card" id="class{{ class.id }}">
+    {% if details %}
+        {% for class in details %}
+            <div class="teacher_class_card" id="class{{ class[0].id }}">
 
-                <div class="class_options" style="display: inline-block; background-color: inherit"><p style="background-color: inherit; display: inline-block">{{ class.class_name }} - ({{ class.id }}, {{ class.pin }})</p></div>
-                <input class="delete_class" type="button" value="Delete" style="display: inline; float: right" onclick="delete_class({{ class.id }}, {{ user.id }})">
-                <input class="toggle_student_button" type="button" value="-" style="display: inline; float: right" onclick="toggle_students('student_card{{ class.id }}')">
+                <div class="class_options" style="display: inline-block; background-color: inherit"><p style="background-color: inherit; display: inline-block">{{ class[0].class_name }} - ({{ class[0].id }}, {{ class[0].pin }})</p></div>
+                <input class="delete_class" type="button" value="Delete" style="display: inline; float: right" onclick="delete_class({{ class[0].id }}, {{ user.id }})">
+                <input class="toggle_student_button" type="button" value="-" style="display: inline; float: right" onclick="toggle_students('student_card{{ class[0].id }}')">
 
-                {% for student in class.list_students() %}
-                    <div class="student_card student_card{{ class.id }}" id="{{ class.id }}student{{ student[0] }}">
-                        <div class="student_info" style="display: inline-block; background-color: inherit"><p style="background-color: inherit; display: inline-block">{{ student[1] }}</p></div>
-                        <input class="kick_student" type="button" value="Kick" style="display: inline; float: right" onclick="kick_student({{ student[0] }}, {{ class.id }}, {{ user.id }})">
+                {% for student in class[1] %}
+                    <div class="student_card student_card{{ class[0].id }}" id="{{ class[0].id }}student{{ student[0].id }}">
+                        <div class="student_info" style="display: inline-block; background-color: inherit"><p style="background-color: inherit; display: inline-block">{{ student[0].full_name }}</p></div>
+                        <input class="kick_student" type="button" value="Kick" style="display: inline; float: right" onclick="kick_student({{ student[0].id }}, {{ class[0].id }}, {{ user.id }})">
+                        {% for model in student[1] %}
+                            <p style="background-color: inherit">{{ model.model_name }}</p>
+                        {% endfor %}
                     </div>
                 {% endfor %}
 

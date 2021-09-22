@@ -3,6 +3,8 @@ import sqlite3
 secret_key = '1234'
 data_path = "/home/alex/code/nea/data/"
 input_path = data_path+"input/"
+output_path= data_path+"output/"
+thumbnail_path = data_path+"thumbnail/"
 model_path = data_path+"models/"
 tmp_path = data_path+"tmp/"
 db_path = data_path+'application_data.db'

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{%  block topbar %}
+     <a class="topbar_option" style="float: right" href="{{ url_for('home') }}">Home</a>
+{% endblock %}
+
+{% block content %}
+
+    <form action="/use_model" method="post" enctype="multipart/form-data">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="error_message">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <input type="file" name="infile" accept="image/*">
+        <input type="hidden" name="model_id" value="{{ model_id }}" />
+        <input type="submit" value="Go"> <br>
+
+    </form>
+
+{% endblock %}

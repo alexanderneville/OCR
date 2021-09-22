@@ -28,7 +28,7 @@ typedef struct image_data_T {
     void (* resize) (struct image_data_T * self, float scale_factor);
     void (* image_translation) (struct image_data_T * self, int x, int y);
     void (* create_document_outline) (struct image_data_T * self);
-    void (* generate_dataset_from_image) (struct image_data_T * self, char * path);
+    void (* generate_dataset_from_image) (struct image_data_T * self, char * output_path, char * thumbnail_path);
 
 } image_data;
 
@@ -44,6 +44,6 @@ void process(image_data * self, kernel_configuration type, int kernel_dimensions
 void resize(image_data * self, float scale_factor);
 void image_translation(image_data * self, int x, int y);
 void create_document_outline(image_data * self);
-void generate_dataset_from_image(image_data * self, char * path);
+void generate_dataset_from_image(image_data * self, char * output_path, char * thumbnail_path);
 
 #endif 

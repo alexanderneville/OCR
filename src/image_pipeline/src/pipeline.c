@@ -13,6 +13,7 @@ typedef struct {
     PyObject *infile;
     PyObject *outfile;
     PyObject *dumpfile;
+    PyObject *thumbnailfile;
     image_data * image;
     int height, width, channels, color_type, bit_depth;
 } PipelineObject;
@@ -204,19 +205,21 @@ static PyObject *
 Pipeline_generate_dataset(PipelineObject *self, PyObject * args) {
 
     char * outfile;
-    if(!PyArg_ParseTuple(args, "s", &outfile)){
+    char * thumbnaifile;
+    if(!PyArg_ParseTuple(args, "ss", &outfile, &thumbnaifile)){
         PyErr_SetString(Pipeline_Error, "path arguement required.");
         return NULL;
     }
 
     self->dumpfile = PyUnicode_FromString(outfile);
+    self->thumbnailfile = PyUnicode_FromString(thumbnaifile);
 
     if (self->image == NULL) {
         PyErr_SetString(Pipeline_Error, "file must be loaded first.");
         return NULL;
     }
 
-    self->image->generate_dataset_from_image(self->image, outfile);
+    self->image->generate_dataset_from_image(self->image, outfile, thumbnaifile);
 
     return PyLong_FromLong(1);
 

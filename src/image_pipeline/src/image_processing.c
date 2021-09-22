@@ -393,8 +393,6 @@ void image_translation(image_data * self, int x, int y) {
 
 void create_document_outline(image_data * self) {
 
-    /* self->greyscale = translation(self->greyscale, 40, 40); */
-
     if (self->greyscale == NULL)
         self->rgb_to_greyscale(self);
 
@@ -408,7 +406,7 @@ void create_document_outline(image_data * self) {
 
 };
 
-void generate_dataset_from_image(image_data * self, char * path) {
+void generate_dataset_from_image(image_data * self, char * output_path, char * thumbnail_path) {
 
     if (!self->document_p)
         return;
@@ -420,7 +418,7 @@ void generate_dataset_from_image(image_data * self, char * path) {
     /*     printf("Line: %d, Word: %d, Character: %d\n", self->data[i].line_number, self->data[i].word_number, self->data[i].character_number); */
 
     extend_dataset(self->set);
-    export_dataset(self->set, path);
+    export_dataset(self->set, output_path, thumbnail_path);
 
 }
 
