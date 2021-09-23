@@ -42,10 +42,13 @@ matrix * create_kernel(kernel_configuration type, float kernel_dimensions, float
         }
         printf("\n");
 
-        kernel_matrix = scale_matrix(tmp_kernel, scale_factor, true);
+        kernel_matrix = scale_matrix(tmp_kernel, scale_factor, false);
 
         for (int y = 0; y < kernel_matrix->y; y++) {
             for (int x = 0; x < kernel_matrix->x; x++) {
+                if (kernel_matrix->array[(y * kernel_matrix->x) + x] > 1000.0 
+                    || kernel_matrix->array[(y * kernel_matrix->x) + x] < 0.0)
+                    kernel_matrix->array[(y * kernel_matrix->x) + x] = 0.0;
                 printf("%f, ", kernel_matrix->array[(y * kernel_matrix->x) + x]);
             }
             printf("\n");
@@ -70,6 +73,7 @@ matrix * create_kernel(kernel_configuration type, float kernel_dimensions, float
     }
 
     return kernel_matrix;
+
 }
 
 matrix * apply_convolution(matrix * matrix_p, kernel_configuration type, matrix * kernel, int kernel_dimensions) {

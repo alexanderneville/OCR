@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <png.h>
+#include <unistd.h>
 #include "../includes/image_io.h"
 
 int check_header(char * file_name) {
@@ -61,7 +62,6 @@ unsigned char ** read_image(char * file_name, int * height, int * width, int * c
         png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
         fclose(fp);
         return NULL;
-
     }
 
     png_init_io(png_ptr, fp);
@@ -117,7 +117,6 @@ unsigned char ** read_image(char * file_name, int * height, int * width, int * c
     fclose(fp);
 
     return pixels;
-
 }
 
 void inspect_image(unsigned char ** pixels, int height, int width) {

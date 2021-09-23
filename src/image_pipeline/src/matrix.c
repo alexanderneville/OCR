@@ -89,11 +89,8 @@ void adjust_scale_factor(float * height, float * width, float * scale_factor, fl
 
         if (valid_height && valid_width) valid_factor = true;
 
-        if (valid_width && escape_counter > 1000000) {
-
+        if (valid_width && escape_counter > 1000000)
             valid_factor = true;
-
-        }
 
     }
 
@@ -120,8 +117,6 @@ matrix * scale_matrix(matrix * matrix_p, float scale_factor, bool adjust) {
         new_width *= scale_factor;
     }
 
-    /* printf("scale factor: %f, x: %f, y: %f \n", scale_factor, new_width, new_height); */
-    
     matrix * scaled_matrix = create_matrix(new_height, new_width);
 
     for (int y = 0; y < new_height; y ++){

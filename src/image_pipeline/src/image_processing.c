@@ -72,7 +72,7 @@ image_data * initialise_data(unsigned char ** pixels, int height, int width, int
     new_image_p->export_pixels = &export_pixels;
     new_image_p->rgb_to_greyscale = &rgb_to_greyscale;
     new_image_p->greyscale_to_rgb = &greyscale_to_rgb;
-    new_image_p->reduce_resolution = & reduce_resolution;
+    new_image_p->reduce_resolution = &reduce_resolution;
     new_image_p->invert = &invert;
     new_image_p->process = &process;
     new_image_p->resize = &resize;
@@ -406,7 +406,7 @@ void create_document_outline(image_data * self) {
 
 };
 
-void generate_dataset_from_image(image_data * self, char * output_path, char * thumbnail_path) {
+void generate_dataset_from_image(image_data * self, char * output_path, char * sample_path, char * info_path) {
 
     if (!self->document_p)
         return;
@@ -418,7 +418,7 @@ void generate_dataset_from_image(image_data * self, char * output_path, char * t
     /*     printf("Line: %d, Word: %d, Character: %d\n", self->data[i].line_number, self->data[i].word_number, self->data[i].character_number); */
 
     extend_dataset(self->set);
-    export_dataset(self->set, output_path, thumbnail_path);
+        export_dataset(self->set, output_path, sample_path, info_path);
 
 }
 

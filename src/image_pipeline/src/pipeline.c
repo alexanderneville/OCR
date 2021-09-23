@@ -10,19 +10,22 @@ static PyObject *Pipeline_Error;
 
 typedef struct {
     PyObject_HEAD
-    PyObject *infile;
-    PyObject *outfile;
-    PyObject *dumpfile;
-    PyObject *thumbnailfile;
+    PyObject *infile_path;
+    PyObject *outfile_path;
+    PyObject *dataset_path;
+    PyObject *sample_path;
+    PyObject *info_path;
     image_data * image;
     int height, width, channels, color_type, bit_depth;
 } PipelineObject;
 
 static PyMemberDef Pipeline_members[] = {
 
-    {"infile",      T_OBJECT_EX,    offsetof(PipelineObject, infile),       0, "the input file"                 },
-    {"outfile",     T_OBJECT_EX,    offsetof(PipelineObject, outfile),      0, "the output file"                },
-    {"dumpfile",    T_OBJECT_EX,    offsetof(PipelineObject, dumpfile),     0, "where to dump the json data"    },
+    {"infile",      T_OBJECT_EX,    offsetof(PipelineObject, infile_path),  0, "the input file"                 },
+    {"outfile",     T_OBJECT_EX,    offsetof(PipelineObject, outfile_path), 0, "the output file"                },
+    {"dataset_path",T_OBJECT_EX,    offsetof(PipelineObject, dataset_path), 0, "where to dump the json data"    },
+    {"sample_path", T_OBJECT_EX,    offsetof(PipelineObject, sample_path),  0, "where to dump the json data"    },
+    {"info_path",   T_OBJECT_EX,    offsetof(PipelineObject, info_path),    0, "where to dump the json data"    },
     {"height",      T_INT,          offsetof(PipelineObject, height),       0, "height of the image in pixels"  },
     {"width",       T_INT,          offsetof(PipelineObject, width),        0, "width of the image in pixels"   },
     {"channels",    T_INT,          offsetof(PipelineObject, channels),     0, "number of channels"             },
@@ -35,8 +38,10 @@ static PyMemberDef Pipeline_members[] = {
 static void
 Pipeline_dealloc(PipelineObject *self)
 {
-    Py_XDECREF(self->infile);
-    Py_XDECREF(self->outfile);
+    Py_XDECREF(self->infile_path);
+    Py_XDECREF(self->outfile_path);
+    Py_XDECREF(self->sample_path);
+    Py_XDECREF(self->info_path);
     destroy_image_data(self->image);
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
@@ -47,18 +52,28 @@ Pipeline_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     PipelineObject *self;
     self = (PipelineObject *) type->tp_alloc(type, 0);
     if (self != NULL) {
-        self->infile = PyUnicode_FromString("");
-        if (self->infile == NULL) {
+        self->infile_path = PyUnicode_FromString("");
+        if (self->infile_path == NULL) {
             Py_DECREF(self);
             return NULL;
         }
-        self->outfile = PyUnicode_FromString("");
-        if (self->outfile == NULL) {
+        self->outfile_path = PyUnicode_FromString("");
+        if (self->outfile_path == NULL) {
             Py_DECREF(self);
             return NULL;
         }
-        self->dumpfile = PyUnicode_FromString("");
-        if (self->dumpfile == NULL) {
+        self->dataset_path = PyUnicode_FromString("");
+        if (self->dataset_path == NULL) {
+            Py_DECREF(self);
+            return NULL;
+        }
+        self->sample_path = PyUnicode_FromString("");
+        if (self->sample_path == NULL) {
+            Py_DECREF(self);
+            return NULL;
+        }
+        self->sample_path = PyUnicode_FromString("");
+        if (self->sample_path == NULL) {
             Py_DECREF(self);
             return NULL;
         }
@@ -75,28 +90,28 @@ Pipeline_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 static int
 Pipeline_init(PipelineObject *self, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {"infile", "outfile", "dumpfile", NULL};
-    PyObject *infile = NULL, *outfile = NULL, *dumpfile = NULL, *tmp;
+    static char *kwlist[] = {"infile_path", "outfile_path", "dataset_path", NULL};
+    PyObject *infile_path = NULL, *outfile_path = NULL, *dataset_path = NULL, *tmp;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OOO", kwlist, &infile, &outfile, &dumpfile))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OOO", kwlist, &infile_path, &outfile_path, &dataset_path))
         return -1;
 
-    if (infile) {
-        tmp = self->infile;
-        Py_INCREF(infile);
-        self->infile = infile;
+    if (infile_path) {
+        tmp = self->infile_path;
+        Py_INCREF(infile_path);
+        self->infile_path = infile_path;
         Py_XDECREF(tmp);
     }
-    if (outfile) {
-        tmp = self->outfile;
-        Py_INCREF(outfile);
-        self->outfile = outfile;
+    if (outfile_path) {
+        tmp = self->outfile_path;
+        Py_INCREF(outfile_path);
+        self->outfile_path = outfile_path;
         Py_XDECREF(tmp);
     }
-    if (dumpfile) {
-        tmp = self->dumpfile;
-        Py_INCREF(dumpfile);
-        self->dumpfile = dumpfile;
+    if (dataset_path) {
+        tmp = self->dataset_path;
+        Py_INCREF(dataset_path);
+        self->dataset_path = dataset_path;
         Py_XDECREF(tmp);
     }
     return 0;
@@ -112,19 +127,28 @@ Pipeline_init(PipelineObject *self, PyObject *args, PyObject *kwds)
 static PyObject *
 Pipeline_files(PipelineObject *self, PyObject *Py_UNUSED(ignored))
 {
-    if (self->infile == NULL) {
+    if (self->infile_path == NULL) {
         PyErr_SetString(Pipeline_Error, "input file missing");
         return NULL;
     }
-    if (self->outfile == NULL) {
+    if (self->outfile_path == NULL) {
         PyErr_SetString(PyExc_AttributeError, "output file missing");
         return NULL;
     }
-    if (self->dumpfile == NULL) {
-        PyErr_SetString(PyExc_AttributeError, "json file missing");
+    if (self->dataset_path == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "No dataset path");
         return NULL;
     }
-    return PyUnicode_FromFormat("%S %S %S", self->infile, self->outfile, self->dumpfile);
+    if (self->sample_path == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "No sample path");
+        return NULL;
+    }
+    if (self->sample_path == NULL) {
+        PyErr_SetString(PyExc_AttributeError, "No info path");
+        return NULL;
+    }
+
+    return PyUnicode_FromFormat("%S %S %S %S", self->infile_path, self->outfile_path, self->dataset_path, self->info_path);
 }
 
 static PyObject *
@@ -152,7 +176,7 @@ Pipeline_load_file(PipelineObject *self, PyObject * args) {
         PyErr_SetString(Pipeline_Error, "path arguement required.");
         return NULL;
     }
-    self->infile = PyUnicode_FromString(infile);
+    self->infile_path = PyUnicode_FromString(infile);
 
     if(check_header(infile) != 0) {
         PyErr_SetString(Pipeline_Error, "invalid file.");
@@ -169,19 +193,19 @@ Pipeline_load_file(PipelineObject *self, PyObject * args) {
 static PyObject *
 Pipeline_save_to_file(PipelineObject *self, PyObject * args) {
 
-    char * outfile;
-    if(!PyArg_ParseTuple(args, "s", &outfile)){
+    char * outfile_path;
+    if(!PyArg_ParseTuple(args, "s", &outfile_path)){
         PyErr_SetString(Pipeline_Error, "path arguement required.");
         return NULL;
     }
-    self->outfile = PyUnicode_FromString(outfile);
+    self->outfile_path = PyUnicode_FromString(outfile_path);
 
     if (self->image == NULL) {
         PyErr_SetString(Pipeline_Error, "Call to 'save_to_file' must follow 'load_file'.");
         return NULL;
     }
     unsigned char ** pixels = self->image->export_pixels(self->image);
-    write_image(outfile, pixels, self->image->height, self->image->width, self->image->channels, self->bit_depth, self->color_type);
+    write_image(outfile_path, pixels, self->image->height, self->image->width, self->image->channels, self->bit_depth, self->color_type);
 
     return PyLong_FromLong(1);
 
@@ -204,22 +228,23 @@ Pipeline_scan_image(PipelineObject *self, PyObject *Py_UNUSED(ignored)) {
 static PyObject *
 Pipeline_generate_dataset(PipelineObject *self, PyObject * args) {
 
-    char * outfile;
-    char * thumbnaifile;
-    if(!PyArg_ParseTuple(args, "ss", &outfile, &thumbnaifile)){
+    char * outfile_path;
+    char * sample_path;
+    char * info_path;
+    if(!PyArg_ParseTuple(args, "sss", &outfile_path, &sample_path, &info_path)){
         PyErr_SetString(Pipeline_Error, "path arguement required.");
         return NULL;
     }
 
-    self->dumpfile = PyUnicode_FromString(outfile);
-    self->thumbnailfile = PyUnicode_FromString(thumbnaifile);
+    self->dataset_path = PyUnicode_FromString(outfile_path);
+    self->sample_path = PyUnicode_FromString(sample_path);
 
     if (self->image == NULL) {
         PyErr_SetString(Pipeline_Error, "file must be loaded first.");
         return NULL;
     }
 
-    self->image->generate_dataset_from_image(self->image, outfile, thumbnaifile);
+    self->image->generate_dataset_from_image(self->image, outfile_path, sample_path, info_path);
 
     return PyLong_FromLong(1);
 
@@ -247,7 +272,7 @@ Pipeline_convolution(PipelineObject *self, PyObject * args) {
         case 2:
             self->image->process(self->image, Gaussian, dimensions, strength);
             break;
-        case3:
+        case 3:
             self->image->process(self->image, Gaussian, dimensions, strength);
             break;
     }
