@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=
-LIBS= -lpng -lpthread
+LIBS= -lpng -lpthread -lm
 
 IDIR=../includes
 ODIR=./obj

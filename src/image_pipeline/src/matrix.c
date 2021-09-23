@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "../includes/matrix.h"
 
 
@@ -145,6 +146,8 @@ matrix * scale_matrix(matrix * matrix_p, float scale_factor, bool adjust) {
                                    };
 
             float value = bilinear_approximation(known_points, x_pos.decimal, y_pos.decimal);
+            if (isnan(value))
+                value = 0.0;
             /* printf("%f\n", value); */
             scaled_matrix->array[(y * scaled_matrix->x) + x] = value;
 
