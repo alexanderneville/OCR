@@ -6,7 +6,7 @@ module1 = Extension(
                     "image_io.c", "matrix.c", "dataset.c",
                     "convolution.c", "character_detection.c"],
         include_dirs=['/usr/include'], 
-        libraries = ['png', 'pthread'], 
+        libraries = ['png', 'pthread', 'm'], 
         library_dirs=['/usr/lib'])
 
 setup(name = "pipeline", 

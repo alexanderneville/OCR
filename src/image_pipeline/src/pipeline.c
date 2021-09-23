@@ -21,16 +21,16 @@ typedef struct {
 
 static PyMemberDef Pipeline_members[] = {
 
-    {"infile",      T_OBJECT_EX,    offsetof(PipelineObject, infile_path),  0, "the input file"                 },
-    {"outfile",     T_OBJECT_EX,    offsetof(PipelineObject, outfile_path), 0, "the output file"                },
-    {"dataset_path",T_OBJECT_EX,    offsetof(PipelineObject, dataset_path), 0, "where to dump the json data"    },
-    {"sample_path", T_OBJECT_EX,    offsetof(PipelineObject, sample_path),  0, "where to dump the json data"    },
-    {"info_path",   T_OBJECT_EX,    offsetof(PipelineObject, info_path),    0, "where to dump the json data"    },
-    {"height",      T_INT,          offsetof(PipelineObject, height),       0, "height of the image in pixels"  },
-    {"width",       T_INT,          offsetof(PipelineObject, width),        0, "width of the image in pixels"   },
-    {"channels",    T_INT,          offsetof(PipelineObject, channels),     0, "number of channels"             },
-    {"color_type",  T_INT,          offsetof(PipelineObject, color_type),   0, "refer to libpng documentation"  },
-    {"bit_depth",   T_INT,          offsetof(PipelineObject, bit_depth),    0, "bit depth per channel"          },
+    {"infile_path",     T_OBJECT_EX,    offsetof(PipelineObject, infile_path),  0, "the input file"                 },
+    {"outfile_path",    T_OBJECT_EX,    offsetof(PipelineObject, outfile_path), 0, "the output file"                },
+    {"dataset_path",    T_OBJECT_EX,    offsetof(PipelineObject, dataset_path), 0, "path for the full dataset"      },
+    {"sample_path",     T_OBJECT_EX,    offsetof(PipelineObject, sample_path),  0, "path for the samples"           },
+    {"info_path",       T_OBJECT_EX,    offsetof(PipelineObject, info_path),    0, "path for general info"          },
+    {"height",          T_INT,          offsetof(PipelineObject, height),       0, "height of the image in pixels"  },
+    {"width",           T_INT,          offsetof(PipelineObject, width),        0, "width of the image in pixels"   },
+    {"channels",        T_INT,          offsetof(PipelineObject, channels),     0, "number of channels"             },
+    {"color_type",      T_INT,          offsetof(PipelineObject, color_type),   0, "refer to libpng documentation"  },
+    {"bit_depth",       T_INT,          offsetof(PipelineObject, bit_depth),    0, "bit depth per channel"          },
 
     {NULL}  // null terminator
 };
@@ -72,8 +72,8 @@ Pipeline_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             Py_DECREF(self);
             return NULL;
         }
-        self->sample_path = PyUnicode_FromString("");
-        if (self->sample_path == NULL) {
+        self->info_path = PyUnicode_FromString("");
+        if (self->info_path == NULL) {
             Py_DECREF(self);
             return NULL;
         }
@@ -90,10 +90,10 @@ Pipeline_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 static int
 Pipeline_init(PipelineObject *self, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {"infile_path", "outfile_path", "dataset_path", NULL};
-    PyObject *infile_path = NULL, *outfile_path = NULL, *dataset_path = NULL, *tmp;
+    static char *kwlist[] = {"infile_path", "outfile_path", "dataset_path", "sample_path", "info_path", NULL};
+    PyObject *infile_path = NULL, *outfile_path = NULL, *dataset_path = NULL, *sample_path = NULL, *info_path = NULL, *tmp;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OOO", kwlist, &infile_path, &outfile_path, &dataset_path))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OOOOO", kwlist, &infile_path, &outfile_path, &dataset_path, &sample_path, &info_path))
         return -1;
 
     if (infile_path) {
@@ -114,6 +114,19 @@ Pipeline_init(PipelineObject *self, PyObject *args, PyObject *kwds)
         self->dataset_path = dataset_path;
         Py_XDECREF(tmp);
     }
+    if (sample_path) {
+        tmp = self->dataset_path;
+        Py_INCREF(sample_path);
+        self->sample_path = sample_path;
+        Py_XDECREF(tmp);
+    }
+    if (info_path) {
+        tmp = self->dataset_path;
+        Py_INCREF(info_path);
+        self->info_path = info_path;
+        Py_XDECREF(tmp);
+    }
+
     return 0;
 }
 
@@ -143,12 +156,12 @@ Pipeline_files(PipelineObject *self, PyObject *Py_UNUSED(ignored))
         PyErr_SetString(PyExc_AttributeError, "No sample path");
         return NULL;
     }
-    if (self->sample_path == NULL) {
+    if (self->info_path == NULL) {
         PyErr_SetString(PyExc_AttributeError, "No info path");
         return NULL;
     }
 
-    return PyUnicode_FromFormat("%S %S %S %S", self->infile_path, self->outfile_path, self->dataset_path, self->info_path);
+    return PyUnicode_FromFormat("%S %S %S %S %S", self->infile_path, self->outfile_path, self->dataset_path, self->sample_path, self->info_path);
 }
 
 static PyObject *
@@ -171,19 +184,19 @@ Pipeline_check_header(PipelineObject *self, PyObject * args)
 static PyObject *
 Pipeline_load_file(PipelineObject *self, PyObject * args) {
 
-    char * infile;
-    if(!PyArg_ParseTuple(args, "s", &infile)){
+    char * infile_path;
+    if(!PyArg_ParseTuple(args, "s", &infile_path)){
         PyErr_SetString(Pipeline_Error, "path arguement required.");
         return NULL;
     }
-    self->infile_path = PyUnicode_FromString(infile);
+    self->infile_path = PyUnicode_FromString(infile_path);
 
-    if(check_header(infile) != 0) {
+    if(check_header(infile_path) != 0) {
         PyErr_SetString(Pipeline_Error, "invalid file.");
         return NULL;
     }
 
-    unsigned char ** pixels = read_image(infile, &(self->height), &(self->width), &(self->channels), &(self->bit_depth), &(self->color_type));
+    unsigned char ** pixels = read_image(infile_path, &(self->height), &(self->width), &(self->channels), &(self->bit_depth), &(self->color_type));
     self->image = initialise_data(pixels, self->height, self->width, self->channels);
 
     return PyLong_FromLong(1);
@@ -228,23 +241,24 @@ Pipeline_scan_image(PipelineObject *self, PyObject *Py_UNUSED(ignored)) {
 static PyObject *
 Pipeline_generate_dataset(PipelineObject *self, PyObject * args) {
 
-    char * outfile_path;
+    char * dataset_path;
     char * sample_path;
     char * info_path;
-    if(!PyArg_ParseTuple(args, "sss", &outfile_path, &sample_path, &info_path)){
+    if(!PyArg_ParseTuple(args, "sss", &dataset_path, &sample_path, &info_path)){
         PyErr_SetString(Pipeline_Error, "path arguement required.");
         return NULL;
     }
 
-    self->dataset_path = PyUnicode_FromString(outfile_path);
+    self->dataset_path = PyUnicode_FromString(dataset_path);
     self->sample_path = PyUnicode_FromString(sample_path);
+    self->info_path = PyUnicode_FromString(info_path);
 
     if (self->image == NULL) {
         PyErr_SetString(Pipeline_Error, "file must be loaded first.");
         return NULL;
     }
 
-    self->image->generate_dataset_from_image(self->image, outfile_path, sample_path, info_path);
+    self->image->generate_dataset_from_image(self->image, dataset_path, sample_path, info_path);
 
     return PyLong_FromLong(1);
 
@@ -254,8 +268,7 @@ static PyObject *
 Pipeline_convolution(PipelineObject *self, PyObject * args) {
 
     int type, dimensions;
-    float strength;
-    if(!PyArg_ParseTuple(args, "iif", &type, &dimensions, &strength)){
+    if(!PyArg_ParseTuple(args, "ii", &type, &dimensions)){
         PyErr_SetString(Pipeline_Error, "takes 3 arguements, type, dimensions & strength");
         return NULL;
     }
@@ -267,13 +280,13 @@ Pipeline_convolution(PipelineObject *self, PyObject * args) {
 
     switch(type){
         case 1:
-            self->image->process(self->image, Mean, dimensions, strength);
+            self->image->process(self->image, Mean, dimensions);
             break;
         case 2:
-            self->image->process(self->image, Gaussian, dimensions, strength);
+            self->image->process(self->image, Gaussian, dimensions);
             break;
         case 3:
-            self->image->process(self->image, Gaussian, dimensions, strength);
+            self->image->process(self->image, Sharpen, dimensions);
             break;
     }
 
@@ -316,6 +329,8 @@ Pipeline_translate(PipelineObject *self, PyObject * args) {
         PyErr_SetString(Pipeline_Error, "file must be loaded first.");
         return NULL;
     }
+
+    self->image->image_translation(self->image, x, y);
 
     return PyLong_FromLong(1);
 
