@@ -196,17 +196,11 @@ unsigned char ** export_pixels(image_data * self) {
 
 }
 
-void process(image_data * self, kernel_configuration type, int kernel_dimensions, float strength) {
+void process(image_data * self, kernel_configuration type, int kernel_dimensions) {
 
     pthread_t threads[9];
 
-    if (strength >= 1.0) {
-        strength = 0;
-    } else {
-        strength = 1 - strength;
-        strength += 1;
-    }
-    matrix * kernel = create_kernel(type, kernel_dimensions, strength);
+    matrix * kernel = create_kernel(type, kernel_dimensions);
 
     for (int y = 0; y < kernel->y; y++) {
         for (int x = 0; x < kernel->x; x++) {
@@ -292,7 +286,7 @@ void reduce_resolution(image_data * self) {
     if (self->channels == 1) {
 
         matrix * tmp = self->greyscale;
-        self->greyscale = max_pool_image(self->greyscale, step);
+        self->greyscale = mean_pool_image(self->greyscale, step);
         destroy_matrix(tmp);
 
     } else if (self->channels == 3) {
@@ -342,7 +336,7 @@ void resize(image_data * self, float scale_factor) {
     if (self->channels == 1) {
 
         matrix * tmp = self->greyscale;
-        self->greyscale = scale_matrix(self->greyscale, scale_factor, true);
+        self->greyscale = scale_matrix(self->greyscale, scale_factor, false);
         destroy_matrix(tmp);
 
         self->height = self->greyscale->y;
@@ -350,15 +344,15 @@ void resize(image_data * self, float scale_factor) {
 
     } else if (self->channels == 3) {
 
-        matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3);
-        tmp[0] = self->R; tmp[1] = self->G; tmp[2] = self->B;
+        /* matrix ** tmp = (matrix **) malloc(sizeof(matrix*) * 3); */
+        /* tmp[0] = self->R; tmp[1] = self->G; tmp[2] = self->B; */
 
-        self->R = scale_matrix(self->R, scale_factor, true);
-        self->G = scale_matrix(self->G, scale_factor, true);
-        self->B = scale_matrix(self->B, scale_factor, true);
+        self->R = scale_matrix(self->R, scale_factor, false);
+        self->G = scale_matrix(self->G, scale_factor, false);
+        self->B = scale_matrix(self->B, scale_factor, false);
 
-        for (int i = 0; i < 3; i++) { destroy_matrix(tmp[i]); }
-        free(tmp);
+        /* for (int i = 0; i < 3; i++) { destroy_matrix(tmp[i]); } */
+        /* free(tmp); */
 
         self->height = self->R->y;
         self->width = self->R->x;

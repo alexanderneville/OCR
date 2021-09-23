@@ -5,7 +5,7 @@
 #include "../includes/convolution.h"
 #include "../includes/matrix.h"
 
-matrix * create_kernel(kernel_configuration type, float kernel_dimensions, float strength) {
+matrix * create_kernel(kernel_configuration type, float kernel_dimensions) {
 
     int trunc_dimensions = kernel_dimensions;
     if ((trunc_dimensions % 2) == 0)
@@ -27,9 +27,6 @@ matrix * create_kernel(kernel_configuration type, float kernel_dimensions, float
                            4.0,  16.0, 24.0, 16.0, 4.0,
                            1.0,  4.0,  6.0,  4.0,  1.0};
 
-        for (int i = 0; i < 25; i++) {
-            weights[i] = weights[i] + (weights[i] * strength);
-        }
         float scale_factor = kernel_dimensions / 5.0;
         matrix * tmp_kernel = create_matrix(5, 5);
         memcpy(tmp_kernel->array, weights, sizeof(float) * 25);
@@ -44,17 +41,6 @@ matrix * create_kernel(kernel_configuration type, float kernel_dimensions, float
 
         kernel_matrix = scale_matrix(tmp_kernel, scale_factor, false);
 
-        for (int y = 0; y < kernel_matrix->y; y++) {
-            for (int x = 0; x < kernel_matrix->x; x++) {
-                if (kernel_matrix->array[(y * kernel_matrix->x) + x] > 1000.0 
-                    || kernel_matrix->array[(y * kernel_matrix->x) + x] < 0.0)
-                    kernel_matrix->array[(y * kernel_matrix->x) + x] = 0.0;
-                printf("%f, ", kernel_matrix->array[(y * kernel_matrix->x) + x]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-
     } else if (type == Sharpen) {
 
         //radius must equal 3
@@ -62,9 +48,6 @@ matrix * create_kernel(kernel_configuration type, float kernel_dimensions, float
                            -1.0,   5.0, -1.0,
                             0.0,  -1.0,  0.0 };
 
-        for (int i = 0; i < 9; i++) {
-            weights[i] = weights[i] + weights[i] * strength;
-        }
         float scale_factor = kernel_dimensions / 3.0;
         matrix * tmp_kernel = create_matrix(3, 3);
         memcpy(tmp_kernel->array, weights, sizeof(float) * 9);

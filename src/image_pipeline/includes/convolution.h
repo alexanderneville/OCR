@@ -19,7 +19,7 @@
         int kernel_dimensions;
     } convultion_arg;
 
-    matrix * create_kernel(kernel_configuration type, float kernel_dimensions, float strength);
+    matrix * create_kernel(kernel_configuration type, float kernel_dimensions);
     matrix * apply_convolution(matrix * matrix_p, kernel_configuration type, matrix * kernel, int kernel_dimensions);
     void * convultion_thread_func(void * arg);
     matrix * max_pool_image(matrix * matrix_p, int step);

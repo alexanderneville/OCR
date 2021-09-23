@@ -96,6 +96,8 @@ void test_scale_smaller() {
     int original = image_p->width;
     image_p->resize(image_p, 0.6);
     assert(image_p->width < original);
+    unsigned char ** pixels = image_p->export_pixels(image_p);
+    write_image("test_output_dir/test_scale_smaller.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     teardown(image_p);
     printf("passed!\n");
 
@@ -108,6 +110,8 @@ void test_scale_larger() {
     int original = image_p->width;
     image_p->resize(image_p, 1.2);
     assert(image_p->width > original);
+    unsigned char ** pixels = image_p->export_pixels(image_p);
+    write_image("test_output_dir/test_scale_larger.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     teardown(image_p);
     printf("passed!\n");
 
@@ -121,11 +125,11 @@ void test_pooling() {
     image_p->reduce_resolution(image_p);
     int after = image_p->width;
     assert(after < original);
+    unsigned char ** pixels = image_p->export_pixels(image_p);
+    write_image("test_output_dir/test_pooling.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     image_p->rgb_to_greyscale(image_p);
     image_p->reduce_resolution(image_p);
     assert(image_p->width < after);
-    unsigned char ** pixels = image_p->export_pixels(image_p);
-    write_image("test_output_dir/test_pooling.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     teardown(image_p);
     printf("passed!\n");
 
@@ -134,10 +138,24 @@ void test_pooling() {
 void test_convolution() {
     printf("testing process() ... ");
     image_data * image_p = setup();
-    /* image_p->process(image_p, Mean, 10, 0.1); */
-    image_p->process(image_p, Gaussian, 5, 0.1);
+    /* image_p->rgb_to_greyscale(image_p); */
+    /* image_p->process(image_p, Mean, 5); */
+    image_p->process(image_p, Gaussian, 7);
     unsigned char ** pixels = image_p->export_pixels(image_p);
     write_image("test_output_dir/test_convolution.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
+    teardown(image_p);
+    printf("passed!\n");
+
+}
+
+void test_translation() {
+
+    printf("testing image_translation() ... ");
+    image_data * image_p = setup();
+    image_p->image_translation(image_p, 40, 40);
+    image_p->image_translation(image_p, -80, -80);
+    unsigned char ** pixels = image_p->export_pixels(image_p);
+    write_image("test_output_dir/test_translation.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     teardown(image_p);
     printf("passed!\n");
 
@@ -178,10 +196,11 @@ int main(int argc, char ** argv) {
     test_invert_colours();
     test_pooling();
     test_convolution();
-    /* test_scale_smaller(); */
-    /* test_scale_larger(); */
-    /* test_scan_image(); */
-    /* test_gernerate_dataset(); */
+    test_translation();
+    test_scale_larger();
+    test_scale_smaller();
+    test_scan_image();
+    test_gernerate_dataset();
 
     printf("\nAll tests passed!\n");
 
