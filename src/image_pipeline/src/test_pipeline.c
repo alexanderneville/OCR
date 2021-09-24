@@ -176,7 +176,7 @@ void test_scan_image() {
 
 void test_gernerate_dataset() {
 
-    printf("testing create_document_outline() ... ");
+    printf("testing generate_dataset_from_image() ... ");
     image_data * image_p = setup();
     image_p->create_document_outline(image_p);
     image_p->generate_dataset_from_image(image_p, "test_output_dir/dataset.txt", "test_output_dir/sample.txt", "test_output_dir/info.json");

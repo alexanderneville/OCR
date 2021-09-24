@@ -103,8 +103,8 @@ void adjust_scale_factor(float * height, float * width, float * scale_factor, fl
 
 matrix * scale_matrix(matrix * matrix_p, float scale_factor, bool adjust) {
 
-    printf("\n");
-    printf("(%d, %d)\n", matrix_p->x, matrix_p->y);
+    /* printf("\n"); */
+    /* printf("(%d, %d)\n", matrix_p->x, matrix_p->y); */
     float new_height = matrix_p->y;
     float new_width = matrix_p->x;
 
@@ -122,18 +122,18 @@ matrix * scale_matrix(matrix * matrix_p, float scale_factor, bool adjust) {
     int int_height = new_height;
     int int_width = new_width;
 
-    printf("(%f, %f)\n", new_width, new_height);
-    printf("(%d, %d)\n", int_width, int_height);
+    /* printf("(%f, %f)\n", new_width, new_height); */
+    /* printf("(%d, %d)\n", int_width, int_height); */
 
     matrix * scaled_matrix = create_matrix(int_height, int_width);
 
     for (int y = 0; y < int_height; y ++){
         for ( int x = 0; x < int_width; x ++) {
 
-            printf("(%d, %d): ", x, y);
+            /* printf("(%d, %d): ", x, y); */
             float x_as_frac = x / new_width;
             float y_as_frac = y / new_height;
-            printf("(%f, %f)\n", x_as_frac, y_as_frac);
+            /* printf("(%f, %f)\n", x_as_frac, y_as_frac); */
 
             pos x_pos = calc_pos(x_as_frac * matrix_p->x);
             pos y_pos = calc_pos(y_as_frac * matrix_p->y);
@@ -146,7 +146,7 @@ matrix * scale_matrix(matrix * matrix_p, float scale_factor, bool adjust) {
                                    };
 
             float value = bilinear_approximation(known_points, x_pos.decimal, y_pos.decimal);
-            if (isnan(value))
+            if (isnan(value) || value > 10000 || value < 0)
                 value = 0.0;
             /* printf("%f\n", value); */
             scaled_matrix->array[(y * scaled_matrix->x) + x] = value;

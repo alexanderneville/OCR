@@ -202,19 +202,19 @@ void process(image_data * self, kernel_configuration type, int kernel_dimensions
 
     matrix * kernel = create_kernel(type, kernel_dimensions);
 
-    for (int y = 0; y < kernel->y; y++) {
-        for (int x = 0; x < kernel->x; x++) {
-            printf("%f, ", kernel->array[(y * kernel->x) + x]);
-        }
-        printf("\n");
-    }
+    /* for (int y = 0; y < kernel->y; y++) { */
+    /*     for (int x = 0; x < kernel->x; x++) { */
+    /*         printf("%f, ", kernel->array[(y * kernel->x) + x]); */
+    /*     } */
+    /*     printf("\n"); */
+    /* } */
 
     if (self->channels == 1) {
 
         matrix * tmp = self->greyscale;
         matrix * dest = create_matrix(self->greyscale->y, self->greyscale->x);
 
-        convultion_arg arguements[3];
+        convolution_arg arguements[3];
 
         for (int i = 0; i < 3; i ++) {
 
@@ -226,7 +226,7 @@ void process(image_data * self, kernel_configuration type, int kernel_dimensions
             arguements[i].step = 3;
             arguements[i].kernel_dimensions = kernel_dimensions;
 
-            pthread_create(&(threads[i]), NULL, &convultion_thread_func, &(arguements[i]));
+            pthread_create(&(threads[i]), NULL, &convolution_thread_func, &(arguements[i]));
         }
         for (int i = 0; i < 3; i ++)
             pthread_join(threads[i], NULL);
@@ -248,7 +248,7 @@ void process(image_data * self, kernel_configuration type, int kernel_dimensions
 
         matrix ** tmp = source_channels;
 
-        convultion_arg arguements[9];
+        convolution_arg arguements[9];
 
         for (int i = 0; i < 3; i ++) {
             for (int j = 0; j < 3; j ++) {
@@ -259,7 +259,7 @@ void process(image_data * self, kernel_configuration type, int kernel_dimensions
                 arguements[(i * 3) + j].offset = j;
                 arguements[(i * 3) + j].step = 3;
                 arguements[(i * 3) + j].kernel_dimensions = kernel_dimensions;
-                pthread_create(&(threads[(i * 3) + j]), NULL, &convultion_thread_func, &(arguements[(i * 3) + j]));
+                pthread_create(&(threads[(i * 3) + j]), NULL, &convolution_thread_func, &(arguements[(i * 3) + j]));
             }
         }
         for (int i = 0; i < 3; i ++) {

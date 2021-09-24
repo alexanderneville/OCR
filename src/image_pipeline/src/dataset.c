@@ -254,7 +254,6 @@ void export_dataset(dataset * set, char * dataset_path, char * sample_path, char
                 for (int x = 0; x < set->elements[i]->images[j]->x; x++){
 
                     if (set->elements[i]->images[j]->array[(y * set->elements[i]->images[j]->x) + x] > 255.0) {
-                        printf("bigger than 255\n");
                         set->elements[i]->images[j]->array[(y * set->elements[i]->images[j]->x) + x] = 0.0;
                     } else if (set->elements[i]->images[j]->array[(y * set->elements[i]->images[j]->x) + x] < 0.0) {
                         set->elements[i]->images[j]->array[(y * set->elements[i]->images[j]->x) + x] = 0.0;

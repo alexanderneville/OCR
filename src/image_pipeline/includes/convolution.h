@@ -9,7 +9,7 @@
         Sharpen = 2
     } kernel_configuration; 
 
-    typedef struct convultion_arg_T {
+    typedef struct convolution_arg_T {
         matrix * matrix_p;
         matrix * dest;
         matrix * kernel;
@@ -17,11 +17,11 @@
         int offset;
         int step;
         int kernel_dimensions;
-    } convultion_arg;
+    } convolution_arg;
 
     matrix * create_kernel(kernel_configuration type, float kernel_dimensions);
     matrix * apply_convolution(matrix * matrix_p, kernel_configuration type, matrix * kernel, int kernel_dimensions);
-    void * convultion_thread_func(void * arg);
+    void * convolution_thread_func(void * arg);
     matrix * max_pool_image(matrix * matrix_p, int step);
     matrix * mean_pool_image(matrix * matrix_p, int step);
 

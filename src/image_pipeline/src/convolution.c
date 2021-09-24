@@ -31,13 +31,13 @@ matrix * create_kernel(kernel_configuration type, float kernel_dimensions) {
         matrix * tmp_kernel = create_matrix(5, 5);
         memcpy(tmp_kernel->array, weights, sizeof(float) * 25);
 
-        for (int y = 0; y < tmp_kernel->y; y++) {
-            for (int x = 0; x < tmp_kernel->x; x++) {
-                printf("%f, ", tmp_kernel->array[(y * tmp_kernel->x) + x]);
-            }
-            printf("\n");
-        }
-        printf("\n");
+        /* for (int y = 0; y < tmp_kernel->y; y++) { */
+        /*     for (int x = 0; x < tmp_kernel->x; x++) { */
+        /*         printf("%f, ", tmp_kernel->array[(y * tmp_kernel->x) + x]); */
+        /*     } */
+        /*     printf("\n"); */
+        /* } */
+        /* printf("\n"); */
 
         kernel_matrix = scale_matrix(tmp_kernel, scale_factor, false);
 
@@ -111,9 +111,9 @@ matrix * apply_convolution(matrix * matrix_p, kernel_configuration type, matrix 
     /* return root; */
 };
 
-void * convultion_thread_func(void * arg) {
+void * convolution_thread_func(void * arg) {
 
-    convultion_arg * arguements = (convultion_arg *) arg;
+    convolution_arg * arguements = (convolution_arg *) arg;
     /* printf("%d\n", arguements->offset); */
 
     int kernel_center = ((arguements->kernel_dimensions + 1) / 2) - 1;

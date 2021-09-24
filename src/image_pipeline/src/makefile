@@ -17,9 +17,11 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: %.c $(IDIR)
 	$(CC) -c -o $@ $<
 
-main: $(OBJ)
+test: $(OBJ)
+	python class_setup.py build
+	mv ./build/lib.linux-x86_64-3.9/pipeline.cpython-39-x86_64-linux-gnu.so ./
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 clean:
-	rm -rf $(ODIR)/*.o outfile.png a.out main *.so build/ output.json
+	rm -rf $(ODIR)/*.o outfile.png a.out main *.so build/ test_output_dir/*

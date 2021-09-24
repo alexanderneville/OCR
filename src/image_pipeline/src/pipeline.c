@@ -269,7 +269,7 @@ Pipeline_convolution(PipelineObject *self, PyObject * args) {
 
     int type, dimensions;
     if(!PyArg_ParseTuple(args, "ii", &type, &dimensions)){
-        PyErr_SetString(Pipeline_Error, "takes 3 arguements, type, dimensions & strength");
+        PyErr_SetString(Pipeline_Error, "takes 2 arguements: type, dimensions");
         return NULL;
     }
 
@@ -288,6 +288,8 @@ Pipeline_convolution(PipelineObject *self, PyObject * args) {
         case 3:
             self->image->process(self->image, Sharpen, dimensions);
             break;
+        default:
+            return PyLong_FromLong(0);
     }
 
     return PyLong_FromLong(1);
