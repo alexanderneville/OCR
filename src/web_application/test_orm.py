@@ -1,121 +1,185 @@
 import orm
-conn = orm.connect_db(orm.db_path)
+import unittest
+import sqlite3
 
-def test_registration():
+class ORMTest(unittest.TestCase):
 
-    print("attempting to register as a student with a new username ... ", end="")
-    try:
+    def setUp(self):
 
-        new_student = orm.Student.create(conn, "alex", "Alex Neville", "1234")
-        print("new student id: ", new_student)
+        self.conn = orm.connect_db(orm.db_path)
 
-    except orm.Existing_Username:
+    def tearDown(self):
 
-        print("username taken")
+        pass
 
-    print("attempting to register as a teacher with a new username ... ", end="")
-    try:
+    # test login/registration functions
 
-        new_teacher = orm.Teacher.create(conn, "John", "John Smith", "1234")
-        print("new teacher id: ", new_teacher)
+    def test_registration_with_valid_credentials(self):
 
-    except orm.Existing_Username:
+        new_student = orm.Student.create(self.conn, "user311", "Student 301", "Aa9-_*'bbbbbbbbbbb")
+        self.assertIsNotNone(new_student)
 
-        print("username taken")
+        new_teacher = orm.Teacher.create(self.conn, "user312", "Teacher 11", "Aa9-_*'bbbbbbbbbbb")
+        self.assertIsNotNone(new_teacher)
 
-def test_login():
+    def test_registragion_with_insecure_password(self):
 
-    print("attempting to login with valid credentials ... ", end="")
-    try:
+        self.assertRaises(orm.Insecure_Password, orm.Student.create, self.conn, "user313", "Student 302", "1234")
+        self.assertRaises(orm.Insecure_Password, orm.Teacher.create, self.conn, "user314", "Teacher 12", "1234")
 
-        user = orm.login_user("alex", "1234")
-        print("the user id is: ", user.id)
+    def test_registration_with_existing_username(self):
 
-    except orm.Invalid_Credentials:
+        self.assertRaises(orm.Existing_Username, orm.Student.create, self.conn, "user11", "Student 303", "Aa9-_*'bbbbbbbbbbb")
+        self.assertRaises(orm.Existing_Username, orm.Teacher.create, self.conn, "user1", "Teacher 13", "Aa9-_*'bbbbbbbbbbb")
 
-        print("invalid credential exception handled")
+    def test_login_with_valid_credentials(self):
 
-    print("attempting to login with invalid credentials ... ", end="")
-    try:
+        self.assertTrue(isinstance(orm.login_user("user11", "1234"), orm.Student))
+        self.assertTrue(isinstance(orm.login_user("user1", "1234"), orm.Teacher))
 
-        user = orm.login_user("", "")
-        print("the user id is: ", user.id)
+    def test_login_with_invalid_credentials(self):
 
-    except orm.Invalid_Credentials:
+        self.assertRaises(orm.Invalid_Credentials, orm.login_user, "user11", "123")
+        self.assertRaises(orm.Invalid_Credentials, orm.login_user, "user1", "123")
 
-        print("invalid credental exception handled")
+    def test_instantiation_with_valid_id(self):
 
-def test_instantiation():
+        self.assertTrue(isinstance(orm.create_user_object(self.conn, 11), orm.Student))
+        self.assertTrue(isinstance(orm.create_user_object(self.conn, 1), orm.Teacher))
 
-    print("attempting to instantiate a new teacher from id ... ", end="")
-    object = orm.create_user_object(conn, 10)
-    print(object.full_name, "is a", object.role)
-    print("attempting to instantiate a new student from id ... ", end="")
-    object = orm.create_user_object(conn, 48)
-    print(object.full_name, "is a", object.role)
+    def test_instantiation_with_invalid_id(self):
 
-def test_user_methods():
+        self.assertRaises(orm.No_Such_ID, orm.create_user_object, self.conn, 4000)
 
-    teacher = orm.create_user_object(conn, 10)
-    student = orm.create_user_object(conn, 48)
+    # test functions belonging to orm.User
 
-    print("classes belonging to the test teacher: ", teacher.list_classes())
-    print("classes that the test student is part of: ", student.list_classes())
+    def test_list_models(self):
 
-    # create a new class
-    teacher.create_class("new_test_class", 1234)
-    teacher_classes = teacher.list_classes()
-    print("classes belonging to test teacher after creating new class: ", teacher_classes)
+        student = orm.login_user("user11", "1234")
+        teacher = orm.login_user("user1", "1234")
+        self.assertEqual(len(student.list_models()), 4)
+        self.assertEqual(len(teacher.list_models()), 4)
 
-    # join the new classes
-    student.join_class(teacher_classes[0][0], 1234)
-    student.join_class(teacher_classes[1][0], 1234)
-    print("classes that the test student is now part of:", student.list_classes())
+    def test_create_model(self):
 
-    print("attempting to join a class with invalid credentials ...", end="")
+        student = orm.login_user("user11", "1234")
+        teacher = orm.login_user("user1", "1234")
 
-    try:
-        student.join_class(teacher_classes[0][0], 345)
-    except orm.Invalid_Credentials:
-        print("invalid credential exception handled")
+        id1 = student.create_model("model4")
+        id2 = teacher.create_model("model4")
+        self.assertRaises(orm.Existing_Model, student.create_model, "model4")
+        # self.assertRaises(orm.Existing_Model, teacher.create_model, "model4")
 
-    teacher.kick_student(48, teacher_classes[0][0])
-    print("classes that the test student is part of after being kicked:", student.list_classes())
 
-    print("teacher's personal models:", teacher.list_models())
-    print("student's personal models:", student.list_models())
+    def test_delete_model(self):
 
-    print("all models available to the teacher:", teacher.list_all_models())
+        student = orm.login_user("user11", "1234")
+        teacher = orm.login_user("user1", "1234")
 
-    classes = []
-    for i in teacher_classes:
-        new = orm.ClassGroup(conn, i[0])
-        print(new.id, new.class_name)
-        print(new.list_students())
-        classes.append(new)
+        student.delete_model((int(student.id) - 1) * 3 + 4)
+        teacher.delete_model((int(student.id) - 1) * 3 + 4)
+
+    def test_list_classes(self):
+
+        student = orm.login_user("user11", "1234")
+        teacher = orm.login_user("user1", "1234")
+
+        self.assertEqual(len(student.list_classes()), 1)
+        self.assertEqual(len(student.list_classes()[0]), 4)
+        self.assertEqual(len(teacher.list_classes()), 1)
+        self.assertEqual(len(teacher.list_classes()[0]), 4)
+
+    def test_user_properties(self):
+
+        student = orm.login_user("user11", "1234")
+        teacher = orm.login_user("user1", "1234")
+
+        self.assertEqual(student.id, 11)
+        self.assertEqual(student.username, "user11")
+        self.assertEqual(student.full_name, "Student 1")
+        self.assertEqual(student.role, "student")
+
+        self.assertEqual(teacher.id, 1)
+        self.assertEqual(teacher.username, "user1")
+        self.assertEqual(teacher.full_name, "Teacher 1")
+        self.assertEqual(teacher.role, "teacher")
+
+    # test functions belonging to orm.Teacher
+    # user2 is being used for this test
+
+    def test_list_all_models(self):
+
+        teacher = orm.login_user("user2", "1234")
+        self.assertIsNotNone(teacher.list_all_models())
+
+    def test_kick_student(self):
         
+        teacher = orm.login_user("user2", "1234")
+        self.assertIsNone(teacher.kick_student(41, 2))
+        affected_student = orm.login_user("user41", "1234")
+        control_student = orm.login_user("user42", "1234")
+        self.assertEqual(len(control_student.list_classes()), 1)
+        self.assertEqual(len(affected_student.list_classes()), 0)
 
+    def test_kick_student_with_invalid_credentials(self):
 
-def main():
+        teacher = orm.login_user("user2", "1234")
+        self.assertRaises(orm.Invalid_Credentials, teacher.kick_student, 12, 1)
 
-    # new dataset
-    orm.new_database()
+    def test_create_class(self):
 
-    # test register/login functions
-    test_registration()
-    print("\n")
-    test_login()
-    print("\n")
+        teacher = orm.login_user("user2", "1234")
+        self.assertIsNone(teacher.create_class("test_class", 1234))
+        self.assertRaises(orm.Existing_Class, teacher.create_class, "test_class", 1234)
+        self.assertEqual(len(teacher.list_classes()), 2)
 
-    # test instantiation function
-    # id:int -> Teacher|Student
-    test_instantiation()
-    print("\n")
+    def test_delete_class(self):
 
-    # test assorted methods of the classes
-    test_user_methods()
-    print("\n")
+        teacher = orm.login_user("user2", "1234")
+        self.assertIsNone(teacher.delete_class(11))
+        self.assertRaises(orm.Invalid_Credentials, teacher.delete_class, 11)
+        self.assertRaises(orm.Invalid_Credentials, teacher.delete_class, 10)
+
+    # test functions belonging to orm.Student
+    # user71 is used for these tests
+
+    def test_join_class(self):
+
+        student = orm.login_user("user71", "1234")
+        self.assertIsNone(student.join_class(4, 1234))
+        self.assertEqual(len(student.list_classes()), 2)
+        self.assertRaises(orm.Existing_Member, student.join_class, 3, 1234)
+        self.assertRaises(orm.Invalid_Credentials, student.join_class, 1, 123)
+        self.assertRaises(orm.Invalid_Credentials, student.join_class, 4000, 1234)
+
+    def test_leave_class(self):
+        student = orm.login_user("user71", "1234")
+        self.assertIsNone(student.leave_class(4)) # executes after test_join_class
+        self.assertEqual(len(student.list_classes()), 1)
+
+    # test functions belonging to orm.ClassGroup
+
+    def test_list_students(self):
+
+        class_group = orm.ClassGroup(orm.connect_db(orm.db_path), 5)
+        self.assertEqual(len(class_group.list_students()), 30)
+
+    def test_classgroup_properties(self):
+
+        class_group = orm.ClassGroup(orm.connect_db(orm.db_path), 5)
+        self.assertEqual(class_group.id, 5)
+        self.assertEqual(class_group.class_name, "class 5")
+        self.assertEqual(class_group.pin, 1234)
+
+    # test functions belonging to orm.Model
+
+    def test_model_properties(self):
+        model = orm.Model(orm.connect_db(orm.db_path), 160)
+        self.assertEqual(model.id, 160)
+        self.assertEqual(model.model_name, "model160")
+
 
 if __name__ == "__main__":
-    main()
 
+    orm.new_database()
+    unittest.main()

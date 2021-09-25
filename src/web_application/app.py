@@ -283,7 +283,7 @@ def train_model():
 @app.route('/use_model', methods=['GET', 'POST'])
 def use_model():
     if session['user']:
-        current_user = orm.create_user_object(orm.connect_db(orm.db_path))
+        current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
         if request.method == 'GET':
 
             model_id = request.args.get('id')
@@ -310,10 +310,10 @@ def use_model():
                 uploaded = request.files['infile']
                 if uploaded.filename == '':
                     raise orm.Insufficient_Data()
-                uploaded.save(orm.tmp_path + timestamp + ".png")
+                uploaded.save(orm.tmp_path + str(timestamp) + ".png")
                 print("creating pipeline object")
                 image_checker = pipeline.Pipeline()
-                rc = image_checker.check_header(orm.tmp_path + file_id)
+                rc = image_checker.check_header(orm.tmp_path + str(timestamp) + ".png")
                 del (image_checker)
                 print("deallocated pipeline object")
                 if rc == 1:

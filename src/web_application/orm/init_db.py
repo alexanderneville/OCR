@@ -19,9 +19,9 @@ def new_test_hash()-> Tuple[str, str]:
 
 def init_user(conn: sqlite3.Connection):
 
+    cursor = conn.cursor()
     try:
 
-        cursor = conn.cursor()
         cursor.execute("DROP TABLE IF EXISTS user")
         cursor.execute('''CREATE TABLE user (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,19 +31,22 @@ def init_user(conn: sqlite3.Connection):
                             full_name TEXT NOT NULL,
                             role TEXT NOT NULL);''')
         conn.commit()
+        cursor.close()
+        conn.close()
 
     except sqlite3.Error as e:
 
         print("error creating user table.")
+        cursor.close()
         conn.close()
         raise e
 
 
 def init_class(conn: sqlite3.Connection):
 
+    cursor = conn.cursor()
     try:
 
-        cursor = conn.cursor()
         cursor.execute("DROP TABLE IF EXISTS class")
         cursor.execute('''CREATE TABLE class (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,18 +57,21 @@ def init_class(conn: sqlite3.Connection):
                             FOREIGN KEY (teacher_id) REFERENCES user (id) ON UPDATE CASCADE ON DELETE CASCADE);''')
 
         conn.commit()
+        cursor.close()
+        conn.close()
 
     except sqlite3.Error as e:
 
         print("error creating class table.")
+        cursor.close()
         conn.close()
         raise e
 
 def init_class_student(conn: sqlite3.Connection):
 
+    cursor = conn.cursor()
     try:
 
-        cursor = conn.cursor()
         cursor.execute("DROP TABLE IF EXISTS class_student")
         cursor.execute('''CREATE TABLE class_student (
                             student_id INTEGER NOT NULL,
@@ -74,18 +80,21 @@ def init_class_student(conn: sqlite3.Connection):
                             FOREIGN KEY (student_id) REFERENCES user (id) ON UPDATE CASCADE ON DELETE CASCADE,
                             FOREIGN KEY (class_id) REFERENCES class (id) ON UPDATE CASCADE ON DELETE CASCADE);''')
         conn.commit()
+        cursor.close()
+        conn.close()
 
     except sqlite3.Error as e:
 
         print("error creating class_student table.")
+        cursor.close()
         conn.close()
         raise e
 
 def init_model(conn: sqlite3.Connection):
 
+    cursor = conn.cursor()
     try:
 
-        cursor = conn.cursor()
         cursor.execute("DROP TABLE IF EXISTS model")
         cursor.execute('''CREATE TABLE model (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -102,14 +111,15 @@ def init_model(conn: sqlite3.Connection):
     except sqlite3.Error as e:
 
         print("error creating model table.")
+        cursor.close()
         conn.close()
         raise e
 
 def init_cache(conn: sqlite3.Connection):
 
+    cursor = conn.cursor()
     try:
 
-        cursor = conn.cursor()
         cursor.execute("DROP TABLE IF EXISTS cache")
         cursor.execute('''CREATE TABLE cache (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -123,21 +133,18 @@ def init_cache(conn: sqlite3.Connection):
     except sqlite3.Error as e:
 
         print("error creating cache table.")
+        cursor.close()
         conn.close()
         raise e
 
 def create_tables():
 
-    conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
-
     # run create table functions
-    init_user(conn)
-    init_class(conn)
-    init_class_student(conn)
-    init_model(conn)
-    init_cache(conn)
-
-    conn.close()
+    init_user(sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES))
+    init_class(sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES))
+    init_class_student(sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES))
+    init_model(sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES))
+    init_cache(sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES))
 
 def populate_tables():
 
@@ -185,6 +192,8 @@ def populate_tables():
     cursor.executemany('INSERT INTO cache (owner_id, contents, timestamp) VALUES (?,?,?)', cache_data)
 
     conn.commit()
+    cursor.close()
+    conn.close()
 
 def new_database():
 
