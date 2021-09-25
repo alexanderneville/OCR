@@ -156,15 +156,16 @@ int find_partition(dataset * unsorted, int low, int high) {
 
     dataset_element * pivot = unsorted->elements[high];
     int pivot_value = 
-        pivot->line_number * 1000 +
+        pivot->line_number * 10000 +
         pivot->word_number * 100 +
         pivot->character_number;
+    // important! max word length is 100 chars and max words per line is 100
 
     int new_partition_position = low - 1;
     for (int iterator = low; iterator < high; iterator ++) {
 
         int current_value = 
-            unsorted->elements[iterator]->line_number * 1000 +
+            unsorted->elements[iterator]->line_number * 10000 +
             unsorted->elements[iterator]->word_number * 100 + 
             unsorted->elements[iterator]->character_number;
 
@@ -228,6 +229,7 @@ void export_dataset(dataset * set, char * dataset_path, char * sample_path, char
     FILE * fp3 = fopen(info_path,   "w");
 
     fprintf(fp3, "{\n");
+    fprintf(fp3, "    \"labels\": null,\n");
     fprintf(fp3, "    \"characters\": [\n");
 
     for (int i = 0; i < set->num_elements; i++) {
@@ -242,6 +244,7 @@ void export_dataset(dataset * set, char * dataset_path, char * sample_path, char
         fprintf(fp3, "            \"y\": %d,\n", set->elements[i]->y);
         fprintf(fp3, "            \"w\": 32,\n");
         fprintf(fp3, "            \"h\": 32,\n");
+        fprintf(fp3, "            \"label\": null\n");
         if (i == set->num_elements - 1) {
             fprintf(fp3, "        }\n");
         } else {

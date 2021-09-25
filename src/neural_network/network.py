@@ -15,13 +15,15 @@ class Network(object):
     Each layer is composed of numpy arrays.
     """
 
-    def __init__(self, layout: list[int]) -> None:
+    def __init__(self, layout: list[int], labels: list[str]) -> None:
 
         """
         A list is passed in with each element representing how many neurons required in each layer.
+        A second list represents all the possible outputs.
         """
 
         self._layout = layout
+        self._labels = labels
 
         # When a network is instantiated, its list of layers is set to blank.
         self._layers: list[layers.Base_Layer] = []
@@ -35,6 +37,10 @@ class Network(object):
 
             self._layers.append(layers.FC_Dense_Layer(x, y))
             self._layers.append(layers.Activation_Layer(functions.tanh, functions.tanh_derivative))
+
+    @property 
+    def lables(self):
+        return self._labels
 
     @property
     def network_parameters(self) -> tuple[list[np.ndarray], list[np.ndarray]]:
@@ -59,6 +65,21 @@ class Network(object):
         """Add a layer to the network."""
 
         self._layers.append(new_layer)
+
+    @staticmethod
+    def calc_y_activations(labels, y_correct):
+        """for each sample, create a set of activations."""
+        activations = [[[0 for node in range(len(labels))]] for sample in range(len(y_correct))]
+        for sample in range(len(y_correct)):
+            activations[sample][0][labels.index(y_correct[sample])] = 1
+
+        return np.array(activations)
+
+    @staticmethod
+    def calc_results(labels, y_activations):
+        """for each set of activations, find the value it corresponds to"""
+        outputs = [labels[vector.tolist()[0].index(max(vector[0]))] for vector in y_activations]
+        return outputs
 
     def predict(self, input_data, single_sample: bool = False):
 
@@ -86,7 +107,6 @@ class Network(object):
                 output.append(current_sample)
 
         return output
-
 
     def batch_learning(self, batch, correct_outputs, learning_rate) -> None:
 
@@ -176,15 +196,13 @@ class Network(object):
     def export_layout(self, path):
 
         weights, biases = self.network_parameters
-        list_weights = []
-        list_biases = []
 
-        for i in range(len(biases)):
-            list_biases.append(biases[i].tolist())
-            list_weights.append(weights[i].tolist())
+        list_weights = [weights[i].tolist() for i in range(len(weights))]
+        list_biases = [biases[i].tolist() for i in range(len(biases))]
 
         config = {
             "layout": self._layout,
+            "labels": self._labels,
             "actication": self._activation,
             "weights": list_weights,
             "biases": list_biases,
@@ -198,7 +216,7 @@ class Network(object):
 
         with open(path) as f:
             config = json.load(f)
-        new = Network(config["layout"])
+        new = Network(config["layout"], config["labels"])
 
         for layer in new._layers:
             if isinstance(layer, layers.FC_Dense_Layer):

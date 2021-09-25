@@ -10,18 +10,7 @@
             "y": 85,
             "w": 32,
             "h": 32,
-            "label": null
-        },
-        {
-            "position": 1,
-            "line_number": 1,
-            "word_number": 1,
-            "character_number": 2,
-            "x": 183,
-            "y": 85,
-            "w": 32,
-            "h": 32,
-            "label": null
+            "label": 0
         },
         {
             "position": 2,
@@ -32,7 +21,7 @@
             "y": 85,
             "w": 32,
             "h": 32,
-            "label": null
+            "label": 2
         },
         {
             "position": 3,
@@ -43,7 +32,7 @@
             "y": 85,
             "w": 32,
             "h": 32,
-            "label": null
+            "label": 3
         },
         {
             "position": 4,
@@ -54,18 +43,7 @@
             "y": 85,
             "w": 32,
             "h": 32,
-            "label": null
-        },
-        {
-            "position": 5,
-            "line_number": 2,
-            "word_number": 1,
-            "character_number": 1,
-            "x": 136,
-            "y": 191,
-            "w": 32,
-            "h": 32,
-            "label": null
+            "label": 4
         },
         {
             "position": 6,
@@ -76,7 +54,7 @@
             "y": 191,
             "w": 32,
             "h": 32,
-            "label": null
+            "label": 6
         },
         {
             "position": 7,
@@ -87,7 +65,7 @@
             "y": 191,
             "w": 32,
             "h": 32,
-            "label": null
+            "label": 7
         },
         {
             "position": 8,
@@ -98,7 +76,7 @@
             "y": 191,
             "w": 32,
             "h": 32,
-            "label": null
+            "label": 8
         },
         {
             "position": 9,
@@ -109,8 +87,7 @@
             "y": 191,
             "w": 32,
             "h": 32,
-            "label": null
+            "label": 9
         }
     ]
 }
-
