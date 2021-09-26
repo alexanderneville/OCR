@@ -134,7 +134,8 @@ def home():
 
         else:
 
-            return render_template('student_home.html', user = current_user)
+            models = [orm.Model(orm.connect_db(orm.db_path), model[0]) for model in current_user.list_models()]
+            return render_template('student_home.html', user = current_user, models = models)
 
     else:
 
@@ -353,17 +354,56 @@ def create_model():
         return redirect(url_for('index'))
 
 
-@app.route('/train_model')
+@app.route('/train_model', methods=["GET", "POST"])
 def train_model():
 
-    if session['user']:
+    if request.method == 'GET':
 
-        # return render_template('train_model.html')
-        return str(request.args.get('model_id'))
+        if session['user']:
 
-    else:
+            model_id = request.args.get('model_id')
 
-        return redirect(url_for('home'))
+            if model_id:
+
+                return render_template('train_model.html', 
+                        model=orm.Model(orm.connect_db(orm.db_path), int(model_id)),
+                        user=orm.create_user_object(orm.connect_db(orm.db_path), 
+                        session["user"]))
+
+            else:
+
+                return redirect(url_for('home'))
+
+        else:
+
+            return redirect(url_for('index'))
+
+    else: # post request was made
+
+        data = request.get_json()
+        current_user = orm.create_user_object(orm.connect_db(orm.db_path), data["user_id"])
+        models = current_user.list_models()
+        ids = [int(element[0]) for element in models]
+        if int(data["model_id"]) not in ids:
+            return jsonify({'status': 0})
+
+        current_model = orm.Model(orm.connect_db(orm.db_path), data["model_id"])
+        if current_model.is_labelled:
+            return jsonify({'status': 0, 'complete': 1})
+
+        if data["label"]:
+            pass
+
+        info = ocr.get_info(current_model.data_paths[4])
+        labels = [character["label"] for character in info["characters"]]
+        try:
+            position = labels.index(None)
+            new_character = ocr.get_single_character(position, current_model.data_paths[3])
+            print(new_character)
+            return jsonify({'status': 1, 'complete': 0, 'new_character': new_character})
+        except ValueError:
+            return jsonify({'status': 1, 'complete': 1})
+
 
 @app.route('/use_model', methods=['GET', 'POST'])
 def use_model():
@@ -414,7 +454,7 @@ def use_model():
                 del (image_checker)
 
                 if rc == 1:
-                    text = ocr.recognise(fields[0], orm.tmp_path + timestamp + ".png") # just a prototype at the moment
+                    text = ocr.recognise(fields[0], orm.tmp_path + str(timestamp) + ".png") # just a prototype at the moment
                     current_user.create_cache(text) # just a prototype for now
                 else:
                     raise orm.Invalid_FileType() # TODO move this exception to ocr package
@@ -422,7 +462,7 @@ def use_model():
                 return redirect(url_for("view_cache"))
 
             except orm.Invalid_FileType:
-                os.remove(orm.tmp_path + timestamp + ".png")
+                os.remove(orm.tmp_path + str(timestamp) + ".png")
                 current_user.delete_model(id)
                 flash('Invalid image file (PNG only)')
                 return redirect(url_for('create_model'))

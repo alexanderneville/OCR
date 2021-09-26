@@ -333,13 +333,20 @@ class Model(entity_model):
     def __init__(self, conn: sqlite3.Connection, id: int):
         super().__init__(conn, id)
         cursor = self.conn.cursor()
-        data = cursor.execute('SELECT name, trained FROM model WHERE id=?', [self._id]).fetchone()
+        data = cursor.execute('SELECT name, trained, labelled FROM model WHERE id=?', [self._id]).fetchone()
         cursor.close
-        self._trained = data[1]
         self._model_name = data[0]
+        self._trained = data[1]
+        self._labelled = data[2]
 
     @staticmethod
     def create():
+        pass
+
+    def set_labelled(self):
+        pass
+
+    def set_trained(self):
         pass
 
     def delete(self):
@@ -353,6 +360,14 @@ class Model(entity_model):
     def is_trained(self):
 
         if self._trained == 1:
+            return True
+        else:
+            return False
+
+    @property
+    def is_labelled(self):
+
+        if self._labelled == 1:
             return True
         else:
             return False

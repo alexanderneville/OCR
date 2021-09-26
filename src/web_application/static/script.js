@@ -170,6 +170,57 @@ function delete_cache(cache_id, user_id) {
 
 }
 
+function get_first_character(model_id, user_id){
+
+    console.log("get first character function");
+
+    var request = new XMLHttpRequest();   // new HttpRequest instance
+    request.open("POST", "train_model", true);
+    request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    request.responseType = "json";
+
+    data = {"model_id": model_id, "user_id": user_id};
+    console.log(data);
+
+    request.onload = function() {
+
+        var responseJson = request.response;
+        console.log(responseJson);
+
+    }
+
+    request.send(JSON.stringify(data));
+ 
+}
+function label_character(model_id, user_id) {
+
+    console.log("label character function");
+
+    var request = new XMLHttpRequest();   // new HttpRequest instance
+    request.open("POST", "train_model", true);
+    request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    request.responseType = "json";
+    label = document.getElementById('textbox_id').value
+    console.log(value);
+    data = {"model_id": cache_id, "user_id": user_id, "label": label};
+    console.log(data);
+
+    request.onload = function() {
+
+        var responseJson = request.response;
+
+        if (responseJson["complete"] == 1) {
+            // go home
+        } else {
+            new_character = responseJson["new_character"];
+            console.log(new_character);
+        }
+    }
+
+    request.send(JSON.stringify(data));
+
+}
+
 function toggle_students(classname) {
     console.log(classname);
     var elements = document.getElementsByClassName(classname);

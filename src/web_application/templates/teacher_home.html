@@ -38,7 +38,7 @@
                         <input class="delete_model" type="button" value="Delete" style="display: inline; float: right" onclick="delete_model({{ model.id }}, {{ user.id }})">
                         {% if model.is_trained %}
                             <input class="use_model_button" type="button" style="display: inline; float: right" onclick="window.location.href='{{ url_for('use_model') }}?model_id={{ model.id }}'" value="Use">
-                        {% else %}
+                        {% elif not model.is_labelled %}
                             <input class="train_model_button" type="button" style="display: inline; float: right" onclick="window.location.href='{{ url_for('train_model') }}?model_id={{ model.id }}'" value="Train">
                         {% endif %}
                 </div>

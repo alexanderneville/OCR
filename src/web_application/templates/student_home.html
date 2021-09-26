@@ -12,23 +12,21 @@
     <br>
     <H2>Models:</H2>
 
-    {% with models = user.list_models() %}
-
-        {% if models %}
-
-            {% for model in models %}
-                <div class="model_card" id="model{{ model[0] }}">
-                        <div class="model_info"><p style="background-color: inherit; display: inline-block">{{ model[0] }} - {{ model[2]}}</p></div>
-                        <input class="delete_model" type="button" value="Delete" style="display: inline; float: right" onclick="delete_model({{ model[0] }}, {{ user.id }})">
+    {% if models %}
+        {% for model in models %}
+                <div class="model_card" id="model{{ model.id }}">
+                        <div class="model_info"><p style="background-color: inherit; display: inline-block">{{ model.id }} - {{ model.model_name }}</p></div>
+                        <input class="delete_model" type="button" value="Delete" style="display: inline; float: right" onclick="delete_model({{ model.id }}, {{ user.id }})">
+                        {% if model.is_trained %}
+                            <input class="use_model_button" type="button" style="display: inline; float: right" onclick="window.location.href='{{ url_for('use_model') }}?model_id={{ model.id }}'" value="Use">
+                        {% elif not model.is_labelled %}
+                            <input class="train_model_button" type="button" style="display: inline; float: right" onclick="window.location.href='{{ url_for('train_model') }}?model_id={{ model.id }}'" value="Train">
+                        {% endif %}
                 </div>
-
-            {% endfor %}
-
-        {% endif %}
-
+        {% endfor %}
         <input class="create_model_button" type="button" onclick="window.location.href='{{ url_for('create_model') }}'" value="Create">
+    {% endif %}
 
-    {% endwith %}
     <H2>Classes:</H2>
     {% with classes = user.list_classes() %}
         {% if classes %}

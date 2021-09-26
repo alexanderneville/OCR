@@ -1,12 +1,30 @@
 from typing import Tuple
 from datetime import datetime
-import time, random, sqlite3, hashlib
+import time, random, sqlite3, hashlib, shutil, os
 
 try:
     from . import config
-    db_path = config.db_path
+    data_path = config.data_path
+    training_data = data_path+"training_data/"
+    infile_path = training_data+"infile/"
+    outfile_path = training_data+"outfile/"
+    dataset_path = training_data+"dataset/"
+    info_path = training_data+"info/"
+    sample_path = training_data+"sample/"
+    model_path = data_path+"models/"
+    tmp_path = data_path+"tmp/"
+    db_path = data_path+'application_data.db'
 except:
-    db_path = "/home/alex/code/nea/data/application_data.db"
+    data_path = "/home/alex/code/nea/data/"
+    training_data = data_path+"training_data/"
+    infile_path = training_data+"infile/"
+    outfile_path = training_data+"outfile/"
+    dataset_path = training_data+"dataset/"
+    info_path = training_data+"info/"
+    sample_path = training_data+"sample/"
+    model_path = data_path+"models/"
+    tmp_path = data_path+"tmp/"
+    db_path = data_path+'application_data.db'
 
 
 def new_test_hash()-> Tuple[str, str]:
@@ -201,8 +219,22 @@ def populate_tables():
     cursor.close()
     conn.close()
 
+def setup_directories():
+
+    shutil.rmtree(data_path)
+    os.mkdir(data_path)
+    os.mkdir(training_data)
+    os.mkdir(infile_path)
+    os.mkdir(outfile_path)
+    os.mkdir(dataset_path)
+    os.mkdir(sample_path)
+    os.mkdir(info_path)
+    os.mkdir(model_path)
+    os.mkdir(tmp_path)
+
 def new_database():
 
+    setup_directories()
     create_tables()
     populate_tables()
 
