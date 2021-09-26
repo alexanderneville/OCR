@@ -1,10 +1,14 @@
 import sqlite3
 
 secret_key = '1234'
+
 data_path = "/home/alex/code/nea/data/"
-input_path = data_path+"input/"
-output_path= data_path+"output/"
-thumbnail_path = data_path+"thumbnail/"
+training = data_path+"training_data/"
+infile_path = training+"infile/"
+outfile_path = training+"outfile/"
+dataset_path = training+"dataset/"
+info_path = training+"info/"
+sample_path = training+"sample/"
 model_path = data_path+"models/"
 tmp_path = data_path+"tmp/"
 db_path = data_path+'application_data.db'

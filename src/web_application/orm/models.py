@@ -75,7 +75,7 @@ class User(entity_model):
 
             current = datetime.now()
             timestamp = time.mktime(current.timetuple())
-            cursor.execute('INSERT INTO model (owner_id, name, timestamp) VALUES (?,?,?)', [self.id, model_name, timestamp])
+            cursor.execute('INSERT INTO model (owner_id, name, trained, labelled, timestamp) VALUES (?,?,?,?,?)', [self.id, model_name, 0, 0, timestamp])
             self.conn.commit()
             id = cursor.execute('SELECT id FROM model WHERE owner_id=? ORDER BY id DESC limit 1', [self.id]).fetchone()[0]
             cursor.close()
@@ -85,6 +85,25 @@ class User(entity_model):
 
             cursor.close()
             raise Existing_Model()
+
+    def list_cache(self):
+
+        cursor = self.conn.cursor()
+        entries = cursor.execute("SELECT * FROM cache WHERE owner_id=? ORDER BY timestamp DESC;", [self._id]).fetchall()
+
+        for entry in range(len(entries)):
+            entries[entry] = list(entries[entry])
+            entries[entry][3] = datetime.fromtimestamp(entries[entry][3])
+
+        cursor.close()
+        return entries
+
+    def delete_cache(self, id):
+
+        cursor = self.conn.cursor()
+        cursor.execute("DELETE FROM cache WHERE id=? and owner_id=?", [id, self._id])
+        self.conn.commit()
+        cursor.close()
 
     @property
     def username(self):
@@ -314,7 +333,9 @@ class Model(entity_model):
     def __init__(self, conn: sqlite3.Connection, id: int):
         super().__init__(conn, id)
         cursor = self.conn.cursor()
-        data = cursor.execute('SELECT name FROM model WHERE id=?', [self._id]).fetchone()
+        data = cursor.execute('SELECT name, trained FROM model WHERE id=?', [self._id]).fetchone()
+        cursor.close
+        self._trained = data[1]
         self._model_name = data[0]
 
     @staticmethod
@@ -327,6 +348,22 @@ class Model(entity_model):
     @property
     def model_name(self):
         return self._model_name
+
+    @property
+    def is_trained(self):
+
+        if self._trained == 1:
+            return True
+        else:
+            return False
+
+    @property
+    def data_paths(self):
+
+        cursor = self.conn.cursor()
+        paths = cursor.execute('SELECT infile_path, outfile_path, dataset_path, sample_path, info_path, model_path FROM model WHERE id=?', [self._id]).fetchone()
+        cursor.close()
+        return paths
 
 ##############
 # EXCEPTIONS #

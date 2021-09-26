@@ -135,6 +135,41 @@ function kick_student(student_id, class_id, user_id) {
     request.send(JSON.stringify(data));
 }
 
+function delete_cache(cache_id, user_id) {
+
+    console.log("delete cache function");
+
+    var request = new XMLHttpRequest();   // new HttpRequest instance
+    request.open("POST", "_delete_cache", true);
+    request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    request.responseType = "json";
+
+    data = {"cache_id": cache_id, "user_id": user_id};
+    console.log(data);
+
+    request.onload = function(){
+
+        var responseJson = request.response;
+
+        console.log(responseJson);
+        console.log(responseJson.status);
+
+        if (responseJson['status'] == 1) {
+
+            let div_id = "cache";
+            div_id = div_id.concat(cache_id.toString());
+
+            console.log(div_id);
+            document.getElementById(div_id).remove();
+
+        }
+
+    }
+
+    request.send(JSON.stringify(data));
+
+}
+
 function toggle_students(classname) {
     console.log(classname);
     var elements = document.getElementsByClassName(classname);

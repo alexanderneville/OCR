@@ -100,8 +100,14 @@ def init_model(conn: sqlite3.Connection):
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             owner_id INTEGER NOT NULL,
                             name TEXT,
-                            path TEXT,
+                            trained INTEGER NOT NULL,
+                            labelled INTEGER NOT NULL,
                             infile_path TEXT,
+                            outfile_path TEXT,
+                            dataset_path TEXT,
+                            sample_path TEXT,
+                            info_path TEXT,
+                            model_path TEXT,
                             timestamp INTEGER,
                             UNIQUE (owner_id, name),
                             FOREIGN KEY (owner_id) REFERENCES user (id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -180,7 +186,7 @@ def populate_tables():
     # populate the cache table with 3 cache entries for each user
     current = datetime.now()
     timestamp = time.mktime(current.timetuple())
-    models = [(i//3 + 1, "model"+str(i+1), timestamp - (random.randint(0, 5000)* 3600)) for i in range(930)]
+    models = [(i//3 + 1, "model"+str(i+1), 0, 0, timestamp - (random.randint(0, 5000)* 3600)) for i in range(930)]
     cache_data = [(i//3 + 1, "cache data belonging to user"+str(i//3+1), timestamp - (random.randint(0, 5000)* 3600)) for i in range(930)]
 
 
@@ -188,7 +194,7 @@ def populate_tables():
     cursor.executemany('INSERT INTO user (username, password, salt, full_name, role) VALUES (?,?,?,?,?)', users)
     cursor.executemany('INSERT INTO class (teacher_id, class_name, pin) VALUES (?,?,?)', classes)
     cursor.executemany('INSERT INTO class_student (student_id, class_id) VALUES (?,?)', class_students)
-    cursor.executemany('INSERT INTO model (owner_id, name, timestamp) VALUES (?,?,?)', models)
+    cursor.executemany('INSERT INTO model (owner_id, name, trained, labelled, timestamp) VALUES (?,?,?,?,?)', models)
     cursor.executemany('INSERT INTO cache (owner_id, contents, timestamp) VALUES (?,?,?)', cache_data)
 
     conn.commit()

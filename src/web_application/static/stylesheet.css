@@ -61,7 +61,7 @@ input[type=radio] {
     margin-bottom: initial;
     border-radius: initial;
 }
-.model_card {
+.model_card, .cache_card {
     background: #353c4a;
     margin: 10px;
     padding: 10px;
@@ -90,12 +90,21 @@ input[type=radio] {
     background: inherit;
 }
 
-.leave_class, .delete_model, .delete_class, .kick_student {
+.leave_class, .delete_model, .delete_class, .kick_student, .delete_cache {
     width: 100px;
     padding: 5px;
     border-color: #bf616a;
     color: #353c4a;
     background: #bf616a;
+}
+
+.use_model_button, .train_model_button {
+    width: 100px;
+    padding: 5px;
+    margin-right: 10px;
+    border-color: #a3be8c;
+    color: #353c4a;
+    background: #a3be8c;
 }
 
 .topbar {

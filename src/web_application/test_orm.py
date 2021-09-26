@@ -174,10 +174,12 @@ class ORMTest(unittest.TestCase):
     # test functions belonging to orm.Model
 
     def test_model_properties(self):
+
         model = orm.Model(orm.connect_db(orm.db_path), 160)
         self.assertEqual(model.id, 160)
         self.assertEqual(model.model_name, "model160")
-
+        self.assertEqual(len(model.data_paths), 6)
+        self.assertFalse(model.is_trained)
 
 if __name__ == "__main__":
 

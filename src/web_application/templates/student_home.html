@@ -2,6 +2,7 @@
 
 {% block topbar %}
     <a class="topbar_option" style="float: right" href="{{ url_for('logout') }}">Logout</a>
+    <a class="topbar_option" style="float: right" href="{{ url_for('view_cache') }}">Results</a>
     <a class="topbar_option" style="float: right" href="{{ url_for('join_class') }}">Join</a>
     <a class="topbar_option" style="float: right" href="{{ url_for('create_model') }}">Create</a>
 {% endblock %}

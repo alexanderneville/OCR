@@ -22,6 +22,7 @@ def handle_form_data(data, keys):
 
     return fields
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
@@ -42,13 +43,16 @@ def login():
 
             current_user = orm.login_user(fields[0], fields[1])
 
-            if current_user is not None:
-
-                print(current_user.id)
-                session['user'] = current_user.id
-                return redirect(url_for('home'))
+            print(current_user.id)
+            session['user'] = current_user.id
+            return redirect(url_for('home'))
 
         except orm.Invalid_Credentials:
+
+            flash("Invalid login details")
+            return render_template('login.html')
+
+        except orm.No_Such_ID:
 
             flash("Invalid login details")
             return render_template('login.html')
@@ -103,6 +107,7 @@ def register():
             return render_template('register.html')
 
         except orm.Insufficient_Data:
+
             flash("Fill in every field")
             return render_template('register.html')
 
@@ -111,44 +116,96 @@ def home():
 
     if session["user"]:
 
-        conn = orm.connect_db(orm.db_path)
-        current_user = orm.create_user_object(conn, session["user"])
+        current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
 
         if isinstance(current_user, orm.Teacher):
-            conn = orm.connect_db(orm.db_path)
-            classes = [orm.ClassGroup(conn, i[0]) for i in current_user.list_classes()]
-            # id, name, pin , students[]
+
+            classes = [orm.ClassGroup(orm.connect_db(orm.db_path), i[0]) for i in current_user.list_classes()]
             details = []
             for i in classes:
-                students = [orm.create_user_object(conn, j[0]) for j in i.list_students()]
-                models = [[orm.Model(conn, model[0]) for model in student.list_models()] for student in students]
+                students = [orm.create_user_object(orm.connect_db(orm.db_path), j[0]) for j in i.list_students()]
+                models = [[orm.Model(orm.connect_db(orm.db_path), model[0]) for model in student.list_models()] for student in students]
                 class_data = [[j[0], j[1]] for j in zip(students, models)]
-                print(class_data)
+                # print(class_data)
                 details.append([i, class_data])
-            print(details)
-            return render_template('teacher_home.html', user = current_user, details=details)
+            # print(details)
+            models = [orm.Model(orm.connect_db(orm.db_path), model[0]) for model in current_user.list_models()]
+            return render_template('teacher_home.html', user = current_user, models = models, details=details)
+
         else:
+
             return render_template('student_home.html', user = current_user)
 
     else:
+
         return redirect(url_for('index'))
 
 @app.route('/index')
 @app.route('/')
 def index():
+
     return render_template('index.html')
 
 @app.route('/logout')
 def logout():
+
     session['user'] = None
-    return redirect(url_for('home'))
+    return redirect(url_for('index'))
 
 
 
 
 
+# create/join/leave class
 
+@app.route('/create_class', methods=['GET', 'POST'])
+def create_class():
+    print("create_class function")
+    if session["user"]:
 
+        current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
+
+        if isinstance(current_user, orm.Student):
+
+            return redirect(url_for('home'))
+
+        if request.method == 'GET':
+
+            return render_template('create_class.html')
+
+        else:
+
+            try:
+
+                if not request.form:
+
+                    raise orm.Insufficient_Data()
+
+                keys = ["class_name", "pin"]
+
+                fields = handle_form_data(request.form, keys)
+                print(fields)
+                current_user.create_class(fields[0], fields[1])
+                return redirect(url_for("home"))
+
+            except orm.Insufficient_Data:
+
+                flash("Fill in both fields")
+                return render_template('create_class.html')
+
+            except orm.Invalid_Credentials:
+
+                flash("Invalid join code or pin")
+                return render_template('create_class.html')
+
+            except orm.Existing_Class:
+
+                flash("Existing class with this name")
+                return render_template('create_class.html')
+
+    else:
+
+        return redirect(url_for('index'))
 
 @app.route('/join_class', methods=['GET', 'POST'])
 def join_class():
@@ -161,7 +218,9 @@ def join_class():
             return redirect(url_for('home'))
 
         if request.method == "GET":
+
             return render_template('join_class.html')
+
         else:
 
             try:
@@ -184,125 +243,163 @@ def join_class():
                 return render_template('join_class.html')
 
     else:
+
         return redirect(url_for('index'))
+
+@app.route('/_leave_class', methods=['POST'])
+def _leave_class():
+
+    print("_leave_class function")
+    data = request.get_json()
+    print(data)
+
+    try:
+
+        student = orm.create_user_object(orm.connect_db(orm.db_path), data['user_id'])
+        student.leave_class(data['class_id'])
+        return jsonify({'status': 1})
+
+    except orm.No_Such_ID:
+
+        return jsonify({'status', 0})
+
+    except orm.Invalid_Role:
+
+        return jsonify({'status', 0})
+
+
+# create/train/use model
 
 @app.route('/create_model', methods=['GET', 'POST'])
 def create_model():
+
     if session["user"]:
+
         if request.method == 'GET':
+
             return render_template('create_model.html')
+
         else:
+
             current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
-            print(current_user.id)
+
             try:
+
                 if not request.form:
+
                     raise orm.Insufficient_Data()
+
                 if not request.form['model_name']:
+
                     raise orm.Insufficient_Data()
+
                 id = current_user.create_model(request.form['model_name'])
-                file_id=str(id)+".png"
-                print(file_id)
+                infile_name = str(id)+".png"
                 uploaded = request.files['infile']
+
                 if uploaded.filename == '':
+
                     raise orm.Insufficient_Data()
-                uploaded.save(orm.tmp_path+file_id)
-                print("creating pipeline object")
+
+                uploaded.save(orm.tmp_path+infile_name)
                 image_checker = pipeline.Pipeline()
-                rc = image_checker.check_header(orm.tmp_path+file_id)
+                rc = image_checker.check_header(orm.tmp_path+infile_name)
                 del(image_checker)
-                print("deallocated pipeline object")
+
                 if rc == 1:
-                    os.rename(orm.tmp_path+file_id, orm.input_path+file_id)
+
+                    os.rename(orm.tmp_path+infile_name, orm.infile_path+infile_name)
+
+                    image_processor = pipeline.Pipeline()
+                    image_processor.load_file(orm.infile_path+infile_name)
+                    image_processor.scan_image()
+                    image_processor.generate_dataset(orm.dataset_path+str(id)+".txt", orm.sample_path+str(id)+".txt", orm.info_path+str(id)+".json")
+                    image_processor.save_to_file(orm.outfile_path+infile_name)
+
                     conn = orm.connect_db(orm.db_path)
                     cursor = conn.cursor()
-                    cursor.execute('UPDATE model SET infile_path=? WHERE id=?', [orm.input_path+file_id, id])
+                    cursor.execute('UPDATE model SET infile_path=?, outfile_path=?, dataset_path=?, sample_path=?, info_path=? WHERE id=?', 
+                                   [orm.infile_path+infile_name, orm.outfile_path+infile_name,
+                                    orm.dataset_path+str(id)+".txt", orm.sample_path+str(id)+".txt", 
+                                    orm.info_path+str(id)+".json", id])
                     conn.commit()
+                    cursor.close()
+                    conn.close()
                     return redirect(url_for('home'))
+
                 else:
+
                     raise orm.Invalid_FileType()
 
             except orm.Invalid_FileType:
-                os.remove(orm.tmp_path + file_id)
+
+                os.remove(orm.tmp_path + infile_name)
                 current_user.delete_model(id)
                 flash('Invalid image file (PNG only)')
                 return redirect(url_for('create_model'))
+
             except orm.Insufficient_Data:
+
                 flash('Fill in every field')
                 return redirect(url_for('create_model'))
+
             except orm.Existing_Model:
+
                 flash('Models must have a unique name')
                 return redirect(url_for('create_model'))
 
     else:
-        return redirect(url_for('index'))
-
-@app.route('/create_class', methods=['GET', 'POST'])
-def create_class():
-    print("create_class function")
-    if session["user"]:
-
-        current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
-        if isinstance(current_user, orm.Student):
-            return redirect(url_for('home'))
-        if request.method == 'GET':
-            return render_template('create_class.html')
-        else:
-
-            try:
-
-                if not request.form:
-                    raise orm.Insufficient_Data()
-                keys = ["class_name", "pin"]
-
-                fields = handle_form_data(request.form, keys)
-                print(fields)
-                current_user.create_class(fields[0], fields[1])
-                return redirect(url_for("home"))
-
-            except orm.Insufficient_Data:
-                flash("Fill in both fields")
-                return render_template('create_class.html')
-            except orm.Invalid_Credentials:
-                flash("Invalid join code or pin")
-                return render_template('create_class.html')
-            except orm.Existing_Class:
-                flash("Existing class with this name")
-                return render_template('create_class.html')
-
-    else:
 
         return redirect(url_for('index'))
+
 
 @app.route('/train_model')
 def train_model():
+
     if session['user']:
-        return render_template()
+
+        # return render_template('train_model.html')
+        return str(request.args.get('model_id'))
+
     else:
+
         return redirect(url_for('home'))
 
 @app.route('/use_model', methods=['GET', 'POST'])
 def use_model():
+
     if session['user']:
+
         current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
+
         if request.method == 'GET':
 
-            model_id = request.args.get('id')
+            model_id = request.args.get('model_id')
             print(model_id)
+
             if model_id == None or model_id == '':
+
                 return redirect(url_for('home'))
+
             available_models = current_user.list_models()
             model_ids = [str(i[0]) for i in available_models]
-            if model_id not in model_ids:
+            if str(model_id) not in model_ids:
+
                 return redirect(url_for('home'))
 
             return render_template('use_model.html', model_id = model_id)
+
         else:
+
             current = datetime.now()
             timestamp = time.mktime(current.timetuple())
+
             try:
 
                 if not request.form:
+
                     raise orm.Insufficient_Data()
+
                 keys = ["model_id"]
                 fields = handle_form_data(request.form, keys)
                 print(fields)
@@ -311,11 +408,11 @@ def use_model():
                 if uploaded.filename == '':
                     raise orm.Insufficient_Data()
                 uploaded.save(orm.tmp_path + str(timestamp) + ".png")
-                print("creating pipeline object")
+
                 image_checker = pipeline.Pipeline()
                 rc = image_checker.check_header(orm.tmp_path + str(timestamp) + ".png")
                 del (image_checker)
-                print("deallocated pipeline object")
+
                 if rc == 1:
                     text = ocr.recognise(fields[0], orm.tmp_path + timestamp + ".png") # just a prototype at the moment
                     current_user.create_cache(text) # just a prototype for now
@@ -340,26 +437,28 @@ def use_model():
                 return render_template('create_class.html')
 
     else:
-        return redirect(url_for())
+
+        return redirect(url_for("/index"))
 
 @app.route("/view_cache")
 def view_cache():
-    return render_template('view_cache.html') # TODO work on this function
 
+    if session["user"]:
 
-@app.route('/_leave_class', methods=['POST'])
-def _leave_class():
-    print("_leave_class function")
+        return render_template('view_cache.html', user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"]))
+
+    else:
+
+        return redirect(url_for('index'))
+
+@app.route('/_delete_cache', methods=['POST'])
+def _delete_cache():
+
+    print("_delete_model function")
     data = request.get_json()
     print(data)
-
-    try:
-        student = orm.create_user_object(orm.connect_db(orm.db_path), data['user_id'])
-        student.leave_class(data['class_id'])
-    except orm.No_Such_ID:
-        return jsonify({'status', 0})
-    except orm.Invalid_Role:
-        return jsonify({'status', 0})
+    user = orm.create_user_object(orm.connect_db(orm.db_path), data['user_id'])
+    user.delete_cache(data["cache_id"])
 
     return jsonify({'status': 1})
 
