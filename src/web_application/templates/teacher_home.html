@@ -43,8 +43,8 @@
                         {% endif %}
                 </div>
         {% endfor %}
-        <input class="create_model_button" type="button" onclick="window.location.href='{{ url_for('create_model') }}'" value="Create">
     {% endif %}
+    <input class="create_model_button" type="button" onclick="window.location.href='{{ url_for('create_model') }}'" value="Create">
 
     <H2>Classes:</H2>
 
@@ -79,5 +79,6 @@
     {% endif %}
 
      <input class="create_class_button" type="button" onclick="window.location.href='{{ url_for('create_class') }}'" value="Create">
+
 {% endblock %}
 

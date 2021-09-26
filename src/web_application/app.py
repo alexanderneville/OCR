@@ -391,17 +391,46 @@ def train_model():
         if current_model.is_labelled:
             return jsonify({'status': 0, 'complete': 1})
 
-        if data["label"]:
-            pass
-
         info = ocr.get_info(current_model.data_paths[4])
         labels = [character["label"] for character in info["characters"]]
+
+        if "label" in data:
+
+            if data["label"] == None or data["label"] == "":
+
+                try:
+
+                    position = labels.index(None)
+                    del(info["characters"][position])
+                    ocr.save_info(info, current_model.data_paths[4])
+
+                except ValueError:
+
+                    return jsonify({'status': 0, 'complete': 1})
+
+            else:
+
+                try:
+
+                    position = labels.index(None)
+                    info["characters"][position]["label"] = data["label"]
+                    ocr.save_info(info, current_model.data_paths[4])
+
+                except ValueError:
+
+                    return jsonify({'status': 0, 'complete': 1})
+
         try:
-            position = labels.index(None)
+
+            labels = [character["label"] for character in info["characters"]]
+            position = labels.index(None) # find the next unlabelled element
             new_character = ocr.get_single_character(position, current_model.data_paths[3])
-            print(new_character)
+            # print(new_character)
             return jsonify({'status': 1, 'complete': 0, 'new_character': new_character})
-        except ValueError:
+
+        except ValueError: # this means everything has been labelled
+
+            current_model.set_labelled()
             return jsonify({'status': 1, 'complete': 1})
 
 
@@ -431,8 +460,10 @@ def use_model():
 
         else:
 
-            current = datetime.now()
-            timestamp = time.mktime(current.timetuple())
+            infile_path = orm.tmp_path + str(current_user.id) + "_infile" + ".png"
+            dataset_path = orm.tmp_path + str(current_user.id) + "_dataset" + ".txt"
+            sample_path = orm.tmp_path + str(current_user.id) + "_sample" + ".txt"
+            info_path = orm.tmp_path + str(current_user.id) + "_info" + ".json"
 
             try:
 
@@ -442,30 +473,41 @@ def use_model():
 
                 keys = ["model_id"]
                 fields = handle_form_data(request.form, keys)
-                print(fields)
+                current_model = orm.Model(orm.connect_db(orm.db_path), fields[0])
 
+                # save and check the infile
                 uploaded = request.files['infile']
                 if uploaded.filename == '':
                     raise orm.Insufficient_Data()
-                uploaded.save(orm.tmp_path + str(timestamp) + ".png")
-
+                uploaded.save(infile_path)
                 image_checker = pipeline.Pipeline()
-                rc = image_checker.check_header(orm.tmp_path + str(timestamp) + ".png")
+                rc = image_checker.check_header(infile_path)
                 del (image_checker)
 
                 if rc == 1:
-                    text = ocr.recognise(fields[0], orm.tmp_path + str(timestamp) + ".png") # just a prototype at the moment
+
+                    image_processor = pipeline.Pipeline()
+                    image_processor.load_file(infile_path)
+                    image_processor.scan_image()
+                    image_processor.generate_dataset(dataset_path, sample_path, info_path)
+                    text = ocr.use_existing_model(info_path, sample_path, current_model.model_path)
                     current_user.create_cache(text) # just a prototype for now
+                    os.remove(infile_path)
+                    os.remove(dataset_path)
+                    os.remove(sample_path)
+                    os.remove(info_path)
+                    del(image_processor)
+
                 else:
+
                     raise orm.Invalid_FileType() # TODO move this exception to ocr package
 
                 return redirect(url_for("view_cache"))
 
             except orm.Invalid_FileType:
-                os.remove(orm.tmp_path + str(timestamp) + ".png")
-                current_user.delete_model(id)
+                os.remove(infile_path)
                 flash('Invalid image file (PNG only)')
-                return redirect(url_for('create_model'))
+                return render_template('create_class.html')
             except orm.Insufficient_Data:
                 flash("Fill in both fields")
                 return render_template('create_class.html')

@@ -20,9 +20,10 @@ $(ODIR)/%.o: %.c $(IDIR)
 test: $(OBJ)
 	python class_setup.py build
 	cp ./build/lib.linux-x86_64-3.9/pipeline.cpython-39-x86_64-linux-gnu.so ./
+	cp ./build/lib.linux-x86_64-3.9/pipeline.cpython-39-x86_64-linux-gnu.so ../../web_application/
 	mv ./build/lib.linux-x86_64-3.9/pipeline.cpython-39-x86_64-linux-gnu.so ../../../tests/
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 clean:
-	rm -rf $(ODIR)/*.o outfile.png a.out main *.so build/ test_output_dir/* ../../../tests/pipeline.cpython-39-x86_64-linux-gnu.so
+	rm -rf $(ODIR)/*.o outfile.png a.out main *.so build/ test_output_dir/* ../../../tests/pipeline.cpython-39-x86_64-linux-gnu.so ../../web_application/pipeline.cpython-39-x86_64-linux-gnu.so

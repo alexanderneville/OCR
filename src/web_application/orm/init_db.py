@@ -236,7 +236,8 @@ def new_database():
 
     setup_directories()
     create_tables()
-    populate_tables()
+    if input("populate tables [y|any]: ") == "y":
+        populate_tables()
 
 if __name__ == "__main__":
     new_database()

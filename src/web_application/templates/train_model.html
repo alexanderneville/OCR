@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 
+{% block body_tag %} onload="get_first_character({{ model.id }}, {{ user.id }})" {% endblock %}
+
 {%  block topbar %}
      <a class="topbar_option" style="float: right" href="{{ url_for('home') }}">Home</a>
 {% endblock %}
 
 {% block content %}
-
-<canvas id="matrix_canvas" width="320" height="320" style="border:1px solid #000000;" onload="get_first_character({{ model.id }}, {{ user.id }})"></canvas> 
+<canvas id="matrix_canvas" width="320" height="320" style="border:1px solid #000000;" ></canvas> 
 <input id="label" type="text" maxlength="1" class="label_input" placeholder="label">
 <input id="submit_label_button" type="button" class="label_submit_button" onclick="label_character({{ model.id }}, {{ user.id }})" value="Submit">
 

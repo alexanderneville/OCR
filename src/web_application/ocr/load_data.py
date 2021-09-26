@@ -10,12 +10,17 @@ def get_info(path):
         data = json.load(info)
     return data
 
-def get_extended_dataset(data, dataset_path):
+def save_info(data, path):
+
+    with open(path, "w") as f:
+        json.dump(data, f, indent=4)
+
+def get_extended_dataset(info, dataset_path):
 
     training_dataset = []
     with open(dataset_path, "r") as dataset:
-        for character_num in range(len(data["characters"])):
-            dataset.seek(data["characters"][character_num]["position"] * 10 * 8 * 32 * 32)
+        for character_num in range(len(info["characters"])):
+            dataset.seek(info["characters"][character_num]["position"] * 10 * 8 * 32 * 32)
             for sample in range(10):
                 current_character = []
                 for row_string in range(32):
@@ -26,11 +31,11 @@ def get_extended_dataset(data, dataset_path):
                 training_dataset.append(np.array(current_character))
     return training_dataset
 
-def get_sample_dataset(data, sample_path):
+def get_sample_dataset(info, sample_path):
     sample_dataset = []
     with open(sample_path, "r") as dataset:
-        for character_num in range(len(data["characters"])):
-            dataset.seek(data["characters"][character_num]["position"] * 8 * 32 * 32)
+        for character_num in range(len(info["characters"])):
+            dataset.seek(info["characters"][character_num]["position"] * 8 * 32 * 32)
             current_character = []
             for row in range(32):
                 row_string = dataset.read(8*32)[:-1]

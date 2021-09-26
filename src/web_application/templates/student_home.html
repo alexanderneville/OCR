@@ -24,8 +24,9 @@
                         {% endif %}
                 </div>
         {% endfor %}
-        <input class="create_model_button" type="button" onclick="window.location.href='{{ url_for('create_model') }}'" value="Create">
     {% endif %}
+
+    <input class="create_model_button" type="button" onclick="window.location.href='{{ url_for('create_model') }}'" value="Create">
 
     <H2>Classes:</H2>
     {% with classes = user.list_classes() %}
@@ -38,8 +39,9 @@
             {% endfor %}
         {% endif %}
 
-        <input class="join_class_button" type="button" onclick="window.location.href='{{ url_for('join_class') }}'" value="Join">
 
     {% endwith %}
+
+    <input class="join_class_button" type="button" onclick="window.location.href='{{ url_for('join_class') }}'" value="Join">
 
 {% endblock %}

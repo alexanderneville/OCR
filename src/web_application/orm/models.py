@@ -105,6 +105,15 @@ class User(entity_model):
         self.conn.commit()
         cursor.close()
 
+    def create_cache(self, text):
+
+        cursor = self.conn.cursor()
+        current = datetime.now()
+        timestamp = time.mktime(current.timetuple())
+        cursor.execute("INSERT INTO cache (owner_id, contents, timestamp) VALUES (?,?,?)", [self._id, text, timestamp])
+        self.conn.commit()
+        cursor.close()
+
     @property
     def username(self):
         return self._username
@@ -344,10 +353,20 @@ class Model(entity_model):
         pass
 
     def set_labelled(self):
-        pass
+
+        cursor = self.conn.cursor()
+        cursor.execute("UPDATE model SET labelled=1 WHERE id=?", [self._id])
+        self._labelled = 1
+        self.conn.commit()
+        cursor.close()
 
     def set_trained(self):
-        pass
+
+        cursor = self.conn.cursor()
+        cursor.execute("UPDATE model SET trained=1 WHERE id=?", [self._id])
+        self._trained = 1
+        self.conn.commit()
+        cursor.close()
 
     def delete(self):
         pass
@@ -355,6 +374,16 @@ class Model(entity_model):
     @property
     def model_name(self):
         return self._model_name
+
+    @property
+    def model_path(self):
+        if self._trained == 0:
+            return None
+        else:
+            cursor = self.conn.cursor()
+            data = cursor.execute("SELECT model_path FROM model WHERE id=?", [self._id]).fetchone()
+            cursor.close()
+            return data[0]
 
     @property
     def is_trained(self):

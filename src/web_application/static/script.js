@@ -170,6 +170,38 @@ function delete_cache(cache_id, user_id) {
 
 }
 
+function rgb_to_hex(r,g,b) {
+
+    r = r.toString(16);
+    g = g.toString(16);
+    b = b.toString(16);
+
+    if (r.length == 1)
+        r = "0" + r;
+    if (g.length == 1)
+        g = "0" + g;
+    if (b.length == 1)
+        b = "0" + b;
+
+    return "#" + r + g + b;
+
+}
+
+function draw_matrix(character) {
+
+    let canvas = document.getElementById("matrix_canvas");
+    let cursor = canvas.getContext("2d");
+    for (let y = 0; y < 32; y++) {
+        for (let x = 0; x < 32; x++)  {
+            let greyscale = Math.floor(character[y][x]);
+            let hex = rgb_to_hex(greyscale, greyscale, greyscale);
+            console.log(hex);
+            cursor.fillStyle = hex;
+            cursor.fillRect(x*10, y*10, 10, 10);
+        }
+    }
+}
+
 function get_first_character(model_id, user_id){
 
     console.log("get first character function");
@@ -185,35 +217,47 @@ function get_first_character(model_id, user_id){
     request.onload = function() {
 
         var responseJson = request.response;
-        console.log(responseJson);
+
+        if (responseJson["complete"] == 1) {
+            // go home
+        } else {
+
+            let new_character = responseJson["new_character"];
+            draw_matrix(new_character);
+
+        }
 
     }
 
     request.send(JSON.stringify(data));
  
 }
+
 function label_character(model_id, user_id) {
 
     console.log("label character function");
 
-    var request = new XMLHttpRequest();   // new HttpRequest instance
+    let request = new XMLHttpRequest();   // new HttpRequest instance
     request.open("POST", "train_model", true);
     request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     request.responseType = "json";
-    label = document.getElementById('textbox_id').value
-    console.log(value);
-    data = {"model_id": cache_id, "user_id": user_id, "label": label};
+    let label = document.getElementById('label').value;
+    document.getElementById('label').value = "";
+    console.log(label);
+    let data = {"model_id": model_id, "user_id": user_id, "label": label};
     console.log(data);
 
     request.onload = function() {
 
         var responseJson = request.response;
 
-        if (responseJson["complete"] == 1) {
-            // go home
+        if (responseJson["complete"] == 1 || responseJson["status"] == 0) {
+            window.location.href="/home";
         } else {
-            new_character = responseJson["new_character"];
-            console.log(new_character);
+
+            let new_character = responseJson["new_character"];
+            draw_matrix(new_character);
+
         }
     }
 
