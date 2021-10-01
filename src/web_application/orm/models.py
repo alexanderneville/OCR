@@ -413,9 +413,6 @@ class Model(entity_model):
 # EXCEPTIONS #
 ##############
 
-class School_Class(entity_model):
-    pass
-
 class No_Such_ID(Exception):
     pass
 
