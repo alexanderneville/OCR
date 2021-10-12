@@ -19,13 +19,21 @@ class ORMTest(unittest.TestCase):
         self.assertIsNotNone(new_teacher)
 
     def test_registragion_with_insecure_password(self):
-        self.assertRaises(orm.Insecure_Password, orm.Student.create, self.conn, "user313", "Student 302", "1234")
-        self.assertRaises(orm.Insecure_Password, orm.Teacher.create, self.conn, "user314", "Teacher 12", "1234")
+        self.assertRaises(orm.Insecure_Password,
+                          orm.Student.create, self.conn,
+                          "user313", "Student 302", "1234")
+        self.assertRaises(orm.Insecure_Password, orm.Teacher.create,
+                          self.conn, "user314",
+                          "Teacher 12", "1234")
 
     def test_registration_with_existing_username(self):
-        self.assertRaises(orm.Existing_Username, orm.Student.create, self.conn, "user11", "Student 303",
+        self.assertRaises(orm.Existing_Username,
+                          orm.Student.create, self.conn,
+                          "user11", "Student 303",
                           "Aa9-_*'bbbbbbbbbbb")
-        self.assertRaises(orm.Existing_Username, orm.Teacher.create, self.conn, "user1", "Teacher 13",
+        self.assertRaises(orm.Existing_Username,
+                          orm.Teacher.create, self.conn,
+                          "user1", "Teacher 13",
                           "Aa9-_*'bbbbbbbbbbb")
 
     def test_login_with_valid_credentials(self):
@@ -52,7 +60,6 @@ class ORMTest(unittest.TestCase):
     def test_create_model(self):
         student = orm.login_user("user11", "1234")
         teacher = orm.login_user("user1", "1234")
-
         id1 = student.create_model("model4")
         id2 = teacher.create_model("model4")
         self.assertRaises(orm.Existing_Model, student.create_model, "model4")
@@ -60,14 +67,12 @@ class ORMTest(unittest.TestCase):
     def test_delete_model(self):
         student = orm.login_user("user11", "1234")
         teacher = orm.login_user("user1", "1234")
-
         student.delete_model((int(student.id) - 1) * 3 + 4)
         teacher.delete_model((int(student.id) - 1) * 3 + 4)
 
     def test_list_classes(self):
         student = orm.login_user("user11", "1234")
         teacher = orm.login_user("user1", "1234")
-
         self.assertEqual(len(student.list_classes()), 1)
         self.assertEqual(len(student.list_classes()[0]), 4)
         self.assertEqual(len(teacher.list_classes()), 1)
@@ -76,12 +81,10 @@ class ORMTest(unittest.TestCase):
     def test_user_properties(self):
         student = orm.login_user("user11", "1234")
         teacher = orm.login_user("user1", "1234")
-
         self.assertEqual(student.id, 11)
         self.assertEqual(student.username, "user11")
         self.assertEqual(student.full_name, "Student 1")
         self.assertEqual(student.role, "student")
-
         self.assertEqual(teacher.id, 1)
         self.assertEqual(teacher.username, "user1")
         self.assertEqual(teacher.full_name, "Teacher 1")
@@ -125,7 +128,7 @@ class ORMTest(unittest.TestCase):
 
     def test_leave_class(self):
         student = orm.login_user("user71", "1234")
-        self.assertIsNone(student.leave_class(4))  # executes after test_join_class
+        self.assertIsNone(student.leave_class(4))
         self.assertEqual(len(student.list_classes()), 1)
 
     def test_list_students(self):

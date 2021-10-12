@@ -15,7 +15,6 @@ def calc_output(activations):
     return output
 
 print("""
-
 +--------+
 | inputs |
 +--------+
@@ -24,7 +23,6 @@ print("""
 |   10   |
 |   11   |
 +--------+
-
 """)
 
 # Instantiate the network

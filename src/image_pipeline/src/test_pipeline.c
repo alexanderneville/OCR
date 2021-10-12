@@ -30,41 +30,30 @@ void teardown(image_data * image_p) {
     destroy_image_data(image_p);
 }
 
-/* ================ */
-/*       Tests      */
-/* ================ */
-
 void test_load() {
-
     printf("testing read_image() and initialise_data() ... ");
     image_data * image_p = setup();
     teardown(image_p);
     printf("passed!\n");
-
 }
 
 void test_export() {
-
     printf("testing export_pixels() ... ");
     image_data * image_p = setup();
     unsigned char ** pixels = image_p->export_pixels(image_p);
     teardown(image_p);
     printf("passed!\n");
-
 }
 void test_save() {
-
     printf("testing write_image() ... ");
     image_data * image_p = setup();
     unsigned char ** pixels = image_p->export_pixels(image_p);
     write_image("test_output_dir/test_save.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     teardown(image_p);
     printf("passed!\n");
-
 }
 
 void test_switch_channel_num() {
-
     printf("testing rgb_to_greyscale() and greyscale_to_rgb() ... ");
     image_data * image_p = setup();
     assert(image_p->channels == 3);
@@ -74,11 +63,9 @@ void test_switch_channel_num() {
     assert(image_p->channels == 3);
     teardown(image_p);
     printf("passed!\n");
-
 }
 
 void test_invert_colours() {
-
     printf("testing invert() ... ");
     image_data * image_p = setup();
     image_p->invert(image_p);
@@ -86,11 +73,9 @@ void test_invert_colours() {
     write_image("test_output_dir/test_invert_colours.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     teardown(image_p);
     printf("passed!\n");
-
 }
 
 void test_scale_smaller() {
-
     printf("testing resize(0.6) ... ");
     image_data * image_p = setup();
     int original = image_p->width;
@@ -100,11 +85,9 @@ void test_scale_smaller() {
     write_image("test_output_dir/test_scale_smaller.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     teardown(image_p);
     printf("passed!\n");
-
 }
 
 void test_scale_larger() {
-
     printf("testing resize(1.2) ... ");
     image_data * image_p = setup();
     int original = image_p->width;
@@ -114,11 +97,9 @@ void test_scale_larger() {
     write_image("test_output_dir/test_scale_larger.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     teardown(image_p);
     printf("passed!\n");
-
 }
 
 void test_pooling() {
-
     printf("testing reduce_resolution() ... ");
     image_data * image_p = setup();
     int original = image_p->width;
@@ -132,7 +113,6 @@ void test_pooling() {
     assert(image_p->width < after);
     teardown(image_p);
     printf("passed!\n");
-
 }
 
 void test_convolution() {
@@ -145,11 +125,9 @@ void test_convolution() {
     write_image("test_output_dir/test_convolution.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     teardown(image_p);
     printf("passed!\n");
-
 }
 
 void test_translation() {
-
     printf("testing image_translation() ... ");
     image_data * image_p = setup();
     image_p->image_translation(image_p, 40, 40);
@@ -158,7 +136,6 @@ void test_translation() {
     write_image("test_output_dir/test_translation.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     teardown(image_p);
     printf("passed!\n");
-
 }
 
 void test_scan_image() {
@@ -171,22 +148,18 @@ void test_scan_image() {
     write_image("test_output_dir/test_scan_image.png", pixels, image_p->height, image_p->width, image_p->channels, 8, 2);
     teardown(image_p);
     printf("passed!\n");
-
 }
 
 void test_gernerate_dataset() {
-
     printf("testing generate_dataset_from_image() ... ");
     image_data * image_p = setup();
     image_p->create_document_outline(image_p);
     image_p->generate_dataset_from_image(image_p, "test_output_dir/dataset.txt", "test_output_dir/sample.txt", "test_output_dir/info.json");
     teardown(image_p);
     printf("passed!\n");
-
 }
 
 int main(int argc, char ** argv) {
-
     printf("Running tests...\n\n");
 
     test_load();
@@ -203,6 +176,5 @@ int main(int argc, char ** argv) {
     test_gernerate_dataset();
 
     printf("\nAll tests passed!\n");
-
     return 0;
 }
