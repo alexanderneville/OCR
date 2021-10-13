@@ -10,4 +10,3 @@ void write_image(char * file_name, unsigned char ** pixels, int height, int widt
 int check_header(char * file_name);
 
 #endif // !handling_H
-

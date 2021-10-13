@@ -1,82 +1,95 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct list_node_T {
+typedef struct list_node_T
+{
 
-    int value;
-    struct list_node_T * next;
+  int value;
+  struct list_node_T *next;
 
 } node;
 
-node * create_list_node() {
+node *
+create_list_node()
+{
 
-    node * new_node_p = (node *) malloc(sizeof(node));
-    new_node_p->value = 0;
-    new_node_p->next = NULL;
+  node *new_node_p = (node *) malloc(sizeof(node));
 
-    return new_node_p;
+  new_node_p->value = 0;
+  new_node_p->next = NULL;
 
-}
-
-void append_list(node * node_p, int value) {
-
-    if (node_p->next) {
-
-        append_list(node_p->next, value);
-
-    } else {
-
-        node_p->next = create_list_node();
-        node_p->next->value = value;
-
-    }
-    return;
+  return new_node_p;
 
 }
 
-void traverse_list(node * node_p) {
+void
+append_list(node * node_p, int value)
+{
 
-    if (node_p->value) {
+  if (node_p->next) {
 
-        printf("%d\n", node_p->value);
+    append_list(node_p->next, value);
 
-    }
+  } else {
 
-    if (node_p->next) {
+    node_p->next = create_list_node();
+    node_p->next->value = value;
 
-        traverse_list(node_p->next);
-
-    }
-
-    return;
-
-}
-
-void destroy_list(node * node_p) {
-
-    if (node_p->next) {
-
-        node * tmp = node_p->next;
-        free(node_p);
-        destroy_list(tmp);
-
-    }
+  }
+  return;
 
 }
 
-int main() {
+void
+traverse_list(node * node_p)
+{
 
-    node * start = create_list_node();
+  if (node_p->value) {
 
-    append_list(start, 1);
-    append_list(start, 3);
-    append_list(start, 2);
+    printf("%d\n", node_p->value);
 
-    printf("inserted data\n");
+  }
 
-    traverse_list(start);
-    destroy_list(start);
+  if (node_p->next) {
 
-    return 0;
+    traverse_list(node_p->next);
+
+  }
+
+  return;
+
+}
+
+void
+destroy_list(node * node_p)
+{
+
+  if (node_p->next) {
+
+    node *tmp = node_p->next;
+
+    free(node_p);
+    destroy_list(tmp);
+
+  }
+
+}
+
+int
+main()
+{
+
+  node *start = create_list_node();
+
+  append_list(start, 1);
+  append_list(start, 3);
+  append_list(start, 2);
+
+  printf("inserted data\n");
+
+  traverse_list(start);
+  destroy_list(start);
+
+  return 0;
 
 }
