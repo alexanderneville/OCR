@@ -8,6 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/api/user', require('./routes/api/user'));
+app.use('/api/class', require('./routes/api/class'));
 
 // Start the server on a specified port or 5000
 const port = process.env.PORT || 5000;

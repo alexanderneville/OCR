@@ -6,17 +6,29 @@ const db = new sqlite3.Database('../../data/application_data.db', (err) => {
     }
 });
 
-db.get("SELECT * FROM user WHERE username=?", ["user10"], (error, row) => {
+db.all("SELECT * FROM user WHERE username=?", ["user10"], (error, rows) => {
     if (error) {
         console.log(error)
     } else {
-        if (row == undefined){
+        if (rows == undefined){
             console.log("no user");
         } else {
-            console.log(row);
+            console.log(rows);
         }
     }
 });
+
+async function test() {
+    let data = await new Promise((resolve,reject) => {
+        db.all("SELECT * FROM class WHERE teacher_id=?", ["1"], (err,rows) => {
+         if(err) reject(err);
+         resolve(rows);
+        })
+    })
+    console.log(data);
+}
+
+test();
 
 
 db.close((err) => {
