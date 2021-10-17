@@ -2,7 +2,7 @@ const salt = require('../config/keys').salt;
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const {User} = require("./classes");
+const {User} = require("./orm");
 const {open_connection} = require("./db_conn");
 
 function new_hash(password) {

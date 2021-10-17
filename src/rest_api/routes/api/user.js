@@ -1,6 +1,6 @@
 const express = require('express');
 const salt = require('../../config/keys').salt;
-const { User } = require('../../src/classes');
+const { User } = require('../../src/orm');
 const { new_hash, existing_hash, create_new_token, authenticate } = require('../../src/authenticate')
 const sqlite3 = require("sqlite3");
 const {open_connection, close_connection} = require("../../src/db_conn");
@@ -8,10 +8,6 @@ const {use} = require("express/lib/router");
 
 
 const router = express.Router();
-
-router.get("/test", ((req, res) => {
-    res.json({message: "hello"});
-}))
 
 router.post('/login', async (req, res) => {
     if (req.body.username && req.body.password) {
@@ -53,11 +49,25 @@ router.get('/dev-verify', authenticate, async (req, res) => {
     res.json(user.return_data());
 });
 
-router.get('/list-classes',authenticate, async (req, res) => {
+router.get('/list-classes', authenticate, async (req, res) => {
     let user = res.locals.user;
     let classes = await user.list_classes();
     console.log(classes);
-    res.json({my_classes: classes});
+    res.json({classes: classes});
 })
+
+router.get('/list-models', authenticate, async (req, res) => {
+    let user = res.locals.user;
+    let models = await user.list_models();
+    res.json({models: models});
+})
+
+router.get('/list-all-models', authenticate, async (req, res) => {
+    let user = res.locals.user;
+    let models = await user.list_all_models();
+    res.json({models: models});
+})
+
+
 
 module.exports = router;
