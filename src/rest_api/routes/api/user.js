@@ -17,9 +17,8 @@ router.post('/login', async (req, res) => {
                 if (error) {
                     console.log(error)
                 } else {
-                    if (row == undefined){
-                        console.log("no user");
-                        res.json({message: "no user"});
+                    if (row == undefined || row.role == "student"){
+                        res.json({message: "valid teacher credentials required."});
                     } else {
                         let hashed = await existing_hash(req.body.password, row.salt);
                         console.log(hashed);

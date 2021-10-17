@@ -24,8 +24,27 @@ router.get('/', authenticate, async (req, res) => {
 
 });
 
-router.post('/', async (req, res) => {
-    res.json({messsage: "called with post"});
+router.post('/', authenticate, async (req, res) => {
+    if (req.body.model_name) {
+        let user = res.locals.user;
+        try {
+            await user.create_model(req.body.model_name);
+            let conn = open_connection();
+            conn.get("SELECT id FROM model WHERE owner_id=? ORDER BY id DESC LIMIT 1;", [user.return_data().id], async (error, row) => {
+                if (error) {
+                    throw error;
+                } else {
+                    if (req.body.nn_model) {
+                        await user.update_model(row.id, req.body.nn_model);
+                    }
+                    let data = await user.get_model_info(row.id);
+                    res.json(data);
+                }
+            });
+        } catch (error) {
+            res.sendStatus(403);
+        }
+    }
 });
 
 router.put('/', authenticate, async (req, res) => {
