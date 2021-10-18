@@ -1,8 +1,8 @@
 * {
     font-family: "sans-serif";
     font-size: 16px;
-    background: #2e3440;
-    color: #d8dee9;
+    background: #ffffff;
+    color: #000000;
 }
 html, body {
     margin: 0;
@@ -20,7 +20,7 @@ form {
     border-radius: 10px;
     border-width: 2px;
     border-color: #81a1c1;
-    background: #353c4a;
+    background: #f2f2f2;
     width: 60%;
     margin-left: 20%;
     margin-right: 20%;
@@ -46,7 +46,7 @@ input[type=text] {
 }
 input[type=submit] {
     border-color: #a3be8c;
-    color: #353c4a;
+    color: #f2f2f2;
     background: #a3be8c;
     width: 50%;
     margin-left: 25%;
@@ -62,7 +62,7 @@ input[type=radio] {
     border-radius: initial;
 }
 .model_card, .cache_card {
-    background: #353c4a;
+    background: #f2f2f2;
     margin: 10px;
     padding: 10px;
     border-style: solid;
@@ -77,7 +77,7 @@ input[type=radio] {
 }
 
 .class_card {
-    background: #353c4a;
+    background: #f2f2f2;
     margin: 10px;
     padding: 10px;
     border-style: solid;
@@ -94,7 +94,7 @@ input[type=radio] {
     width: 100px;
     padding: 5px;
     border-color: #bf616a;
-    color: #353c4a;
+    color: #f2f2f2;
     background: #bf616a;
 }
 
@@ -103,21 +103,21 @@ input[type=radio] {
     padding: 5px;
     margin-right: 10px;
     border-color: #a3be8c;
-    color: #353c4a;
+    color: #f2f2f2;
     background: #a3be8c;
 }
 
 .topbar {
-  background-color: #353c4a;
+  background-color: #f2f2f2;
   overflow: hidden;
 }
 
 .topbar_option {
-    background: #353c4a;
+    background: #f2f2f2;
 }
 .topbar a {
   float: left;
-  color: #d8dee9;
+  color: #000000;
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
@@ -126,21 +126,21 @@ input[type=radio] {
 
 /* Change the color of links on hover */
 .topbar a:hover {
-  background-color: #2e3440;
-  color: #d8dee9;
+  background-color: #ffffff;
+  color: #000000;
 }
 
 
 .create_model_button, .join_class_button, .create_class_button {
     border-color: #a3be8c;
-    color: #353c4a;
+    color: #f2f2f2;
     background: #a3be8c;
     width: 20%;
     margin-left: 40%;
 }
 
 .teacher_class_card, .student_card {
-    background: #353c4a;
+    background: #f2f2f2;
     margin: 10px;
     padding: 10px;
     border-style: solid;
@@ -149,7 +149,7 @@ input[type=radio] {
     border-color: #b58ead;
 }
 .student_card {
-    background: #4c566a;
+    background: #dee0e2;
     margin: 10px;
     padding: 10px;
     border-style: solid;
@@ -163,6 +163,6 @@ input[type=radio] {
     padding: 5px;
     margin-right: 10px;
     border-color: #81a1c1;
-    color: #353c4a;
+    color: #f2f2f2;
     background: #81a1c1;
 }

@@ -3,11 +3,6 @@ import numpy as np
 from . import functions
 from . import layers
 
-
-import os, sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))+"/tests")
-import debug
-
 class Network(object):
 
     """ A representation of a fully connected neural network. """

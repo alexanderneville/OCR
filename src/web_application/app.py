@@ -1,16 +1,19 @@
-from flask import Flask, session, json, render_template, request, redirect, url_for, abort, flash, get_flashed_messages, jsonify
+from flask import Flask, session, json, render_template, request, redirect, url_for, abort, flash, get_flashed_messages, \
+    jsonify
 import os, time
 import orm, ocr, pipeline
 from datetime import datetime
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.config.update({'SECRET_KEY': orm.secret_key })
+app.config.update({'SECRET_KEY': orm.secret_key})
+
 
 def handle_form_data(data, keys):
-
+    """ Pass a dictionary and a set of keys which must be extracted from it. """
+    
+    # prepare a list to store results
     fields = []
-
     for i in range(len(keys)):
         if keys[i] in data:
             if request.form[keys[i]] == '':
@@ -25,10 +28,10 @@ def handle_form_data(data, keys):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-
+    """ Endpoint for the login page, supports GET and POST. """
+    
     if request.method == "GET":
 
-        print("get request to /login")
         return render_template('login.html')
 
     else:
@@ -40,9 +43,7 @@ def login():
 
             keys = ["username", "password"]
             fields = handle_form_data(request.form, keys)
-
             current_user = orm.login_user(fields[0], fields[1])
-
             print(current_user.id)
             session['user'] = current_user.id
             return redirect(url_for('home'))
@@ -61,8 +62,10 @@ def login():
             flash("Fill in every field")
             return render_template('login.html')
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """ Endpoint for the registration page, supports GET and POST. """
 
     if request.method == "GET":
 
@@ -78,14 +81,11 @@ def register():
 
             keys = ["username", "password", "full_name", "role"]
             fields = handle_form_data(request.form, keys)
-
             conn = orm.connect_db(orm.db_path)
-
             print(fields[0])
             print(fields[1])
             print(fields[2])
             print(fields[3])
-
             orm.validate_password(fields[1])
 
             if fields[3] == "teacher":
@@ -103,7 +103,8 @@ def register():
 
         except orm.Insecure_Password:
 
-            flash("Password must be at least 8 characters, contatining one upper case, one lower case, one numeric and one special character")
+            flash(
+                "Password must be at least 8 characters, contatining one upper case, one lower case, one numeric and one special character")
             return render_template('register.html')
 
         except orm.Insufficient_Data:
@@ -111,10 +112,12 @@ def register():
             flash("Fill in every field")
             return render_template('register.html')
 
+
 @app.route('/home')
 def home():
-
-    if session["user"]:
+    """ Serve the home page to logged in users. """
+    
+    if "user" in session and session["user"]:
 
         current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
 
@@ -124,37 +127,33 @@ def home():
             details = []
             for i in classes:
                 students = [orm.create_user_object(orm.connect_db(orm.db_path), j[0]) for j in i.list_students()]
-                models = [[orm.Model(orm.connect_db(orm.db_path), model[0]) for model in student.list_models()] for student in students]
+                models = [[orm.Model(orm.connect_db(orm.db_path), model[0]) for model in student.list_models()] for
+                          student in students]
                 class_data = [[j[0], j[1]] for j in zip(students, models)]
-                # print(class_data)
                 details.append([i, class_data])
-            # print(details)
             models = [orm.Model(orm.connect_db(orm.db_path), model[0]) for model in current_user.list_models()]
-            return render_template('teacher_home.html', user = current_user, models = models, details=details)
+            return render_template('teacher_home.html', user=current_user, models=models, details=details)
 
         else:
 
             models = [orm.Model(orm.connect_db(orm.db_path), model[0]) for model in current_user.list_models()]
-            return render_template('student_home.html', user = current_user, models = models)
+            return render_template('student_home.html', user=current_user, models=models)
 
     else:
 
         return redirect(url_for('index'))
 
+
 @app.route('/index')
 @app.route('/')
 def index():
-
     return render_template('index.html')
+
 
 @app.route('/logout')
 def logout():
-
     session['user'] = None
     return redirect(url_for('index'))
-
-
-
 
 
 # create/join/leave class
@@ -162,16 +161,14 @@ def logout():
 @app.route('/create_class', methods=['GET', 'POST'])
 def create_class():
     print("create_class function")
-    if session["user"]:
+    if "user" in session and session["user"]:
 
         current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
 
         if isinstance(current_user, orm.Student):
-
             return redirect(url_for('home'))
 
         if request.method == 'GET':
-
             return render_template('create_class.html')
 
         else:
@@ -179,11 +176,9 @@ def create_class():
             try:
 
                 if not request.form:
-
                     raise orm.Insufficient_Data()
 
                 keys = ["class_name", "pin"]
-
                 fields = handle_form_data(request.form, keys)
                 print(fields)
                 current_user.create_class(fields[0], fields[1])
@@ -208,10 +203,10 @@ def create_class():
 
         return redirect(url_for('index'))
 
+
 @app.route('/join_class', methods=['GET', 'POST'])
 def join_class():
-
-    if session["user"]:
+    if "user" in session and session["user"]:
 
         current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
 
@@ -247,9 +242,9 @@ def join_class():
 
         return redirect(url_for('index'))
 
+
 @app.route('/_leave_class', methods=['POST'])
 def _leave_class():
-
     print("_leave_class function")
     data = request.get_json()
     print(data)
@@ -273,8 +268,7 @@ def _leave_class():
 
 @app.route('/create_model', methods=['GET', 'POST'])
 def create_model():
-
-    if session["user"]:
+    if "user" in session and session["user"]:
 
         if request.method == 'GET':
 
@@ -287,42 +281,42 @@ def create_model():
             try:
 
                 if not request.form:
-
                     raise orm.Insufficient_Data()
 
                 if not request.form['model_name']:
-
                     raise orm.Insufficient_Data()
 
                 id = current_user.create_model(request.form['model_name'])
-                infile_name = str(id)+".png"
+                infile_name = str(id) + ".png"
                 uploaded = request.files['infile']
 
                 if uploaded.filename == '':
-
                     raise orm.Insufficient_Data()
 
-                uploaded.save(orm.tmp_path+infile_name)
+                uploaded.save(orm.tmp_path + infile_name)
                 image_checker = pipeline.Pipeline()
-                rc = image_checker.check_header(orm.tmp_path+infile_name)
-                del(image_checker)
+                rc = image_checker.check_header(orm.tmp_path + infile_name)
+                del (image_checker)
 
                 if rc == 1:
 
-                    os.rename(orm.tmp_path+infile_name, orm.infile_path+infile_name)
+                    os.rename(orm.tmp_path + infile_name, orm.infile_path + infile_name)
 
                     image_processor = pipeline.Pipeline()
-                    image_processor.load_file(orm.infile_path+infile_name)
+                    image_processor.load_file(orm.infile_path + infile_name)
                     image_processor.scan_image()
-                    image_processor.generate_dataset(orm.dataset_path+str(id)+".txt", orm.sample_path+str(id)+".txt", orm.info_path+str(id)+".json")
-                    image_processor.save_to_file(orm.outfile_path+infile_name)
+                    image_processor.generate_dataset(orm.dataset_path + str(id) + ".txt",
+                                                     orm.sample_path + str(id) + ".txt",
+                                                     orm.info_path + str(id) + ".json")
+                    image_processor.save_to_file(orm.outfile_path + infile_name)
 
                     conn = orm.connect_db(orm.db_path)
                     cursor = conn.cursor()
-                    cursor.execute('UPDATE model SET infile_path=?, outfile_path=?, dataset_path=?, sample_path=?, info_path=? WHERE id=?', 
-                                   [orm.infile_path+infile_name, orm.outfile_path+infile_name,
-                                    orm.dataset_path+str(id)+".txt", orm.sample_path+str(id)+".txt", 
-                                    orm.info_path+str(id)+".json", id])
+                    cursor.execute(
+                        'UPDATE model SET infile_path=?, outfile_path=?, dataset_path=?, sample_path=?, info_path=? WHERE id=?',
+                        [orm.infile_path + infile_name, orm.outfile_path + infile_name,
+                         orm.dataset_path + str(id) + ".txt", orm.sample_path + str(id) + ".txt",
+                         orm.info_path + str(id) + ".json", id])
                     conn.commit()
                     cursor.close()
                     conn.close()
@@ -356,7 +350,6 @@ def create_model():
 
 @app.route('/train_model', methods=["GET", "POST"])
 def train_model():
-
     if request.method == 'GET':
 
         if session['user']:
@@ -365,10 +358,10 @@ def train_model():
 
             if model_id:
 
-                return render_template('train_model.html', 
-                        model=orm.Model(orm.connect_db(orm.db_path), int(model_id)),
-                        user=orm.create_user_object(orm.connect_db(orm.db_path), 
-                        session["user"]))
+                return render_template('train_model.html',
+                                       model=orm.Model(orm.connect_db(orm.db_path), int(model_id)),
+                                       user=orm.create_user_object(orm.connect_db(orm.db_path),
+                                                                   session["user"]))
 
             else:
 
@@ -378,7 +371,7 @@ def train_model():
 
             return redirect(url_for('index'))
 
-    else: # post request was made
+    else:  # post request was made
 
         data = request.get_json()
         current_user = orm.create_user_object(orm.connect_db(orm.db_path), data["user_id"])
@@ -401,7 +394,7 @@ def train_model():
                 try:
 
                     position = labels.index(None)
-                    del(info["characters"][position])
+                    del (info["characters"][position])
                     ocr.save_info(info, current_model.data_paths[4])
 
                 except ValueError:
@@ -423,12 +416,12 @@ def train_model():
         try:
 
             labels = [character["label"] for character in info["characters"]]
-            position = labels.index(None) # find the next unlabelled element
+            position = labels.index(None)  # find the next unlabelled element
             new_character = ocr.get_single_character(position, current_model.data_paths[3])
             # print(new_character)
             return jsonify({'status': 1, 'complete': 0, 'new_character': new_character})
 
-        except ValueError: # this means everything has been labelled
+        except ValueError:  # this means everything has been labelled
 
             current_model.set_labelled()
             return jsonify({'status': 1, 'complete': 1})
@@ -436,7 +429,6 @@ def train_model():
 
 @app.route('/use_model', methods=['GET', 'POST'])
 def use_model():
-
     if session['user']:
 
         current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
@@ -447,16 +439,14 @@ def use_model():
             print(model_id)
 
             if model_id == None or model_id == '':
-
                 return redirect(url_for('home'))
 
             available_models = current_user.list_models()
             model_ids = [str(i[0]) for i in available_models]
             if str(model_id) not in model_ids:
-
                 return redirect(url_for('home'))
 
-            return render_template('use_model.html', model_id = model_id)
+            return render_template('use_model.html', model_id=model_id)
 
         else:
 
@@ -468,7 +458,6 @@ def use_model():
             try:
 
                 if not request.form:
-
                     raise orm.Insufficient_Data()
 
                 keys = ["model_id"]
@@ -491,16 +480,16 @@ def use_model():
                     image_processor.scan_image()
                     image_processor.generate_dataset(dataset_path, sample_path, info_path)
                     text = ocr.use_existing_model(info_path, sample_path, current_model.model_path)
-                    current_user.create_cache(text) # just a prototype for now
+                    current_user.create_cache(text)  # just a prototype for now
                     os.remove(infile_path)
                     os.remove(dataset_path)
                     os.remove(sample_path)
                     os.remove(info_path)
-                    del(image_processor)
+                    del (image_processor)
 
                 else:
 
-                    raise orm.Invalid_FileType() # TODO move this exception to ocr package
+                    raise orm.Invalid_FileType()  # TODO move this exception to ocr package
 
                 return redirect(url_for("view_cache"))
 
@@ -522,20 +511,21 @@ def use_model():
 
         return redirect(url_for("/index"))
 
+
 @app.route("/view_cache")
 def view_cache():
+    if "user" in session and session["user"]:
 
-    if session["user"]:
-
-        return render_template('view_cache.html', user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"]))
+        return render_template('view_cache.html',
+                               user=orm.create_user_object(orm.connect_db(orm.db_path), session["user"]))
 
     else:
 
         return redirect(url_for('index'))
 
+
 @app.route('/_delete_cache', methods=['POST'])
 def _delete_cache():
-
     print("_delete_model function")
     data = request.get_json()
     print(data)
@@ -543,6 +533,7 @@ def _delete_cache():
     user.delete_cache(data["cache_id"])
 
     return jsonify({'status': 1})
+
 
 @app.route('/_delete_model', methods=['POST'])
 def _delete_model():
@@ -562,6 +553,7 @@ def _delete_model():
 
     return jsonify({'status': 1})
 
+
 @app.route("/_kick_student", methods=['POST'])
 def _kick_student():
     print("_kick_student function")
@@ -574,6 +566,7 @@ def _kick_student():
         return jsonify({"status": 1})
     except:
         return jsonify({"status": 0})
+
 
 @app.route("/_delete_class", methods=['POST'])
 def _delete_class():
@@ -590,5 +583,4 @@ def _delete_class():
 
 
 if __name__ == "__main__":
-
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)
