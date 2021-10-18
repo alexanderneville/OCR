@@ -84,6 +84,9 @@ test_switch_channel_num()
   assert(image_p->channels == 1);
   image_p->greyscale_to_rgb(image_p);
   assert(image_p->channels == 3);
+  unsigned char **pixels = image_p->export_pixels(image_p);
+  write_image("test_output_dir/test_greyscale.png", pixels, image_p->height,
+              image_p->width, image_p->channels, 8, 2);
   teardown(image_p);
   printf("passed!\n");
 }

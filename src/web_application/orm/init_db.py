@@ -5,7 +5,7 @@ import time, random, sqlite3, hashlib, shutil, os
 try:
     from . import config
     data_path = config.data_path
-except:
+except ImportError:
     data_path = "/home/alex/code/nea/data/"
 
 training_data = data_path + "training_data/"
@@ -198,22 +198,19 @@ def populate_tables():
 
     cursor.executemany('''INSERT INTO user
                           (username, password, salt, full_name, role)
-                          VALUES (?,?,?,?,?)''',
-                       users)
+                          VALUES (?,?,?,?,?)''', users)
     cursor.executemany('''INSERT INTO class
-                          (teacher_id, class_name, pin) VALUES (?,?,?)''', classes)
+                          (teacher_id, class_name, pin) 
+                          VALUES (?,?,?)''', classes)
     cursor.executemany('''INSERT INTO class_student
                           (student_id, class_id)
-                          VALUES (?,?)''',
-                       class_students)
+                          VALUES (?,?)''', class_students)
     cursor.executemany('''INSERT INTO model
                           (owner_id, name, trained, labelled, timestamp)
-                          VALUES (?,?,?,?,?)''',
-                       models)
+                          VALUES (?,?,?,?,?)''', models)
     cursor.executemany('''INSERT INTO cache 
                           (owner_id, contents, timestamp)
-                          VALUES (?,?,?)''',
-                        cache_data)
+                          VALUES (?,?,?)''', cache_data)
     conn.commit()
     cursor.close()
     conn.close()
