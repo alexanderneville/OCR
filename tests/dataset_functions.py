@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 import numpy as np
 import json
 
@@ -39,3 +40,19 @@ def get_datasets(data, dataset_path, sample_path):
             sample_dataset.append(np.array(current_character))
 
     return training_dataset, sample_dataset
+
+def save_numbers(characters):
+    for i in range(len(characters)):
+        characters[i] = characters[i].astype(int)
+        plt.imsave("./output/numbers/"+str(i)+".png", characters[i], cmap=plt.get_cmap('gray'))
+
+def save_alphabet(characters):
+    for i in range(len(characters)):
+        characters[i] = characters[i].astype(int)
+        labels = [i for i in "abcdefghijklmnopqrstuvwxyz"]
+        plt.imsave("./output/alphabet/"+labels[i]+".png", characters[i], cmap=plt.get_cmap('gray'))
+
+def invert_colours(samples):
+    threshold = np.full((32,32), 255.0)
+    for i in range(len(samples)):
+        samples[i] = np.subtract(threshold, samples[i])

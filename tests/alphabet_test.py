@@ -50,37 +50,42 @@ def simulate_alphabet_labeling():
 
 def test_nn_with_alphabet():
 
-#     process_alphabet()
-#     simulate_alphabet_labeling()
+    process_alphabet()
+    simulate_alphabet_labeling()
     data = get_info("./output/alphabet_info.json")
     training_dataset, sample_dataset = get_datasets(data, "./output/alphabet_dataset.txt", "./output/alphabet_sample.txt")
-#     display_alphabet(sample_dataset)
-# 
-#     # prepare the training data
-#     labels = [character["label"] for character in data["characters"]]
-#     network = nn.Network([32*32, 75, 75, len(labels)], labels)
-#     dataset_outputs = []
-#     for i in range(len(labels)):
-#         for _ in range(10):
-#             dataset_outputs.append(labels[i])
-#     y_correct = network.calc_y_activations(network.lables, dataset_outputs)
-# 
-#     # train the network
-#     network.train(training_dataset, y_correct, 5000)
-#     y_predicted = network.predict(sample_dataset)
-#     outputs = network.calc_results(network.lables, y_predicted)
-#     print(outputs)
-# 
-#     # export the model
-#     print("\nSaving model to file.")
-#     network.export_layout("./models/alphabet_model.json")
-#     del(network)
+
+    invert_colours(sample_dataset)
+    display_alphabet(sample_dataset)
+    save_alphabet(sample_dataset)
+    invert_colours(sample_dataset)
+    display_alphabet(sample_dataset)
+
+    labels = [character["label"] for character in data["characters"]]
+    network = nn.Network([32*32, 75, 75, len(labels)], labels)
+    dataset_outputs = []
+    for i in range(len(labels)):
+        for _ in range(10):
+            dataset_outputs.append(labels[i])
+    y_correct = network.calc_y_activations(network.labels, dataset_outputs)
+
+    # train the network
+    network.train(training_dataset, y_correct, 5000)
+    y_predicted = network.predict(sample_dataset)
+    # prepare the training data
+    outputs = network.calc_results(network.labels, y_predicted)
+    print(outputs)
+
+    # export the model
+    print("\nSaving model to file.")
+    network.export_layout("./models/alphabet_model.json")
+    del(network)
     print("loading model.")
 
     # import the model
     network = nn.Network.import_layout("./models/alphabet_model.json")
     y_predicted = network.predict(sample_dataset)
-    outputs = network.calc_results(network.lables, y_predicted)
+    outputs = network.calc_results(network.labels, y_predicted)
     print(outputs)
 
 if __name__ == "__main__":
