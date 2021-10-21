@@ -11,26 +11,6 @@
     <br>
     <H2>Models:</H2>
 
-    {#
-    {% with models = user.list_models() %}
-
-        {% if models %}
-
-            {% for model in models %}
-                <div class="model_card" id="model{{ model[0] }}">
-                        <div class="model_info"><p style="background-color: inherit; display: inline-block">{{ model[0] }} - {{ model[2]}}</p></div>
-                        <input class="delete_model" type="button" value="Delete" style="display: inline; float: right" onclick="delete_model({{ model[0] }}, {{ user.id }})">
-                </div>
-
-            {% endfor %}
-
-        {% endif %}
-
-        <input class="create_model_button" type="button" onclick="window.location.href='{{ url_for('create_model') }}'" value="Create">
-
-    {% endwith %}
-    #}
-
     {% if models %}
         {% for model in models %}
                 <div class="model_card" id="model{{ model.id }}">
@@ -58,16 +38,16 @@
 
                 {% for student in class[1] %}
                     <div class="student_card student_card{{ class[0].id }}" id="{{ class[0].id }}student{{ student[0].id }}">
-                        <div class="student_info" style="display: inline-block; background-color: inherit"><p style="background-color: inherit; display: inline-block">{{ student[0].full_name }}</p></div>
+                        <div class="student_info" style="display: inline-block; background-color: inherit"><p style="background-color: inherit; display: inline-block"><strong>{{ student[0].full_name }}</strong></p></div>
                         <input class="kick_student" type="button" value="Kick" style="display: inline; float: right" onclick="kick_student({{ student[0].id }}, {{ class[0].id }}, {{ user.id }})">
                         {% for model in student[1] %}
                             <div class="student_model_list" style="background-color: inherit;">
-                                <div class="student_model_info" style="display: inline-block; background-color: inherit;"> <p style="display: inline-block; background-color: inherit">{{ model.model_name }}</p></div>
+                                <div class="student_model_info" style="background-color: inherit;"> <p style="display: inline-block; background-color: inherit">{{ model.model_name }}</p>
                                 {% if model.is_trained %}
-                                    <input class="use_model_button" type="button" style="display: inline; margin-left: auto; margin-right: 10px;" onclick="window.location.href='{{ url_for('use_model') }}?model_id={{ model.id }}'" value="Use">
-                                    {#                                {% else %}
-                                    <input class="train_model_button" type="button" style="display: inline; margin-left: auto; margin-right: 10px;" onclick="window.location.href='{{ url_for('train_model') }}?model_id={{ model.id }}'" value="Train"> #}
+                                    <input class="use_model_button" type="button" style="display: inline-block; clear: right; float: right; margin-right: 0px" onclick="window.location.href='{{ url_for('use_model') }}?model_id={{ model.id }}'" value="Use">
                                 {% endif %}
+                                </div>
+
                                 <br>
                             </div>
                         {% endfor %}

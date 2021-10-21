@@ -9,10 +9,10 @@
         {% with cache_data = user.list_cache() %}
             {% for cache_entry in cache_data %}
             <div class="cache_card", id="cache{{ cache_entry[0] }}", style="background: inherit">
-                <p style="background: inherit; display: inline-block">{{ cache_entry[3] }}</p>
+                <p style="background: inherit; display: inline-block; white-space: pre-wrap;">{{ cache_entry[3] }}</p>
                 <input class="delete_cache" type="button" value="Delete" style="display: inline; float: right" onclick="delete_cache({{ cache_entry[0] }}, {{ user.id }})">
                 <br>
-                <p style="background: inherit">{{ cache_entry[2] }}</p>
+                <p style="background: inherit; white-space: pre-wrap;">{{ cache_entry[2] }}</p>
             </div>
             {% endfor %}
         {% endwith %}

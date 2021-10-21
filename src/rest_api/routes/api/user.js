@@ -12,6 +12,7 @@ const router = express.Router();
 router.post('/login', async (req, res) => {
     if (req.body.username && req.body.password) {
         try {
+            // open a connection and select login credentials
             const conn = await open_connection()
             conn.get("SELECT * FROM user WHERE username=?", [req.body.username], async (error, row) => {
                 if (error) {
@@ -20,10 +21,12 @@ router.post('/login', async (req, res) => {
                     if (row == undefined || row.role == "student"){
                         res.json({message: "valid teacher credentials required."});
                     } else {
+                        // proceed with login if valid credentials
                         let hashed = await existing_hash(req.body.password, row.salt);
                         console.log(hashed);
                         console.log(row.password);
                         if (hashed == row.password) {
+                            // create a new user if the credentials are valid
                             let user = new User(conn, row.id, req.body.username);
                             let data = user.return_data();
                             let token = await create_new_token(data, salt);

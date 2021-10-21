@@ -4,8 +4,8 @@ from . import functions
 from . import layers
 
 class Network(object):
-
     """ A representation of a fully connected neural network. """
+
     def __init__(self, layout: list[int], labels: list[str]) -> None:
 
         # set fields
@@ -22,13 +22,11 @@ class Network(object):
 
     @property
     def labels(self):
-
         """ Return the list of possible labels for output data. """
         return self._labels
 
     @property
     def network_parameters(self) -> tuple[list[np.ndarray], list[np.ndarray]]:
-
         """ Return tuple containing lists of the tunable parameters of the network. """
 
         weights = []
@@ -45,14 +43,12 @@ class Network(object):
         return weights, biases
 
     def add_layer(self, new_layer: layers.Base_Layer) -> None:
-
         """Given a layer class, add it to the network."""
 
         self._layers.append(new_layer)
 
     @staticmethod
     def calc_y_activations(labels, y_correct):
-
         """ For each sample, create a vector of activations. """
 
         # list comprehension to generate empty vector for each output
@@ -66,11 +62,11 @@ class Network(object):
     @staticmethod
     def calc_results(labels, y_activations):
         """ For each vector of activations, find the label. """
+
         outputs = [labels[vector.tolist()[0].index(max(vector[0]))] for vector in y_activations]
         return outputs
 
     def predict(self, input_data, single_sample: bool = False):
-
         """ Use the current network configuration to predict the activations for a sample or set of samples. """
 
         if single_sample:
@@ -91,7 +87,6 @@ class Network(object):
         return output
 
     def batch_learning(self, batch, correct_outputs, learning_rate) -> None:
-
         """ Implement mini-bath gradient descent."""
 
         # obtain network parameters
@@ -138,7 +133,6 @@ class Network(object):
                              (learning_rate / len(batch)) * nabla_biases.pop(0))
 
     def train(self, input_data, correct_outputs, epochs: int = 1, learning_rate: float = 0.1, batch_size: int = None):
-
         """ Using given data, feed the  data through the network in both directions. """
 
         for i in range(epochs):
@@ -174,6 +168,7 @@ class Network(object):
             print(f"Epoch: {i + 1}, Average Cost: {self._cost / len(input_data)}, Remaining: {epochs - (i + 1)}")
 
     def export_layout(self, path):
+        """Save the current neural network configuration to a JSON file."""
 
         # generate the lists of parameters to export
         weights, biases = self.network_parameters
@@ -193,6 +188,7 @@ class Network(object):
 
     @staticmethod
     def import_layout(path):
+        """Load a neural network config from JSON file. Return instantiated network."""
 
         with open(path) as f:
             config = json.load(f)

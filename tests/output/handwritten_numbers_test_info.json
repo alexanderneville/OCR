@@ -1,0 +1,115 @@
+{
+    "labels": null,
+    "characters": [
+        {
+            "position": 0,
+            "line_number": 1,
+            "word_number": 1,
+            "character_number": 1,
+            "x": 146,
+            "y": 50,
+            "w": 32,
+            "h": 32,
+            "label": "0"
+        },
+        {
+            "position": 1,
+            "line_number": 1,
+            "word_number": 1,
+            "character_number": 2,
+            "x": 416,
+            "y": 50,
+            "w": 32,
+            "h": 32,
+            "label": "1"
+        },
+        {
+            "position": 2,
+            "line_number": 1,
+            "word_number": 1,
+            "character_number": 3,
+            "x": 571,
+            "y": 50,
+            "w": 32,
+            "h": 32,
+            "label": "2"
+        },
+        {
+            "position": 3,
+            "line_number": 1,
+            "word_number": 1,
+            "character_number": 4,
+            "x": 817,
+            "y": 50,
+            "w": 32,
+            "h": 32,
+            "label": "3"
+        },
+        {
+            "position": 4,
+            "line_number": 1,
+            "word_number": 1,
+            "character_number": 5,
+            "x": 1038,
+            "y": 50,
+            "w": 32,
+            "h": 32,
+            "label": "4"
+        },
+        {
+            "position": 5,
+            "line_number": 1,
+            "word_number": 1,
+            "character_number": 6,
+            "x": 1364,
+            "y": 50,
+            "w": 32,
+            "h": 32,
+            "label": "5"
+        },
+        {
+            "position": 6,
+            "line_number": 2,
+            "word_number": 1,
+            "character_number": 1,
+            "x": 236,
+            "y": 520,
+            "w": 32,
+            "h": 32,
+            "label": "6"
+        },
+        {
+            "position": 7,
+            "line_number": 2,
+            "word_number": 1,
+            "character_number": 2,
+            "x": 504,
+            "y": 520,
+            "w": 32,
+            "h": 32,
+            "label": "7"
+        },
+        {
+            "position": 8,
+            "line_number": 2,
+            "word_number": 1,
+            "character_number": 3,
+            "x": 761,
+            "y": 520,
+            "w": 32,
+            "h": 32,
+            "label": "8"
+        },
+        {
+            "position": 9,
+            "line_number": 2,
+            "word_number": 1,
+            "character_number": 4,
+            "x": 1000,
+            "y": 520,
+            "w": 32,
+            "h": 32,
+            "label": "9"
+        }
+    ]
+}

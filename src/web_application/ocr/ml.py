@@ -41,9 +41,12 @@ def use_existing_model(info_path, sample_path, model_path):
     current_word = 0
     current_line = 1
     output_string = ""
+    # format the output string with spaces and new lines
     for i in range(len(outputs)):
         if info["characters"][i]["word_number"] != current_word or info["characters"][i]["line_number"] != current_line:
-            if current_word != 0:
+            if info["characters"][i]["line_number"] != current_line and current_line != 0:
+                output_string += "\n"
+            elif current_word != 0:
                 output_string += " "
             current_word = info["characters"][i]["word_number"]
             current_line = info["characters"][i]["line_number"]

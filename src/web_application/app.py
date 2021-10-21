@@ -429,7 +429,8 @@ def train_model():
 
 @app.route('/use_model', methods=['GET', 'POST'])
 def use_model():
-    if session['user']:
+
+    if "user" in session and session['user']:
 
         current_user = orm.create_user_object(orm.connect_db(orm.db_path), session["user"])
 
@@ -444,7 +445,13 @@ def use_model():
             available_models = current_user.list_models()
             model_ids = [str(i[0]) for i in available_models]
             if str(model_id) not in model_ids:
-                return redirect(url_for('home'))
+                if isinstance(current_user, orm.Teacher):
+                    available_models = current_user.list_all_models()
+                    model_ids = [str(i[1]) for i in available_models]
+                    if str(model_id) not in model_ids:
+                        return redirect(url_for('home'))
+                else:
+                    return redirect(url_for('home'))
 
             return render_template('use_model.html', model_id=model_id)
 

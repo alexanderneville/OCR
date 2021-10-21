@@ -129,7 +129,7 @@ scale_matrix(matrix * matrix_p, float scale_factor, bool adjust)
 
   for (int y = 0; y < int_height; y++) {
     for (int x = 0; x < int_width; x++) {
-      // iterate over every pixel in the ouput image
+      // iterate over every pixel in the output image
       float x_as_frac = x / new_width;
       float y_as_frac = y / new_height;
       pos x_pos = calc_pos(x_as_frac * matrix_p->x);

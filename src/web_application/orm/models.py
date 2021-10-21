@@ -106,6 +106,7 @@ class User(entity_model):
         cursor = self.conn.cursor()
         entries = cursor.execute("SELECT * FROM cache WHERE owner_id=? ORDER BY timestamp DESC;", [self._id]).fetchall()
 
+        # format the return value
         for entry in range(len(entries)):
             entries[entry] = list(entries[entry])
             entries[entry][3] = datetime.fromtimestamp(entries[entry][3])
@@ -125,6 +126,7 @@ class User(entity_model):
         """ Create a new cache entry. """
 
         cursor = self.conn.cursor()
+        # get current timestamp
         current = datetime.now()
         timestamp = time.mktime(current.timetuple())
         cursor.execute("INSERT INTO cache (owner_id, contents, timestamp) VALUES (?,?,?)", [self._id, text, timestamp])
@@ -157,15 +159,10 @@ class Teacher(User):
 
         # check that instantiation is valid
         if not data:
-
             raise No_Such_ID("no user associated with that username.")
-
         elif data[2] != "teacher":
-
             raise Invalid_Role("user is a student, not a teacher")
-
         else:
-
             # populate fields
             self._username = data[0]
             self._full_name = data[1]

@@ -194,6 +194,7 @@ function draw_matrix(character) {
     for (let y = 0; y < 32; y++) {
         for (let x = 0; x < 32; x++)  {
             let greyscale = Math.floor(character[y][x]);
+            greyscale = 255 - greyscale;
             let hex = rgb_to_hex(greyscale, greyscale, greyscale);
             console.log(hex);
             cursor.fillStyle = hex;

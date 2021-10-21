@@ -52,9 +52,7 @@ def get_sample_dataset(info, sample_path):
                 row_pixels = row_string.split(",")
                 row_pixels = list(map(convert_type, row_pixels))
                 current_character.append(row_pixels)
-
             sample_dataset.append(np.array(current_character))
-
     return sample_dataset
 
 
