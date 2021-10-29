@@ -35,6 +35,11 @@ main(int argc, char **argv)
   image_p->rgb_to_greyscale(image_p);
   image_p->invert(image_p);
   point ** centroids = k_means_segmentation(image_p->greyscale, 4);
+
+  for (int centroid = 0; centroid < 4; centroid++) {
+      printf("x: %d, y: %d\n", centroids[centroid]->x, centroids[centroid]->y);
+  }
+  image_p->invert(image_p);
   image_p->greyscale_to_rgb(image_p);
   outline_clusters(image_p->R, centroids, 4);
 
@@ -42,4 +47,5 @@ main(int argc, char **argv)
   write_image("test_output_dir/test_kmeans.png", pixels, image_p->height,
               image_p->width, image_p->channels, 8, 2);
   return 0;
+
 }

@@ -1,12 +1,13 @@
 #include "../includes/clustering.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 #include <math.h>
 
 point * new_point(int x, int y) {
     point * new_point = (point *) malloc(sizeof(point));
-    new_point->current_cluster = -1;
+    new_point->current_cluster = - 1;
     new_point->x = x;
     new_point->y = y;
     return new_point;
@@ -20,7 +21,7 @@ tmp_points matrix_to_points(matrix * matrix_p) {
 
     for (int y = 0; y < matrix_p->y; y ++){
         for (int x = 0; x < matrix_p->x; x ++){
-            if (matrix_p->array[y * matrix_p->x + x] >= 128.0) {
+            if (matrix_p->array[y * matrix_p->x + x] >= 255.0) {
                 set.points[set.num_points] = new_point(x, y);
                 set.num_points++;
             }
@@ -37,18 +38,22 @@ float distance_between_points(point one, point two) {
 }
 
 point * new_random_centroid(int max_x, int max_y) {
-    srand(time(0));
+    printf("new centroid ... ");
     int x = rand() % max_x;
     int y = rand() % max_y;
+    printf("x:%d,y:%d\n", x, y);
     point * new_centroid = new_point(x, y);
     return new_centroid;
 }
 
 point ** initialise_centroids(int num_centroids, int max_x, int max_y) {
+    printf("initialising centroids:\n");
+    srand(time(0));
     point ** centroids = (point **) malloc(sizeof(point *) * num_centroids);
     for (int centroid = 0; centroid < num_centroids; centroid++) {
         centroids[centroid] = new_random_centroid(max_x, max_y);
     }
+    printf("\n");
     return centroids;
 }
 
@@ -82,6 +87,7 @@ void update_centroids(point ** centroids, point ** points, int num_centroids, in
             } 
         }
 
+        printf("%d\n", total_points);
         centroids[centroid]->x = sum_x / total_points;
         centroids[centroid]->y = sum_y / total_points;
 
@@ -95,7 +101,7 @@ point ** k_means_segmentation(matrix * matrix_p, int num_clusters) {
     int num_points = set.num_points;
     point ** points = set.points;
     point ** centroids = initialise_centroids(num_clusters, matrix_p->x, matrix_p->y);
-    for (int iterations = 0; iterations < 20; iterations ++) {
+    for (int iterations = 0; iterations < 1000; iterations ++) {
         assign_centroids(centroids, points, num_clusters, num_points);
         update_centroids(centroids, points, num_clusters, num_points);
     }
@@ -104,19 +110,24 @@ point ** k_means_segmentation(matrix * matrix_p, int num_clusters) {
 
 void outline_clusters(matrix * matrix_p, point ** centroids, int num_clusters) {
 
+    int dimensions = 9;
+
     for (int centroid = 0; centroid < num_clusters; centroid++) {
 
-        matrix_p->array[(centroids[centroid]->y - 1) * matrix_p->x + centroids[centroid]->x - 1] = 255;
-        matrix_p->array[(centroids[centroid]->y - 1) * matrix_p->x + centroids[centroid]->x] = 255;
-        matrix_p->array[(centroids[centroid]->y - 1) * matrix_p->x + centroids[centroid]->x + 1] = 255;
+        int origin[2] = {centroids[centroid]->x - ((dimensions-1)/2), centroids[centroid]->y - ((dimensions-1)/2)};
+        for (int cursor = 0; cursor < dimensions * dimensions; cursor ++) {
 
-        matrix_p->array[(centroids[centroid]->y) * matrix_p->x + centroids[centroid]->x -1] = 255;
-        matrix_p->array[(centroids[centroid]->y) * matrix_p->x + centroids[centroid]->x] = 255;
-        matrix_p->array[(centroids[centroid]->y) * matrix_p->x + centroids[centroid]->x + 1] = 255;
+            int x_pos = cursor % dimensions;
+            int y_pos = cursor / dimensions;
 
-        matrix_p->array[(centroids[centroid]->y + 1) * matrix_p->x + centroids[centroid]->x - 1] = 255;
-        matrix_p->array[(centroids[centroid]->y + 1) * matrix_p->x + centroids[centroid]->x] = 255;
-        matrix_p->array[(centroids[centroid]->y + 1) * matrix_p->x + centroids[centroid]->x + 1] = 255;
+            if (origin[1] + y_pos >= 0 &&
+                origin[1] + y_pos < matrix_p->y &&
+                origin[0] + x_pos >= 0 &&
+                origin[0] + x_pos < matrix_p->x)
+            {
+                matrix_p->array[(origin[1] + y_pos) * matrix_p->x + origin[0] + x_pos] = 255.0;
+            }
 
+        }
     }
 }

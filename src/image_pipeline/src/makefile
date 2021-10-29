@@ -5,8 +5,9 @@ LIBS= -lpng -lpthread -lm
 IDIR=../includes
 ODIR=./obj
 _HEADS = image_io.h image_processing.h convolution.h tree.h matrix.h character_detection.h dataset.h
+
 _OBJ = test_pipeline.o image_io.o image_processing.o convolution.o tree.o matrix.o character_detection.o dataset.o
-_KOBJ = clustering.o
+_KOBJ = test_kmeans.o image_io.o image_processing.o convolution.o tree.o matrix.o character_detection.o dataset.o clustering.o
 
 HEADS = $(patsubst %,$(IDIR)/%,$(_HEADS))
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
