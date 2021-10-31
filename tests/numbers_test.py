@@ -27,7 +27,7 @@ def simulate_number_labelling(file):
         data = json.load(info)
 
     for i in range(len(data["characters"])):
-        data["characters"][i]["label"] = "8129045637"
+        data["characters"][i]["label"] = "8129045637"[i]
 
     with open(f"./output/{file}_info.json", "w") as f:
         json.dump(data, f, indent=4)
@@ -60,8 +60,8 @@ def test_nn_with_numbers():
     # prepare the labels and activations for the training dataset
     dataset_outputs = []
     for i in range(len(labels)):
-        for _ in range(1):
-            dataset_outputs.append(labels[i])
+        # for _ in range(1):
+        dataset_outputs.append(labels[i])
     correct_activations = network.calc_y_activations(network.labels, dataset_outputs)
 
     # do the training

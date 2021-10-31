@@ -3,26 +3,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 from pprint import pprint
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))+"/src")
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + "/src")
 import neural_network as nn
 import pipeline
 from dataset_functions import *
 
-def display_alphabet(characters):
 
+def display_alphabet(characters):
     for i in range(26):
-        plt.subplot(6,5,i+1)
+        plt.subplot(6, 5, i + 1)
         plt.imshow(characters[i], cmap=plt.get_cmap('gray'))
 
     plt.show()
 
+
 def display_one_character(character):
-    plt.subplot(1,1,1)
+    plt.subplot(1, 1, 1)
     plt.imshow(character, cmap=plt.get_cmap('gray'))
     plt.show()
 
-def simulate_alphabet_labeling(file):
 
+def simulate_alphabet_labeling(file):
     with open(f"./output/{file}_info.json", "r") as info:
         data = json.load(info)
 
@@ -34,20 +36,19 @@ def simulate_alphabet_labeling(file):
 
 
 def test_nn_with_alphabet():
-
     # open, segment and output data from the input file
     process_file("alphabet")
     # obtain labels for the training data
     simulate_alphabet_labeling("alphabet")
     # load the data needed to train a new model
     data = get_info("./output/alphabet_info.json")
-    extended_dataset, sample_dataset = get_datasets(data, "./output/alphabet_dataset.csv",
-                                                    "./output/alphabet_sample.csv")
+    extended_dataset, sample_dataset = get_datasets(data, "./output/alphabet_dataset.txt",
+                                                    "./output/alphabet_sample.txt")
 
     # create new neural network with the appropriate parameters
     labels = [character["label"] for character in data["characters"]]
     # cast the list of labels to a set to remove repetition
-    network = nn.Network([32*32, 50, 50, len(list(set(labels)))], list(set(labels)))
+    network = nn.Network([32 * 32, 50, 50, len(list(set(labels)))], list(set(labels)))
 
     # divide the dataset into training and test data
     training_dataset = []
@@ -65,11 +66,11 @@ def test_nn_with_alphabet():
     correct_activations = network.calc_y_activations(network.labels, dataset_outputs)
 
     # do the training
-    network.train(training_dataset, correct_activations, 7000)
+    network.train(training_dataset, correct_activations, 3000)
 
     # export / import the model
     network.export_layout("./models/alphabet_model.json")
-    del(network)
+    del (network)
     network = nn.Network.import_layout("./models/alphabet_model.json")
 
     # predict and and evaluate test data
@@ -84,6 +85,7 @@ def test_nn_with_alphabet():
             total_correct += 1
     percentage = (total_correct / len(correct_outputs)) * 100
     print("Accuracy: ", percentage, "%")
+
 
 if __name__ == "__main__":
     test_nn_with_alphabet()

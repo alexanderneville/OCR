@@ -1,0 +1,57 @@
+CREATE TABLE user (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+username TEXT UNIQUE NOT NULL,
+password TEXT NOT NULL,
+salt INTEGER NOT NULL,
+full_name TEXT NOT NULL,
+role TEXT NOT NULL
+);
+
+
+CREATE TABLE class (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+teacher_id INTEGER NOT NULL,
+class_name TEXT NOT NULL,
+pin INTEGER NOT NULL,
+UNIQUE(class_name, teacher_id),
+FOREIGN KEY (teacher_id) REFERENCES user (id) 
+ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE class_student (
+student_id INTEGER NOT NULL,
+class_id INTEGER NOT NULL,
+UNIQUE (student_id, class_id),
+FOREIGN KEY (student_id) REFERENCES user (id) 
+ON UPDATE CASCADE ON DELETE CASCADE,
+FOREIGN KEY (class_id) REFERENCES class (id) 
+ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+
+CREATE TABLE model (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+owner_id INTEGER NOT NULL,
+name TEXT,
+trained INTEGER NOT NULL,
+labelled INTEGER NOT NULL,
+infile_path TEXT,
+outfile_path TEXT,
+dataset_path TEXT,
+sample_path TEXT,
+info_path TEXT,
+model_path TEXT,
+timestamp INTEGER,
+UNIQUE (owner_id, name),
+FOREIGN KEY (owner_id) REFERENCES user (id)
+ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE cache (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+owner_id INTEGER NOT NULL,
+contents TEXT, 
+timestamp INTEGER,
+FOREIGN KEY (owner_id) REFERENCES user (id)
+ON UPDATE CASCADE ON DELETE CASCADE
+);

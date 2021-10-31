@@ -1,0 +1,291 @@
+{
+    "labels": null,
+    "characters": [
+        {
+            "position": 0,
+            "line_number": 1,
+            "word_number": 1,
+            "character_number": 1,
+            "x": 60,
+            "y": 90,
+            "w": 32,
+            "h": 32,
+            "label": "a"
+        },
+        {
+            "position": 1,
+            "line_number": 1,
+            "word_number": 2,
+            "character_number": 1,
+            "x": 156,
+            "y": 90,
+            "w": 32,
+            "h": 32,
+            "label": "b"
+        },
+        {
+            "position": 2,
+            "line_number": 1,
+            "word_number": 3,
+            "character_number": 1,
+            "x": 260,
+            "y": 90,
+            "w": 32,
+            "h": 32,
+            "label": "c"
+        },
+        {
+            "position": 3,
+            "line_number": 1,
+            "word_number": 4,
+            "character_number": 1,
+            "x": 362,
+            "y": 90,
+            "w": 32,
+            "h": 32,
+            "label": "d"
+        },
+        {
+            "position": 4,
+            "line_number": 1,
+            "word_number": 5,
+            "character_number": 1,
+            "x": 456,
+            "y": 90,
+            "w": 32,
+            "h": 32,
+            "label": "e"
+        },
+        {
+            "position": 5,
+            "line_number": 1,
+            "word_number": 6,
+            "character_number": 1,
+            "x": 556,
+            "y": 90,
+            "w": 32,
+            "h": 32,
+            "label": "f"
+        },
+        {
+            "position": 6,
+            "line_number": 1,
+            "word_number": 7,
+            "character_number": 1,
+            "x": 659,
+            "y": 90,
+            "w": 32,
+            "h": 32,
+            "label": "g"
+        },
+        {
+            "position": 7,
+            "line_number": 2,
+            "word_number": 1,
+            "character_number": 1,
+            "x": 62,
+            "y": 289,
+            "w": 32,
+            "h": 32,
+            "label": "h"
+        },
+        {
+            "position": 8,
+            "line_number": 2,
+            "word_number": 2,
+            "character_number": 1,
+            "x": 159,
+            "y": 289,
+            "w": 32,
+            "h": 32,
+            "label": "i"
+        },
+        {
+            "position": 9,
+            "line_number": 2,
+            "word_number": 3,
+            "character_number": 1,
+            "x": 259,
+            "y": 289,
+            "w": 32,
+            "h": 32,
+            "label": "j"
+        },
+        {
+            "position": 10,
+            "line_number": 2,
+            "word_number": 4,
+            "character_number": 1,
+            "x": 361,
+            "y": 289,
+            "w": 32,
+            "h": 32,
+            "label": "k"
+        },
+        {
+            "position": 11,
+            "line_number": 2,
+            "word_number": 5,
+            "character_number": 1,
+            "x": 458,
+            "y": 289,
+            "w": 32,
+            "h": 32,
+            "label": "l"
+        },
+        {
+            "position": 12,
+            "line_number": 2,
+            "word_number": 6,
+            "character_number": 1,
+            "x": 558,
+            "y": 289,
+            "w": 32,
+            "h": 32,
+            "label": "m"
+        },
+        {
+            "position": 13,
+            "line_number": 2,
+            "word_number": 7,
+            "character_number": 1,
+            "x": 659,
+            "y": 289,
+            "w": 32,
+            "h": 32,
+            "label": "n"
+        },
+        {
+            "position": 14,
+            "line_number": 3,
+            "word_number": 1,
+            "character_number": 1,
+            "x": 57,
+            "y": 497,
+            "w": 32,
+            "h": 32,
+            "label": "o"
+        },
+        {
+            "position": 15,
+            "line_number": 3,
+            "word_number": 2,
+            "character_number": 1,
+            "x": 156,
+            "y": 497,
+            "w": 32,
+            "h": 32,
+            "label": "p"
+        },
+        {
+            "position": 16,
+            "line_number": 3,
+            "word_number": 3,
+            "character_number": 1,
+            "x": 257,
+            "y": 497,
+            "w": 32,
+            "h": 32,
+            "label": "q"
+        },
+        {
+            "position": 17,
+            "line_number": 3,
+            "word_number": 4,
+            "character_number": 1,
+            "x": 363,
+            "y": 497,
+            "w": 32,
+            "h": 32,
+            "label": "r"
+        },
+        {
+            "position": 18,
+            "line_number": 3,
+            "word_number": 5,
+            "character_number": 1,
+            "x": 460,
+            "y": 497,
+            "w": 32,
+            "h": 32,
+            "label": "s"
+        },
+        {
+            "position": 19,
+            "line_number": 3,
+            "word_number": 6,
+            "character_number": 1,
+            "x": 558,
+            "y": 497,
+            "w": 32,
+            "h": 32,
+            "label": "t"
+        },
+        {
+            "position": 20,
+            "line_number": 3,
+            "word_number": 7,
+            "character_number": 1,
+            "x": 659,
+            "y": 497,
+            "w": 32,
+            "h": 32,
+            "label": "u"
+        },
+        {
+            "position": 21,
+            "line_number": 4,
+            "word_number": 1,
+            "character_number": 1,
+            "x": 58,
+            "y": 697,
+            "w": 32,
+            "h": 32,
+            "label": "v"
+        },
+        {
+            "position": 22,
+            "line_number": 4,
+            "word_number": 2,
+            "character_number": 1,
+            "x": 155,
+            "y": 697,
+            "w": 32,
+            "h": 32,
+            "label": "w"
+        },
+        {
+            "position": 23,
+            "line_number": 4,
+            "word_number": 3,
+            "character_number": 1,
+            "x": 260,
+            "y": 697,
+            "w": 32,
+            "h": 32,
+            "label": "x"
+        },
+        {
+            "position": 24,
+            "line_number": 4,
+            "word_number": 4,
+            "character_number": 1,
+            "x": 360,
+            "y": 697,
+            "w": 32,
+            "h": 32,
+            "label": "y"
+        },
+        {
+            "position": 25,
+            "line_number": 4,
+            "word_number": 5,
+            "character_number": 1,
+            "x": 460,
+            "y": 697,
+            "w": 32,
+            "h": 32,
+            "label": "z"
+        }
+    ]
+}

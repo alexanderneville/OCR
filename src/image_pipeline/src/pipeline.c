@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include "../includes/image_io.h"
 #include "../includes/image_processing.h"
+
+// define the exception type and the new class
 static PyObject *Pipeline_Error;
 typedef struct
 {
@@ -16,6 +18,7 @@ typedef struct
   int height, width, channels, color_type, bit_depth;
 } PipelineObject;
 
+// declare members
 static PyMemberDef Pipeline_members[] = {
   {"infile_path", T_OBJECT_EX, offsetof(PipelineObject, infile_path), 0,
    "the input file"},
@@ -40,6 +43,7 @@ static PyMemberDef Pipeline_members[] = {
   {NULL}                        // null terminator
 };
 
+// cyclic garbage collection
 static void
 Pipeline_dealloc(PipelineObject * self)
 {
@@ -139,6 +143,8 @@ Pipeline_init(PipelineObject * self, PyObject * args, PyObject * kwds)
   return 0;
 }
 
+
+// pipeline methods
 static PyObject *
 Pipeline_files(PipelineObject * self, PyObject * Py_UNUSED(ignored))
 {
@@ -356,6 +362,7 @@ Pipeline_switch_channel_num(PipelineObject * self,
   return PyLong_FromLong(1);
 }
 
+// declare custom methods
 static PyMethodDef Pipeline_methods[] = {
   {"print_files", (PyCFunction) Pipeline_files, METH_NOARGS,
    "return the names of the files that the object will use / is using."},
@@ -371,12 +378,10 @@ static PyMethodDef Pipeline_methods[] = {
    "generate a json dataset from the input image. Takes the file to save to."},
   {"convolution", (PyCFunction) Pipeline_convolution, METH_VARARGS,
    "perform a convolution on the loaded file."},
-  {"resize", (PyCFunction) Pipeline_resize, METH_VARARGS,
-   "resize the input image."},
+  {"resize", (PyCFunction) Pipeline_resize, METH_VARARGS, "resize the input image."},
   {"translate", (PyCFunction) Pipeline_translate, METH_VARARGS,
    "'move' the input image contents, wrapping on the corners."},
-  {"switch_channel_num", (PyCFunction) Pipeline_switch_channel_num,
-   METH_NOARGS,
+  {"switch_channel_num", (PyCFunction) Pipeline_switch_channel_num, METH_NOARGS,
    "greyscale/rgb inversion"},
   {"invert_colours", (PyCFunction) Pipeline_invert_colours, METH_NOARGS,
    "greyscale/rgb inversion"},

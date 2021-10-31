@@ -220,7 +220,7 @@ function get_first_character(model_id, user_id){
         var responseJson = request.response;
 
         if (responseJson["complete"] == 1) {
-            // go home
+            window.location.href="/home";
         } else {
 
             let new_character = responseJson["new_character"];
