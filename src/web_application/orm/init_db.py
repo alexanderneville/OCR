@@ -6,7 +6,7 @@ try:
     from . import config
     data_path = config.data_path
 except ImportError:
-    data_path = "/home/alex/code/nea/data/"
+    data_path = "/home/alex/repos/nea/data/"
 
 training_data = data_path + "training_data/"
 infile_path = training_data + "infile/"

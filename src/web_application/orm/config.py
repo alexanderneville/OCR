@@ -2,7 +2,7 @@ import sqlite3
 
 secret_key = '1234'
 
-data_path = "/home/alex/code/nea/data/"
+data_path = "/home/alex/repos/nea/data/"
 training_data = data_path+"training_data/"
 infile_path = training_data+"infile/"
 outfile_path = training_data+"outfile/"

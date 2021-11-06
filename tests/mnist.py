@@ -16,15 +16,18 @@ def invert_mnist_colours(samples):
 
 
 def display_numbers(characters):
-    for i in range(len(characters)):
-        plt.subplot(2,5,i+1, frame_on=False)
+    for i in range(60):
+        plt.subplot(10,6,i+1, frame_on=False)
         plt.axis("off")
-        plt.imshow(characters[i], cmap=plt.get_cmap('gray'))
+        current_char = [characters[i]]
+        invert_mnist_colours(current_char)
+        plt.imshow(current_char[0], cmap=plt.get_cmap('gray'))
     plt.show()
 
 
 def test_nn_with_mnist():
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    display_numbers(x_test)
     labels = [i for i in range(10)]
     network = nn.Network([28*28, 50, 50, len(list(set(labels)))], list(set(labels)))
     y_correct = network.calc_y_activations(network.labels, y_train[:2000])

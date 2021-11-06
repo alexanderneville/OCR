@@ -18,7 +18,7 @@ class ORMTest(unittest.TestCase):
         new_teacher = orm.Teacher.create(self.conn, "user312", "Teacher 11", "Aa9-_*'bbbbbbbbbbb")
         self.assertIsNotNone(new_teacher)
 
-    def test_registragion_with_insecure_password(self):
+    def test_registration_with_insecure_password(self):
         self.assertRaises(orm.Insecure_Password,
                           orm.Student.create, self.conn,
                           "user313", "Student 302", "1234")

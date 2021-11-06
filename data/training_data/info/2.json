@@ -1,0 +1,27 @@
+{
+    "labels": null,
+    "characters": [
+        {
+            "position": 0,
+            "line_number": 1,
+            "word_number": 1,
+            "character_number": 1,
+            "x": 135,
+            "y": 85,
+            "w": 32,
+            "h": 32,
+            "label": "0"
+        },
+        {
+            "position": 1,
+            "line_number": 1,
+            "word_number": 1,
+            "character_number": 2,
+            "x": 183,
+            "y": 85,
+            "w": 32,
+            "h": 32,
+            "label": "1"
+        }
+    ]
+}
