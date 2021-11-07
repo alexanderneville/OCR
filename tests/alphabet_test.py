@@ -44,7 +44,8 @@ def test_nn_with_alphabet():
     data = get_info("./output/alphabet_info.json")
     extended_dataset, sample_dataset = get_datasets(data, "./output/alphabet_dataset.txt",
                                                     "./output/alphabet_sample.txt")
-
+    invert_colours(sample_dataset)
+    save_alphabet(sample_dataset)
     # create new neural network with the appropriate parameters
     labels = [character["label"] for character in data["characters"]]
     # cast the list of labels to a set to remove repetition
