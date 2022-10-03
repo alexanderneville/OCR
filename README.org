@@ -1,3 +1,0 @@
-#+TITLE: Character Recognition System
-
-See the docs folder for more info.
