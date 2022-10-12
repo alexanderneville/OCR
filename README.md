@@ -1,3 +1,3 @@
-# Optical Character Recognition System
+# Optical Character Recognition
 
-![Examples](docs/images/handwritten_alphabet.png)
+![](./res/cover_image.png)
