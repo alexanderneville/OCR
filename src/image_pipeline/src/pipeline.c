@@ -1,5 +1,5 @@
 #define PY_SSIZE_T_CLEAN
-#include <python3.9/Python.h>
+#include <python3.11/Python.h>
 #include "structmember.h"
 #include <stddef.h>
 #include "../includes/image_io.h"

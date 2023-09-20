@@ -18,18 +18,21 @@ KOBJ = $(patsubst %,$(ODIR)/%,$(_KOBJ))
 # '^' is the right side of the ':'
 
 $(ODIR)/%.o: %.c $(IDIR)
+	mkdir -p obj
 	$(CC) -c -o $@ $<
 
 test: $(OBJ)
+	mkdir -p obj
 	python class_setup.py build
-	cp ./build/lib.linux-x86_64-3.9/pipeline.cpython-39-x86_64-linux-gnu.so ./
-	cp ./build/lib.linux-x86_64-3.9/pipeline.cpython-39-x86_64-linux-gnu.so ../../web_application/
-	mv ./build/lib.linux-x86_64-3.9/pipeline.cpython-39-x86_64-linux-gnu.so ../../../tests/
+	cp ./build/lib.linux-x86_64-cpython-311/pipeline.cpython-311-x86_64-linux-gnu.so ./
+	cp ./build/lib.linux-x86_64-cpython-311/pipeline.cpython-311-x86_64-linux-gnu.so ../../web_application/
+	mv ./build/lib.linux-x86_64-cpython-311/pipeline.cpython-311-x86_64-linux-gnu.so ../../../tests/
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	make kmeans
 
 kmeans: $(KOBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 clean:
-	rm -rf $(ODIR)/*.o outfile.png a.out main *.so build/ test_output_dir/* ../../../tests/pipeline.cpython-39-x86_64-linux-gnu.so ../../web_application/pipeline.cpython-39-x86_64-linux-gnu.so
+	rm -rf $(ODIR)/*.o outfile.png a.out main *.so build/ test_output_dir/* ../../../tests/pipeline.cpython-39-x86_64-linux-gnu.so ../../web_application/pipeline.cpython-39-x86_64-linux-gnu.so kmeans test
